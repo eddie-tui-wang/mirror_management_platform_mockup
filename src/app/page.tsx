@@ -11,16 +11,15 @@ import { DemoAccount, PortalType } from '@/lib/types';
 const { Title, Paragraph, Text } = Typography;
 
 const PORTAL_CONFIG: Record<PortalType, { color: string; label: string; icon: React.ReactNode; description: string }> = {
-  platform: { color: '#531dab', label: '平台端', icon: <BankOutlined />, description: '全局管理视角，管理渠道、客户、用户、资产、设备' },
+  platform: { color: '#531dab', label: '平台端', icon: <BankOutlined />, description: '全局管理视角，管理渠道、客户、用户、资产' },
   channel: { color: '#0958d9', label: '渠道端', icon: <TeamOutlined />, description: '渠道代理视角，管理名下客户和客户账号' },
-  customer: { color: '#389e0d', label: '客户端', icon: <ShopOutlined />, description: '终端客户视角，管理成员、服装、模板、设备' },
+  customer: { color: '#389e0d', label: '客户端', icon: <ShopOutlined />, description: '终端客户视角，管理成员、服装、模板' },
 };
 
 const ROLE_DESCRIPTION: Record<string, string> = {
-  PlatformSuperAdmin: '拥有全部权限，可管理所有渠道、客户、用户、资产和设备',
+  PlatformSuperAdmin: '拥有全部权限，可管理所有渠道、客户、用户、资产',
   ChannelOwner: '渠道管理员，可查看/创建名下客户，管理客户账号',
-  ChannelOps: '渠道运营，仅可查看名下客户和客户账号（只读）',
-  HQOwner: '客户管理员，可管理成员、服装库、模板库、设备和会话',
+  HQOwner: '客户管理员，可管理成员、服装库、模板库',
   HQOps: '客户运营，可查看成员、上传/编辑服装、创建/发布模板（无删除/禁用权限）',
 };
 

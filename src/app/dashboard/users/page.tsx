@@ -6,6 +6,7 @@ import {
 } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import { useSearchParams } from 'next/navigation';
 import { users, memberships, organizations } from '@/lib/mock-data';
 import {
   ROLE_PERMISSIONS, PERMISSIONS, type PermissionKey,
@@ -42,8 +43,10 @@ interface RoleRow {
 // ===================== Users Tab =====================
 
 function UsersTab() {
+  const searchParams = useSearchParams();
+
   const [searchText, setSearchText] = useState('');
-  const [orgFilter, setOrgFilter] = useState<string>('all');
+  const [orgFilter, setOrgFilter] = useState<string>(searchParams.get('org') ?? 'all');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -167,12 +170,6 @@ function UsersTab() {
       title: '最后登录时间',
       dataIndex: 'last_login',
       key: 'last_login',
-      render: (val: string | null) => val ?? '-',
-    },
-    {
-      title: '当前活跃设备',
-      dataIndex: 'current_device',
-      key: 'current_device',
       render: (val: string | null) => val ?? '-',
     },
     {

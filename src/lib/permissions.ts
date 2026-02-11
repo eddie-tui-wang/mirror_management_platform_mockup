@@ -8,7 +8,6 @@ export const PERMISSIONS = {
   'platform:channels:view': '查看渠道列表',
   'platform:channels:create': '新建渠道',
   'platform:channels:disable': '禁用/启用渠道',
-  'platform:channels:export': '导出渠道',
   'platform:customers:view': '查看客户列表',
   'platform:customers:create': '新建直客',
   'platform:customers:transfer': '变更客户归属',
@@ -21,18 +20,12 @@ export const PERMISSIONS = {
   'platform:garments:edit': '编辑服装(兜底)',
   'platform:templates:view': '查看模板库(聚合)',
   'platform:templates:edit': '编辑模板(兜底)',
-  'platform:devices:view': '查看设备列表',
-  'platform:devices:force_logout': '强制登出设备',
-  'platform:devices:disable': '禁用设备',
-  'platform:sessions:view': '查看会话列表',
-  'platform:sessions:terminate': '终止会话',
 
   // ---- 渠道端 ----
   'channel:customers:view': '查看名下客户',
   'channel:customers:create': '新建渠道客户',
   'channel:users:view': '查看客户账号',
   'channel:users:reinvite': '重发邀请',
-  'channel:sessions:view': '查看客户设备/会话',
 
   // ---- 客户端 ----
   'customer:users:view': '查看组织成员',
@@ -48,10 +41,6 @@ export const PERMISSIONS = {
   'customer:templates:publish': '发布模板',
   'customer:templates:rollback': '回滚模板',
   'customer:templates:disable': '停用模板',
-  'customer:devices:view': '查看设备',
-  'customer:devices:force_logout': '强制登出',
-  'customer:sessions:view': '查看会话',
-  'customer:sessions:terminate': '终止会话',
 } as const;
 
 export type PermissionKey = keyof typeof PERMISSIONS;
@@ -66,13 +55,6 @@ export const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'channel:customers:create',
     'channel:users:view',
     'channel:users:reinvite',
-    'channel:sessions:view',
-  ],
-
-  ChannelOps: [
-    'channel:customers:view',
-    'channel:users:view',
-    // 无 create / reinvite 权限
   ],
 
   HQOwner: [
@@ -89,10 +71,6 @@ export const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'customer:templates:publish',
     'customer:templates:rollback',
     'customer:templates:disable',
-    'customer:devices:view',
-    'customer:devices:force_logout',
-    'customer:sessions:view',
-    'customer:sessions:terminate',
   ],
 
   HQOps: [
@@ -103,8 +81,6 @@ export const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'customer:templates:view',
     'customer:templates:create',
     'customer:templates:publish',
-    'customer:devices:view',
-    'customer:sessions:view',
     // 无 invite/disable/delete/rollback/terminate 等管理权限
   ],
 };
@@ -114,7 +90,6 @@ export const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
 export const ROLE_PORTAL: Record<RoleKey, PortalType> = {
   PlatformSuperAdmin: 'platform',
   ChannelOwner: 'channel',
-  ChannelOps: 'channel',
   HQOwner: 'customer',
   HQOps: 'customer',
 };
@@ -127,18 +102,13 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   '/dashboard/users': 'platform:users:view',
   '/dashboard/assets/garments': 'platform:garments:view',
   '/dashboard/assets/templates': 'platform:templates:view',
-  '/dashboard/devices': 'platform:devices:view',
-  '/dashboard/sessions': 'platform:sessions:view',
   // 渠道端
   '/dashboard/channel/customers': 'channel:customers:view',
   '/dashboard/channel/users': 'channel:users:view',
-  '/dashboard/channel/sessions': 'channel:sessions:view',
   // 客户端
   '/dashboard/customer/users': 'customer:users:view',
   '/dashboard/customer/garments': 'customer:garments:view',
   '/dashboard/customer/templates': 'customer:templates:view',
-  '/dashboard/customer/devices': 'customer:devices:view',
-  '/dashboard/customer/sessions': 'customer:sessions:view',
 };
 
 // ==================== 权限检查工具函数 ====================

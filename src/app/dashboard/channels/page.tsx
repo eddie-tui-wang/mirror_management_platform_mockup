@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, Typography, message, Select } from 'antd';
-import { PlusOutlined, ExportOutlined, StopOutlined } from '@ant-design/icons';
+import { Table, Button, Tag, Space, Modal, Form, Input, Typography, message } from 'antd';
+import { PlusOutlined, StopOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import { useRouter } from 'next/navigation';
 import { organizations, getChannelSummary } from '@/lib/mock-data';
 import type { Organization } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
@@ -17,6 +18,7 @@ interface ChannelRow extends Organization {
 }
 
 export default function ChannelsPage() {
+  const router = useRouter();
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [form] = Form.useForm();
 
@@ -90,27 +92,21 @@ export default function ChannelsPage() {
           <Button
             type="link"
             size="small"
-            onClick={() =>
-              message.info(`跳转到用户管理，筛选org=${record.org_id}`)
-            }
+            onClick={() => router.push(`/dashboard/users?org=${record.org_id}`)}
           >
             查看成员
           </Button>
           <Button
             type="link"
             size="small"
-            onClick={() =>
-              message.info(`查看渠道 ${record.name} 的客户列表`)
-            }
+            onClick={() => router.push(`/dashboard/customers?channel=${record.org_id}`)}
           >
             查看客户
           </Button>
           <Button
             type="link"
             size="small"
-            onClick={() =>
-              message.info(`查看渠道 ${record.name} 的资产`)
-            }
+            onClick={() => router.push(`/dashboard/assets/garments?org=${record.org_id}`)}
           >
             查看资产
           </Button>
@@ -138,9 +134,6 @@ export default function ChannelsPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Title level={4} style={{ margin: 0 }}>渠道管理</Title>
         <Space>
-          <PermGuard permission="platform:channels:export">
-            <Button icon={<ExportOutlined />}>导出</Button>
-          </PermGuard>
           <PermGuard permission="platform:channels:create">
             <Button
               type="primary"

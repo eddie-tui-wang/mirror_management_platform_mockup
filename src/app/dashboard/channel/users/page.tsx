@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from 'react';
 import { Table, Button, Tag, Space, Typography, message, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { getChannelCustomers, memberships, users, organizations } from '@/lib/mock-data';
 import type { RoleKey, Status } from '@/lib/types';
@@ -24,7 +25,9 @@ interface CustomerUserRow {
 
 export default function ChannelUsersPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
-  const [orgFilter, setOrgFilter] = useState<string>('all');
+  const searchParams = useSearchParams();
+
+  const [orgFilter, setOrgFilter] = useState<string>(searchParams.get('org') ?? 'all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [roleFilter, setRoleFilter] = useState<string>('all');
 

@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from 'react';
 import { Table, Button, Tag, Space, Typography, Select, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { useSearchParams } from 'next/navigation';
 import { organizations, garments, getOrgById } from '@/lib/mock-data';
 import type { GarmentCatalog, OrgType, Status } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
@@ -15,8 +16,11 @@ interface GarmentRow extends GarmentCatalog {
 }
 
 export default function GarmentsPage() {
+  const searchParams = useSearchParams();
+  const initialOrgId = searchParams.get('org') ?? undefined;
+
   const [filterOrgType, setFilterOrgType] = useState<OrgType | undefined>(undefined);
-  const [filterOrgId, setFilterOrgId] = useState<string | undefined>(undefined);
+  const [filterOrgId, setFilterOrgId] = useState<string | undefined>(initialOrgId);
   const [filterStatus, setFilterStatus] = useState<Status | undefined>(undefined);
 
   const orgOptions = useMemo(() => {
@@ -105,15 +109,6 @@ export default function GarmentsPage() {
               查看/编辑
             </Button>
           </PermGuard>
-          <Button
-            type="link"
-            size="small"
-            onClick={() =>
-              message.info(`跳转到组织 ${record.org_name} (${record.org_id})`)
-            }
-          >
-            跳转到组织
-          </Button>
         </Space>
       ),
     },

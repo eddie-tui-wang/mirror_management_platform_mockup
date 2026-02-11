@@ -1,6 +1,7 @@
+import dayjs from 'dayjs';
 import {
   Organization, User, OrgMembership, GarmentCatalog, TemplateSet,
-  Device, Session, DemoAccount,
+  Device, Session, DemoAccount, TrialStatus,
 } from './types';
 
 // ==================== 组织数据 ====================
@@ -12,11 +13,11 @@ export const organizations: Organization[] = [
   { org_id: 'org_ch_003', platform_id: 'p1', org_type: 'CHANNEL', name: '渠道C', parent_org_id: null, status: 'Active', created_at: '2026-01-20' },
   // 客户（直客）
   { org_id: 'org_cu_1001', platform_id: 'p1', org_type: 'CUSTOMER', name: '客户X', parent_org_id: null, status: 'Active', created_at: '2026-02-03' },
-  { org_id: 'org_cu_1004', platform_id: 'p1', org_type: 'CUSTOMER', name: '客户W', parent_org_id: null, status: 'Active', created_at: '2026-02-07' },
+  { org_id: 'org_cu_1004', platform_id: 'p1', org_type: 'CUSTOMER', name: '客户W', parent_org_id: null, status: 'Active', created_at: '2026-02-07', is_trial: true, trial_days: 14, trial_start_date: '2026-02-01', trial_max_sales: 50, trial_used_sales: 12 },
   // 客户（渠道客户）
   { org_id: 'org_cu_1002', platform_id: 'p1', org_type: 'CUSTOMER', name: '客户Y', parent_org_id: 'org_ch_001', status: 'Active', created_at: '2026-02-05' },
   { org_id: 'org_cu_1003', platform_id: 'p1', org_type: 'CUSTOMER', name: '客户Z', parent_org_id: 'org_ch_001', status: 'Active', created_at: '2026-02-06' },
-  { org_id: 'org_cu_1005', platform_id: 'p1', org_type: 'CUSTOMER', name: '客户V', parent_org_id: 'org_ch_003', status: 'Active', created_at: '2026-02-08' },
+  { org_id: 'org_cu_1005', platform_id: 'p1', org_type: 'CUSTOMER', name: '客户V', parent_org_id: 'org_ch_003', status: 'Active', created_at: '2026-01-20', is_trial: true, trial_days: 14, trial_start_date: '2026-01-20', trial_max_sales: 30, trial_used_sales: 30 },
 ];
 
 // ==================== 用户数据 ====================
@@ -53,7 +54,7 @@ export const users: User[] = [
 export const memberships: OrgMembership[] = [
   // 渠道A
   { user_id: 'u_001', org_id: 'org_ch_001', role_key: 'ChannelOwner', invited_by: null, created_at: '2026-02-01' },
-  { user_id: 'u_004', org_id: 'org_ch_001', role_key: 'ChannelOps', invited_by: 'u_001', created_at: '2026-02-02' },
+  { user_id: 'u_004', org_id: 'org_ch_001', role_key: 'ChannelOwner', invited_by: 'u_001', created_at: '2026-02-02' },
   // 渠道B
   { user_id: 'u_005', org_id: 'org_ch_002', role_key: 'ChannelOwner', invited_by: null, created_at: '2026-01-15' },
   // 渠道C
@@ -126,10 +127,40 @@ export const sessions: Session[] = [
 export const demoAccounts: DemoAccount[] = [
   { user_id: 'u_super', email: 'super@platform.com', name: '平台超管', role: 'PlatformSuperAdmin', portal: 'platform', org_id: 'platform', org_name: '试衣镜平台', password: 'demo' },
   { user_id: 'u_001', email: 'admin@channel-a.com', name: 'Alice Chen', role: 'ChannelOwner', portal: 'channel', org_id: 'org_ch_001', org_name: '渠道A', password: 'demo' },
-  { user_id: 'u_004', email: 'ops@channel-a.com', name: 'Bob Li', role: 'ChannelOps', portal: 'channel', org_id: 'org_ch_001', org_name: '渠道A', password: 'demo' },
   { user_id: 'u_002', email: 'hq.admin@x.com', name: 'David Zhang', role: 'HQOwner', portal: 'customer', org_id: 'org_cu_1001', org_name: '客户X', password: 'demo' },
   { user_id: 'u_006', email: 'ops1@x.com', name: 'Eva Liu', role: 'HQOps', portal: 'customer', org_id: 'org_cu_1001', org_name: '客户X', password: 'demo' },
 ];
+
+// ==================== 试用辅助函数 ====================
+
+/** 计算试用客户的状态信息（含天数 + 销售次数） */
+export function getTrialInfo(org: Organization): {
+  trialStatus: TrialStatus;
+  remainingDays: number;
+  trialEndDate: string;
+  trialMaxSales: number;
+  trialUsedSales: number;
+  trialRemainingSales: number;
+} {
+  if (!org.is_trial || !org.trial_start_date || !org.trial_days) {
+    return { trialStatus: 'not_trial', remainingDays: 0, trialEndDate: '', trialMaxSales: 0, trialUsedSales: 0, trialRemainingSales: 0 };
+  }
+  const endDate = dayjs(org.trial_start_date).add(org.trial_days, 'day');
+  const today = dayjs();
+  const remaining = endDate.diff(today, 'day');
+  const maxSales = org.trial_max_sales ?? 0;
+  const usedSales = org.trial_used_sales ?? 0;
+  const daysExpired = remaining < 0;
+  const salesExhausted = usedSales >= maxSales;
+  return {
+    trialStatus: (daysExpired || salesExhausted) ? 'expired' : 'active',
+    remainingDays: Math.max(remaining, 0),
+    trialEndDate: endDate.format('YYYY-MM-DD'),
+    trialMaxSales: maxSales,
+    trialUsedSales: usedSales,
+    trialRemainingSales: Math.max(maxSales - usedSales, 0),
+  };
+}
 
 // ==================== 辅助函数 ====================
 
@@ -193,6 +224,7 @@ export function getCustomerSummary(customerOrgId: string) {
   const adminUser = admin ? users.find(u => u.user_id === admin.user_id) : null;
   const parentOrg = organizations.find(o => o.org_id === customerOrgId);
   const channelOrg = parentOrg?.parent_org_id ? organizations.find(o => o.org_id === parentOrg.parent_org_id) : null;
+  const trialInfo = parentOrg ? getTrialInfo(parentOrg) : { trialStatus: 'not_trial' as const, remainingDays: 0, trialEndDate: '', trialMaxSales: 0, trialUsedSales: 0, trialRemainingSales: 0 };
   return {
     memberCount: members.length,
     onlineDeviceCount: onlineDevices,
@@ -201,5 +233,12 @@ export function getCustomerSummary(customerOrgId: string) {
     customerType: parentOrg?.parent_org_id ? 'Reseller' as const : 'Direct' as const,
     channelName: channelOrg?.name ?? '-',
     channelOrgId: channelOrg?.org_id ?? null,
+    isTrial: parentOrg?.is_trial ?? false,
+    trialStatus: trialInfo.trialStatus,
+    remainingDays: trialInfo.remainingDays,
+    trialEndDate: trialInfo.trialEndDate,
+    trialMaxSales: trialInfo.trialMaxSales,
+    trialUsedSales: trialInfo.trialUsedSales,
+    trialRemainingSales: trialInfo.trialRemainingSales,
   };
 }

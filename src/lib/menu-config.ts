@@ -22,15 +22,12 @@ const platformMenu: MenuItemConfig[] = [
       { key: 'templates', label: '模板库', icon: 'LayoutOutlined', path: '/dashboard/assets/templates', permission: 'platform:templates:view' },
     ],
   },
-  { key: 'devices', label: '设备管理', icon: 'DesktopOutlined', path: '/dashboard/devices', permission: 'platform:devices:view' },
-  { key: 'sessions', label: '会话管理', icon: 'ClockCircleOutlined', path: '/dashboard/sessions', permission: 'platform:sessions:view' },
 ];
 
 // 渠道端菜单
 const channelMenu: MenuItemConfig[] = [
   { key: 'ch-customers', label: '客户管理', icon: 'TeamOutlined', path: '/dashboard/channel/customers', permission: 'channel:customers:view' },
   { key: 'ch-users', label: '客户账号', icon: 'UserOutlined', path: '/dashboard/channel/users', permission: 'channel:users:view' },
-  { key: 'ch-sessions', label: '设备与会话', icon: 'DesktopOutlined', path: '/dashboard/channel/sessions', permission: 'channel:sessions:view' },
 ];
 
 // 客户端菜单
@@ -38,8 +35,6 @@ const customerMenu: MenuItemConfig[] = [
   { key: 'cu-users', label: '组织成员', icon: 'UserOutlined', path: '/dashboard/customer/users', permission: 'customer:users:view' },
   { key: 'cu-garments', label: '服装库', icon: 'SkinOutlined', path: '/dashboard/customer/garments', permission: 'customer:garments:view' },
   { key: 'cu-templates', label: '模板库', icon: 'LayoutOutlined', path: '/dashboard/customer/templates', permission: 'customer:templates:view' },
-  { key: 'cu-devices', label: '设备管理', icon: 'DesktopOutlined', path: '/dashboard/customer/devices', permission: 'customer:devices:view' },
-  { key: 'cu-sessions', label: '会话管理', icon: 'ClockCircleOutlined', path: '/dashboard/customer/sessions', permission: 'customer:sessions:view' },
 ];
 
 export const PORTAL_MENUS: Record<PortalType, MenuItemConfig[]> = {

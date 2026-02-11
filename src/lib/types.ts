@@ -1,12 +1,14 @@
 // ==================== 数据模型类型 ====================
 
 export type OrgType = 'CHANNEL' | 'CUSTOMER';
-export type RoleKey = 'PlatformSuperAdmin' | 'ChannelOwner' | 'ChannelOps' | 'HQOwner' | 'HQOps';
+export type RoleKey = 'PlatformSuperAdmin' | 'ChannelOwner' | 'HQOwner' | 'HQOps';
 export type PortalType = 'platform' | 'channel' | 'customer';
 export type Status = 'Active' | 'Disabled';
 export type DeviceStatus = 'Online' | 'Offline';
 export type SessionStatus = 'ACTIVE' | 'TERMINATED' | 'EXPIRED';
 export type CustomerType = 'Direct' | 'Reseller';
+export type AccountKind = 'Regular' | 'Trial';
+export type TrialStatus = 'active' | 'expired' | 'not_trial';
 
 export interface Platform {
   platform_id: string;
@@ -21,6 +23,12 @@ export interface Organization {
   parent_org_id: string | null; // 渠道客户指向所属渠道
   status: Status;
   created_at: string;
+  // 试用账户字段（可选，向后兼容）
+  is_trial?: boolean;
+  trial_days?: number;
+  trial_start_date?: string;
+  trial_max_sales?: number;   // 试用销售次数上限（创建时输入）
+  trial_used_sales?: number;  // 已使用的试用销售次数
 }
 
 export interface User {
