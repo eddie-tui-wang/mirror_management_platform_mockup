@@ -1,0 +1,172 @@
+'use client';
+
+import React, { useMemo, useState } from 'react';
+import { Table, Button, Tag, Space, Typography, Select, message } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import { organizations, garments, getOrgById } from '@/lib/mock-data';
+import type { GarmentCatalog, OrgType, Status } from '@/lib/types';
+import PermGuard from '@/components/PermGuard';
+
+const { Title } = Typography;
+
+interface GarmentRow extends GarmentCatalog {
+  org_name: string;
+  org_type: OrgType;
+}
+
+export default function GarmentsPage() {
+  const [filterOrgType, setFilterOrgType] = useState<OrgType | undefined>(undefined);
+  const [filterOrgId, setFilterOrgId] = useState<string | undefined>(undefined);
+  const [filterStatus, setFilterStatus] = useState<Status | undefined>(undefined);
+
+  const orgOptions = useMemo(() => {
+    let orgs = organizations;
+    if (filterOrgType) {
+      orgs = orgs.filter((o) => o.org_type === filterOrgType);
+    }
+    return orgs.map((o) => ({ label: `${o.name} (${o.org_id})`, value: o.org_id }));
+  }, [filterOrgType]);
+
+  const dataSource: GarmentRow[] = useMemo(() => {
+    return garments
+      .map((g) => {
+        const org = getOrgById(g.org_id);
+        return {
+          ...g,
+          org_name: org?.name ?? '-',
+          org_type: org?.org_type ?? ('CUSTOMER' as OrgType),
+        };
+      })
+      .filter((g) => {
+        if (filterOrgType && g.org_type !== filterOrgType) return false;
+        if (filterOrgId && g.org_id !== filterOrgId) return false;
+        if (filterStatus && g.status !== filterStatus) return false;
+        return true;
+      });
+  }, [filterOrgType, filterOrgId, filterStatus]);
+
+  const columns: ColumnsType<GarmentRow> = [
+    {
+      title: '服装名称',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'garment_id',
+      dataIndex: 'garment_id',
+      key: 'garment_id',
+      render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
+    },
+    {
+      title: '所属组织类型',
+      dataIndex: 'org_type',
+      key: 'org_type',
+      render: (type: OrgType) => (
+        <Tag color={type === 'CHANNEL' ? 'blue' : 'orange'}>{type}</Tag>
+      ),
+    },
+    {
+      title: '所属组织名称',
+      dataIndex: 'org_name',
+      key: 'org_name',
+    },
+    {
+      title: 'org_id',
+      dataIndex: 'org_id',
+      key: 'org_id',
+      render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: Status) => (
+        <Tag color={status === 'Active' ? 'green' : 'red'}>{status}</Tag>
+      ),
+    },
+    {
+      title: '更新时间',
+      dataIndex: 'updated_at',
+      key: 'updated_at',
+    },
+    {
+      title: '操作',
+      key: 'actions',
+      render: (_, record) => (
+        <Space size="small">
+          <PermGuard permission="platform:garments:edit">
+            <Button
+              type="link"
+              size="small"
+              onClick={() =>
+                message.info(`查看/编辑服装 ${record.name} (${record.garment_id})`)
+              }
+            >
+              查看/编辑
+            </Button>
+          </PermGuard>
+          <Button
+            type="link"
+            size="small"
+            onClick={() =>
+              message.info(`跳转到组织 ${record.org_name} (${record.org_id})`)
+            }
+          >
+            跳转到组织
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div>
+      <Title level={4} style={{ marginBottom: 16 }}>服装库（聚合管理）</Title>
+
+      <Space style={{ marginBottom: 16 }} wrap>
+        <Select
+          placeholder="组织类型"
+          allowClear
+          style={{ width: 160 }}
+          value={filterOrgType}
+          onChange={(val) => {
+            setFilterOrgType(val);
+            setFilterOrgId(undefined);
+          }}
+          options={[
+            { label: 'CHANNEL', value: 'CHANNEL' },
+            { label: 'CUSTOMER', value: 'CUSTOMER' },
+          ]}
+        />
+        <Select
+          placeholder="组织"
+          allowClear
+          showSearch
+          optionFilterProp="label"
+          style={{ width: 260 }}
+          value={filterOrgId}
+          onChange={setFilterOrgId}
+          options={orgOptions}
+        />
+        <Select
+          placeholder="状态"
+          allowClear
+          style={{ width: 120 }}
+          value={filterStatus}
+          onChange={setFilterStatus}
+          options={[
+            { label: 'Active', value: 'Active' },
+            { label: 'Disabled', value: 'Disabled' },
+          ]}
+        />
+      </Space>
+
+      <Table<GarmentRow>
+        columns={columns}
+        dataSource={dataSource}
+        rowKey="catalog_id"
+        pagination={{ pageSize: 10 }}
+      />
+    </div>
+  );
+}
