@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import {
-  Organization, User, OrgMembership, GarmentCatalog, TemplateSet,
-  Device, Session, DemoAccount, TrialStatus,
+  Organization, User, OrgMembership, GarmentCatalog, GarmentCategory,
+  MasterTemplate, TemplateAssignment, Device, Session, DemoAccount, TrialStatus,
 } from './types';
 
 // ==================== 组织数据 ====================
@@ -79,25 +79,70 @@ export const memberships: OrgMembership[] = [
 // ==================== 服装库 ====================
 
 export const garments: GarmentCatalog[] = [
-  { catalog_id: 'cat_01', garment_id: 'g_9001', org_id: 'org_cu_1001', name: 'Black Suit Set', status: 'Active', updated_at: '2026-02-09 18:32' },
-  { catalog_id: 'cat_02', garment_id: 'g_9002', org_id: 'org_ch_001', name: 'Summer Dress', status: 'Active', updated_at: '2026-02-08 11:05' },
-  { catalog_id: 'cat_03', garment_id: 'g_9003', org_id: 'org_cu_1001', name: 'Casual Jacket', status: 'Active', updated_at: '2026-02-07 14:22' },
-  { catalog_id: 'cat_04', garment_id: 'g_9004', org_id: 'org_cu_1002', name: 'Winter Coat', status: 'Active', updated_at: '2026-02-06 09:10' },
-  { catalog_id: 'cat_05', garment_id: 'g_9005', org_id: 'org_cu_1003', name: 'Silk Blouse', status: 'Disabled', updated_at: '2026-02-05 16:45' },
-  { catalog_id: 'cat_06', garment_id: 'g_9006', org_id: 'org_ch_003', name: 'Denim Series', status: 'Active', updated_at: '2026-02-04 12:00' },
-  { catalog_id: 'cat_07', garment_id: 'g_9007', org_id: 'org_cu_1001', name: 'Evening Gown', status: 'Active', updated_at: '2026-02-03 20:15' },
-  { catalog_id: 'cat_08', garment_id: 'g_9008', org_id: 'org_cu_1004', name: 'Sport Wear', status: 'Active', updated_at: '2026-02-02 10:30' },
+  { catalog_id: 'cat_01', garment_id: 'g_9001', org_id: 'org_cu_1001', name: 'Black Suit Set', image_url: 'https://picsum.photos/seed/g9001/80/80', category_id: 'gc_01', status: 'Active', updated_at: '2026-02-09 18:32' },
+  { catalog_id: 'cat_02', garment_id: 'g_9002', org_id: 'org_ch_001', name: 'Summer Dress', image_url: 'https://picsum.photos/seed/g9002/80/80', category_id: null, status: 'Active', updated_at: '2026-02-08 11:05' },
+  { catalog_id: 'cat_03', garment_id: 'g_9003', org_id: 'org_cu_1001', name: 'Casual Jacket', image_url: 'https://picsum.photos/seed/g9003/80/80', category_id: 'gc_03', status: 'Active', updated_at: '2026-02-07 14:22' },
+  { catalog_id: 'cat_04', garment_id: 'g_9004', org_id: 'org_cu_1002', name: 'Winter Coat', image_url: 'https://picsum.photos/seed/g9004/80/80', category_id: 'gc_07', status: 'Active', updated_at: '2026-02-06 09:10' },
+  { catalog_id: 'cat_05', garment_id: 'g_9005', org_id: 'org_cu_1003', name: 'Silk Blouse', image_url: 'https://picsum.photos/seed/g9005/80/80', category_id: null, status: 'Disabled', updated_at: '2026-02-05 16:45' },
+  { catalog_id: 'cat_06', garment_id: 'g_9006', org_id: 'org_ch_003', name: 'Denim Series', image_url: 'https://picsum.photos/seed/g9006/80/80', category_id: null, status: 'Active', updated_at: '2026-02-04 12:00' },
+  { catalog_id: 'cat_07', garment_id: 'g_9007', org_id: 'org_cu_1001', name: 'Evening Gown', image_url: 'https://picsum.photos/seed/g9007/80/80', category_id: 'gc_02', status: 'Active', updated_at: '2026-02-03 20:15' },
+  { catalog_id: 'cat_08', garment_id: 'g_9008', org_id: 'org_cu_1004', name: 'Sport Wear', image_url: 'https://picsum.photos/seed/g9008/80/80', category_id: null, status: 'Active', updated_at: '2026-02-02 10:30' },
 ];
 
-// ==================== 模板库 ====================
+// ==================== 服装分类（客户端管理） ====================
 
-export const templates: TemplateSet[] = [
-  { template_set_id: 'ts_01', template_id: 't_001', org_id: 'org_cu_1001', name: 'Spring Theme Template', version: 'v2.1', status: 'Active', updated_at: '2026-02-09 17:00' },
-  { template_set_id: 'ts_02', template_id: 't_002', org_id: 'org_ch_001', name: 'Brand Showcase Template', version: 'v1.0', status: 'Active', updated_at: '2026-02-08 10:00' },
-  { template_set_id: 'ts_03', template_id: 't_003', org_id: 'org_cu_1002', name: 'Minimal Fitting Template', version: 'v1.3', status: 'Active', updated_at: '2026-02-07 14:00' },
-  { template_set_id: 'ts_04', template_id: 't_004', org_id: 'org_cu_1001', name: 'Promotional Template', version: 'v3.0', status: 'Disabled', updated_at: '2026-02-06 11:00' },
-  { template_set_id: 'ts_05', template_id: 't_005', org_id: 'org_cu_1003', name: 'Store Guide Template', version: 'v1.1', status: 'Active', updated_at: '2026-02-05 09:00' },
-  { template_set_id: 'ts_06', template_id: 't_006', org_id: 'org_ch_003', name: 'Channel Standard Template', version: 'v2.0', status: 'Active', updated_at: '2026-02-04 15:00' },
+export const garmentCategories: GarmentCategory[] = [
+  // 客户X (org_cu_1001)
+  { category_id: 'gc_01', org_id: 'org_cu_1001', name: 'Tops', created_at: '2026-02-01' },
+  { category_id: 'gc_02', org_id: 'org_cu_1001', name: 'Dresses', created_at: '2026-02-01' },
+  { category_id: 'gc_03', org_id: 'org_cu_1001', name: 'Outerwear', created_at: '2026-02-02' },
+  { category_id: 'gc_04', org_id: 'org_cu_1001', name: 'Accessories', created_at: '2026-02-03' },
+  // 客户Y (org_cu_1002)
+  { category_id: 'gc_05', org_id: 'org_cu_1002', name: 'Tops', created_at: '2026-02-05' },
+  { category_id: 'gc_06', org_id: 'org_cu_1002', name: 'Bottoms', created_at: '2026-02-05' },
+  { category_id: 'gc_07', org_id: 'org_cu_1002', name: 'Outerwear', created_at: '2026-02-05' },
+  // 客户Z (org_cu_1003)
+  { category_id: 'gc_08', org_id: 'org_cu_1003', name: 'Formal', created_at: '2026-02-06' },
+  { category_id: 'gc_09', org_id: 'org_cu_1003', name: 'Casual', created_at: '2026-02-06' },
+];
+
+// ==================== 主模板库（平台统一管理的模块化场景） ====================
+
+export const masterTemplates: MasterTemplate[] = [
+  { template_id: 'tpl_001', name: 'Daily Life Scene', prompts: ['Casual daily outfit recommendation', 'Seasonal outfit matching', 'Accessory pairing suggestion'], status: 'Active', created_at: '2026-01-10 09:00', updated_at: '2026-02-09 17:00' },
+  { template_id: 'tpl_002', name: 'Brand Showcase', prompts: ['Display brand story and heritage', 'Highlight signature products', 'Show latest collection lookbook'], status: 'Active', created_at: '2026-01-12 10:00', updated_at: '2026-02-08 10:00' },
+  { template_id: 'tpl_003', name: 'Fitting Room', prompts: ['Virtual try-on with body scan', 'Suggest matching items', 'Show size recommendation'], status: 'Active', created_at: '2026-01-14 14:00', updated_at: '2026-02-07 14:00' },
+  { template_id: 'tpl_004', name: 'Holiday Promotion', prompts: ['Show limited-time offers', 'Countdown timer for flash sale', 'Gift bundle recommendation', 'Loyalty points reminder'], status: 'Active', created_at: '2026-01-05 11:00', updated_at: '2026-02-06 11:00' },
+  { template_id: 'tpl_005', name: 'Store Guide', prompts: ['Interactive floor map navigation', 'Product location finder', 'Department directory display'], status: 'Active', created_at: '2026-01-18 09:00', updated_at: '2026-02-05 09:00' },
+  { template_id: 'tpl_006', name: 'Lookbook', prompts: ['Swipeable outfit gallery', 'Style inspiration feed', 'Cross-sell related items', 'Save favorite looks'], status: 'Active', created_at: '2026-01-20 15:00', updated_at: '2026-02-04 15:00' },
+  { template_id: 'tpl_007', name: 'Summer Collection', prompts: ['Feature summer new arrivals', 'Beach and resort outfit ideas', 'Lightweight fabric highlights'], status: 'Active', created_at: '2026-01-25 12:00', updated_at: '2026-02-03 12:00' },
+  { template_id: 'tpl_008', name: 'VIP Welcome', prompts: ['Personalized greeting by name', 'Show purchase history highlights', 'Exclusive VIP offers', 'Loyalty tier and rewards'], status: 'Active', created_at: '2026-01-28 10:00', updated_at: '2026-02-02 10:00' },
+  { template_id: 'tpl_009', name: 'Product Comparison', prompts: ['Side-by-side spec comparison', 'Price and value analysis'], status: 'Disabled', created_at: '2026-01-30 08:00', updated_at: '2026-02-01 08:00' },
+  { template_id: 'tpl_010', name: 'Winter Theme', prompts: ['Winter holiday gift guide', 'Cozy outfit recommendations', 'Seasonal color palette showcase', 'Gift wrapping options'], status: 'Active', created_at: '2026-01-08 16:00', updated_at: '2026-01-30 16:00' },
+];
+
+// ==================== 模板分配记录（平台管理员分配给客户） ====================
+
+export const templateAssignments: TemplateAssignment[] = [
+  // 客户X (org_cu_1001) - 4个模板
+  { assignment_id: 'ta_001', template_id: 'tpl_001', org_id: 'org_cu_1001', enabled: true,  assigned_at: '2026-02-01 10:00', assigned_by: 'u_super' },
+  { assignment_id: 'ta_002', template_id: 'tpl_003', org_id: 'org_cu_1001', enabled: true,  assigned_at: '2026-02-01 10:00', assigned_by: 'u_super' },
+  { assignment_id: 'ta_003', template_id: 'tpl_004', org_id: 'org_cu_1001', enabled: false, assigned_at: '2026-02-02 14:00', assigned_by: 'u_super' },
+  { assignment_id: 'ta_004', template_id: 'tpl_006', org_id: 'org_cu_1001', enabled: true,  assigned_at: '2026-02-03 09:00', assigned_by: 'u_super' },
+  // 客户Y (org_cu_1002) - 3个模板
+  { assignment_id: 'ta_005', template_id: 'tpl_002', org_id: 'org_cu_1002', enabled: true,  assigned_at: '2026-02-05 11:00', assigned_by: 'u_super' },
+  { assignment_id: 'ta_006', template_id: 'tpl_003', org_id: 'org_cu_1002', enabled: true,  assigned_at: '2026-02-05 11:00', assigned_by: 'u_super' },
+  { assignment_id: 'ta_007', template_id: 'tpl_008', org_id: 'org_cu_1002', enabled: false, assigned_at: '2026-02-06 10:00', assigned_by: 'u_super' },
+  // 客户Z (org_cu_1003) - 3个模板
+  { assignment_id: 'ta_008', template_id: 'tpl_005', org_id: 'org_cu_1003', enabled: true,  assigned_at: '2026-02-06 12:00', assigned_by: 'u_super' },
+  { assignment_id: 'ta_009', template_id: 'tpl_006', org_id: 'org_cu_1003', enabled: true,  assigned_at: '2026-02-06 12:00', assigned_by: 'u_super' },
+  { assignment_id: 'ta_010', template_id: 'tpl_010', org_id: 'org_cu_1003', enabled: true,  assigned_at: '2026-02-07 09:00', assigned_by: 'u_super' },
+  // 客户W (org_cu_1004) - 2个模板（试用账户）
+  { assignment_id: 'ta_011', template_id: 'tpl_001', org_id: 'org_cu_1004', enabled: true,  assigned_at: '2026-02-07 14:00', assigned_by: 'u_super' },
+  { assignment_id: 'ta_012', template_id: 'tpl_007', org_id: 'org_cu_1004', enabled: true,  assigned_at: '2026-02-07 14:00', assigned_by: 'u_super' },
+  // 客户V (org_cu_1005) - 2个模板（试用账户）
+  { assignment_id: 'ta_013', template_id: 'tpl_004', org_id: 'org_cu_1005', enabled: true,  assigned_at: '2026-02-08 10:00', assigned_by: 'u_super' },
+  { assignment_id: 'ta_014', template_id: 'tpl_005', org_id: 'org_cu_1005', enabled: false, assigned_at: '2026-02-08 10:00', assigned_by: 'u_super' },
 ];
 
 // ==================== 设备数据 ====================
@@ -190,8 +235,51 @@ export function getOrgGarments(orgId: string) {
   return garments.filter(g => g.org_id === orgId);
 }
 
-export function getOrgTemplates(orgId: string) {
-  return templates.filter(t => t.org_id === orgId);
+/** 获取客户的服装分类列表 */
+export function getOrgGarmentCategories(orgId: string) {
+  return garmentCategories.filter(c => c.org_id === orgId);
+}
+
+/** 根据分类 ID 获取分类名称 */
+export function getGarmentCategoryName(categoryId: string | null) {
+  if (!categoryId) return null;
+  return garmentCategories.find(c => c.category_id === categoryId)?.name ?? null;
+}
+
+/** 根据 ID 查找主模板 */
+export function getMasterTemplateById(templateId: string) {
+  return masterTemplates.find(t => t.template_id === templateId);
+}
+
+/** 获取客户被分配的模板（含主模板详情） */
+export function getCustomerAssignedTemplates(orgId: string) {
+  return templateAssignments
+    .filter(a => a.org_id === orgId)
+    .map(a => {
+      const tpl = getMasterTemplateById(a.template_id);
+      return {
+        ...a,
+        template_name: tpl?.name ?? '-',
+        template_prompts: tpl?.prompts ?? [],
+        template_status: tpl?.status ?? ('Disabled' as const),
+      };
+    });
+}
+
+/** 获取某模板已分配的客户列表 */
+export function getTemplateAssignedOrgs(templateId: string) {
+  return templateAssignments
+    .filter(a => a.template_id === templateId)
+    .map(a => {
+      const org = getOrgById(a.org_id);
+      return { ...a, org_name: org?.name ?? '-', org_status: org?.status ?? ('Disabled' as const) };
+    });
+}
+
+/** 获取某模板尚未分配的客户列表 */
+export function getTemplateUnassignedOrgs(templateId: string) {
+  const assignedOrgIds = templateAssignments.filter(a => a.template_id === templateId).map(a => a.org_id);
+  return organizations.filter(o => o.org_type === 'CUSTOMER' && !assignedOrgIds.includes(o.org_id));
 }
 
 export function getOrgDevices(orgId: string) {

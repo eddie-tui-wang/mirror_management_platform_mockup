@@ -53,18 +53,38 @@ export interface GarmentCatalog {
   garment_id: string;
   org_id: string;
   name: string;
+  image_url: string;
+  category_id: string | null; // 关联服装分类，客户自行管理
   status: Status;
   updated_at: string;
 }
 
-export interface TemplateSet {
-  template_set_id: string;
-  template_id: string;
+// 服装分类（客户端自行创建和管理）
+export interface GarmentCategory {
+  category_id: string;
   org_id: string;
   name: string;
-  version: string;
+  created_at: string;
+}
+
+// 平台统一管理的主模板（模块化场景）
+export interface MasterTemplate {
+  template_id: string;
+  name: string;           // 模块统称，如"生活场景"
+  prompts: string[];      // 提示词列表
   status: Status;
+  created_at: string;
   updated_at: string;
+}
+
+// 模板分配记录：将主模板绑定到客户组织
+export interface TemplateAssignment {
+  assignment_id: string;
+  template_id: string;
+  org_id: string;
+  enabled: boolean;
+  assigned_at: string;
+  assigned_by: string;
 }
 
 export interface Device {

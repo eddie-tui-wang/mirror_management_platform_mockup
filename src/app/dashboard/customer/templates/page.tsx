@@ -1,31 +1,35 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Table, Button, Tag, Space, Typography, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Table, Tag, Typography, Switch, Tooltip, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuthStore } from '@/lib/store';
-import { getOrgTemplates } from '@/lib/mock-data';
-import type { TemplateSet, Status } from '@/lib/types';
-import PermGuard from '@/components/PermGuard';
+import { getCustomerAssignedTemplates } from '@/lib/mock-data';
+import { hasPermission } from '@/lib/permissions';
 
 const { Title } = Typography;
+
+// 从 getCustomerAssignedTemplates 返回值推断行类型
+type AssignedTemplateRow = ReturnType<typeof getCustomerAssignedTemplates>[number];
 
 export default function CustomerTemplatesPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
 
   const orgId = currentUser?.org_id ?? '';
   const orgName = currentUser?.org_name ?? '';
+  const canToggle = currentUser
+    ? hasPermission(currentUser.role, 'customer:templates:toggle')
+    : false;
 
-  const dataSource: TemplateSet[] = useMemo(() => {
-    return getOrgTemplates(orgId);
+  const dataSource: AssignedTemplateRow[] = useMemo(() => {
+    return getCustomerAssignedTemplates(orgId);
   }, [orgId]);
 
-  const columns: ColumnsType<TemplateSet> = [
+  const columns: ColumnsType<AssignedTemplateRow> = [
     {
       title: 'Template Name',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'template_name',
+      key: 'template_name',
     },
     {
       title: 'template_id',
@@ -34,95 +38,65 @@ export default function CustomerTemplatesPage() {
       render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
     },
     {
-      title: 'Version',
-      dataIndex: 'version',
-      key: 'version',
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: Status) => (
-        <Tag color={status === 'Active' ? 'green' : 'red'}>{status}</Tag>
-      ),
-    },
-    {
-      title: 'Updated At',
-      dataIndex: 'updated_at',
-      key: 'updated_at',
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
+      title: 'Prompts',
+      key: 'prompts',
       render: (_, record) => (
-        <Space size="small">
-          <PermGuard permission="customer:templates:publish" fallback="disable">
-            <Button
-              type="link"
-              size="small"
-              onClick={() =>
-                message.info(`Publish template ${record.name} (simulated)`)
-              }
-            >
-              Publish
-            </Button>
-          </PermGuard>
-          <PermGuard permission="customer:templates:rollback" fallback="disable">
-            <Button
-              type="link"
-              size="small"
-              onClick={() =>
-                message.info(`Rollback template ${record.name} (simulated)`)
-              }
-            >
-              Rollback
-            </Button>
-          </PermGuard>
-          <PermGuard permission="customer:templates:disable" fallback="disable">
-            <Button
-              type="link"
-              size="small"
-              danger
-              onClick={() =>
-                message.info(`Disable template ${record.name} (simulated)`)
-              }
-            >
-              Disable
-            </Button>
-          </PermGuard>
-        </Space>
+        <Tooltip
+          title={
+            record.template_prompts.length > 0
+              ? record.template_prompts.map((p, i) => <div key={i}>{`${i + 1}. ${p}`}</div>)
+              : 'No prompts'
+          }
+        >
+          <Tag style={{ cursor: 'pointer' }}>{record.template_prompts.length} prompt(s)</Tag>
+        </Tooltip>
       ),
+    },
+    {
+      title: 'Assigned At',
+      dataIndex: 'assigned_at',
+      key: 'assigned_at',
+    },
+    {
+      title: 'Enabled',
+      key: 'enabled',
+      render: (_, record) => {
+        const masterDisabled = record.template_status === 'Disabled';
+        return (
+          <Tooltip
+            title={
+              masterDisabled
+                ? 'Template disabled by platform'
+                : !canToggle
+                  ? 'No permission'
+                  : undefined
+            }
+          >
+            <Switch
+              checked={record.enabled && !masterDisabled}
+              disabled={masterDisabled || !canToggle}
+              onChange={(checked) => {
+                message.success(
+                  `Template "${record.template_name}" ${checked ? 'enabled' : 'disabled'} (simulated)`
+                );
+              }}
+            />
+          </Tooltip>
+        );
+      },
     },
   ];
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 16,
-        }}
-      >
-        <Title level={4} style={{ margin: 0 }}>
-          {orgName} - Templates
-        </Title>
-        <PermGuard permission="customer:templates:create">
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => message.info('Create template (simulated)')}
-          >
-            Create Template
-          </Button>
-        </PermGuard>
-      </div>
+      <Title level={4} style={{ marginBottom: 16 }}>
+        {orgName} - Templates
+      </Title>
 
-      <Table<TemplateSet>
+      <Table<AssignedTemplateRow>
         columns={columns}
         dataSource={dataSource}
-        rowKey="template_set_id"
+        rowKey="assignment_id"
         pagination={{ pageSize: 10 }}
       />
     </div>

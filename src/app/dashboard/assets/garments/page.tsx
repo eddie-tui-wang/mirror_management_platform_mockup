@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Table, Button, Tag, Space, Typography, Select, message } from 'antd';
+import { Table, Button, Tag, Space, Typography, Select, Image, Modal, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useSearchParams } from 'next/navigation';
 import { organizations, garments, getOrgById } from '@/lib/mock-data';
@@ -49,7 +49,33 @@ export default function GarmentsPage() {
       });
   }, [filterOrgType, filterOrgId, filterStatus]);
 
+  const confirmDelete = (record: GarmentRow) => {
+    Modal.confirm({
+      title: `Delete garment "${record.name}"?`,
+      content: `This garment belongs to ${record.org_name}.`,
+      okText: 'Delete',
+      okType: 'danger',
+      onOk: () => message.success(`Garment "${record.name}" deleted (simulated)`),
+    });
+  };
+
   const columns: ColumnsType<GarmentRow> = [
+    {
+      title: 'Image',
+      dataIndex: 'image_url',
+      key: 'image',
+      width: 80,
+      render: (url: string) => (
+        <Image
+          src={url}
+          alt="garment"
+          width={60}
+          height={60}
+          style={{ objectFit: 'cover', borderRadius: 4 }}
+          fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iMTIiIHk9IjM1IiBmb250LXNpemU9IjEyIiBmaWxsPSIjY2NjIj5OL0E8L3RleHQ+PC9zdmc+"
+        />
+      ),
+    },
     {
       title: 'Garment Name',
       dataIndex: 'name',
@@ -75,12 +101,6 @@ export default function GarmentsPage() {
       key: 'org_name',
     },
     {
-      title: 'org_id',
-      dataIndex: 'org_id',
-      key: 'org_id',
-      render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
-    },
-    {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
@@ -98,7 +118,7 @@ export default function GarmentsPage() {
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
-          <PermGuard permission="platform:garments:edit">
+          <PermGuard permission="platform:garments:edit" fallback="disable">
             <Button
               type="link"
               size="small"
@@ -107,6 +127,16 @@ export default function GarmentsPage() {
               }
             >
               View / Edit
+            </Button>
+          </PermGuard>
+          <PermGuard permission="platform:garments:delete" fallback="disable">
+            <Button
+              type="link"
+              size="small"
+              danger
+              onClick={() => confirmDelete(record)}
+            >
+              Delete
             </Button>
           </PermGuard>
         </Space>

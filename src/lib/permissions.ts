@@ -18,8 +18,12 @@ export const PERMISSIONS = {
   'platform:roles:view': 'View role permissions',
   'platform:garments:view': 'View garments (aggregated)',
   'platform:garments:edit': 'Edit garment (fallback)',
+  'platform:garments:delete': 'Delete garment',
   'platform:templates:view': 'View templates (aggregated)',
-  'platform:templates:edit': 'Edit template (fallback)',
+  'platform:templates:create': 'Create new template',
+  'platform:templates:edit': 'Edit template',
+  'platform:templates:delete': 'Delete template',
+  'platform:templates:assign': 'Assign template to customer',
 
   // ---- 渠道端 ----
   'channel:customers:view': 'View customers',
@@ -36,11 +40,9 @@ export const PERMISSIONS = {
   'customer:garments:upload': 'Upload/Import garment',
   'customer:garments:edit': 'Edit garment',
   'customer:garments:delete': 'Remove/Delete garment',
-  'customer:templates:view': 'View templates',
-  'customer:templates:create': 'Create template',
-  'customer:templates:publish': 'Publish template',
-  'customer:templates:rollback': 'Rollback template',
-  'customer:templates:disable': 'Disable template',
+  'customer:garments:manage_categories': 'Manage garment categories',
+  'customer:templates:view': 'View assigned templates',
+  'customer:templates:toggle': 'Enable/Disable assigned template',
 } as const;
 
 export type PermissionKey = keyof typeof PERMISSIONS;
@@ -66,11 +68,9 @@ export const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'customer:garments:upload',
     'customer:garments:edit',
     'customer:garments:delete',
+    'customer:garments:manage_categories',
     'customer:templates:view',
-    'customer:templates:create',
-    'customer:templates:publish',
-    'customer:templates:rollback',
-    'customer:templates:disable',
+    'customer:templates:toggle',
   ],
 
   HQOps: [
@@ -79,9 +79,7 @@ export const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'customer:garments:upload',
     'customer:garments:edit',
     'customer:templates:view',
-    'customer:templates:create',
-    'customer:templates:publish',
-    // 无 invite/disable/delete/rollback/terminate 等管理权限
+    // 无 toggle/invite/disable/delete 等管理权限，模板仅可查看
   ],
 };
 
