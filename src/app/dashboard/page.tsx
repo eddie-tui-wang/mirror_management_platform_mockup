@@ -26,7 +26,7 @@ export default function DashboardIndex() {
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-      <Spin size="large" tip="正在跳转..." />
+      <Spin size="large" tip="Redirecting..." />
     </div>
   );
 }

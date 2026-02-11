@@ -23,7 +23,7 @@ export default function CustomerTemplatesPage() {
 
   const columns: ColumnsType<TemplateSet> = [
     {
-      title: '模板名',
+      title: 'Template Name',
       dataIndex: 'name',
       key: 'name',
     },
@@ -34,12 +34,12 @@ export default function CustomerTemplatesPage() {
       render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
     },
     {
-      title: '版本',
+      title: 'Version',
       dataIndex: 'version',
       key: 'version',
     },
     {
-      title: '状态',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: Status) => (
@@ -47,12 +47,12 @@ export default function CustomerTemplatesPage() {
       ),
     },
     {
-      title: '更新时间',
+      title: 'Updated At',
       dataIndex: 'updated_at',
       key: 'updated_at',
     },
     {
-      title: '操作',
+      title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
@@ -61,10 +61,10 @@ export default function CustomerTemplatesPage() {
               type="link"
               size="small"
               onClick={() =>
-                message.info(`发布模板 ${record.name}（模拟）`)
+                message.info(`Publish template ${record.name} (simulated)`)
               }
             >
-              发布
+              Publish
             </Button>
           </PermGuard>
           <PermGuard permission="customer:templates:rollback" fallback="disable">
@@ -72,10 +72,10 @@ export default function CustomerTemplatesPage() {
               type="link"
               size="small"
               onClick={() =>
-                message.info(`回滚模板 ${record.name}（模拟）`)
+                message.info(`Rollback template ${record.name} (simulated)`)
               }
             >
-              回滚
+              Rollback
             </Button>
           </PermGuard>
           <PermGuard permission="customer:templates:disable" fallback="disable">
@@ -84,10 +84,10 @@ export default function CustomerTemplatesPage() {
               size="small"
               danger
               onClick={() =>
-                message.info(`停用模板 ${record.name}（模拟）`)
+                message.info(`Disable template ${record.name} (simulated)`)
               }
             >
-              停用
+              Disable
             </Button>
           </PermGuard>
         </Space>
@@ -106,15 +106,15 @@ export default function CustomerTemplatesPage() {
         }}
       >
         <Title level={4} style={{ margin: 0 }}>
-          {orgName} - 模板库
+          {orgName} - Templates
         </Title>
         <PermGuard permission="customer:templates:create">
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => message.info('新建模板（模拟）')}
+            onClick={() => message.info('Create template (simulated)')}
           >
-            新建模板
+            Create Template
           </Button>
         </PermGuard>
       </div>

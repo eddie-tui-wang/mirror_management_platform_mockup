@@ -9,8 +9,8 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "试衣镜管理系统 - Demo",
-  description: "智能试衣镜多账号权限管理系统演示",
+  title: "Smart Mirror Management - Demo",
+  description: "Smart Mirror Multi-Account RBAC Management System Demo",
 };
 
 export default function RootLayout({
@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN">
+    <html lang="en">
       <body className={`${geistSans.variable} antialiased`}>
         <AntdProvider>
           {children}

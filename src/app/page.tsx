@@ -11,16 +11,16 @@ import { DemoAccount, PortalType } from '@/lib/types';
 const { Title, Paragraph, Text } = Typography;
 
 const PORTAL_CONFIG: Record<PortalType, { color: string; label: string; icon: React.ReactNode; description: string }> = {
-  platform: { color: '#531dab', label: '平台端', icon: <BankOutlined />, description: '全局管理视角，管理渠道、客户、用户、资产' },
-  channel: { color: '#0958d9', label: '渠道端', icon: <TeamOutlined />, description: '渠道代理视角，管理名下客户和客户账号' },
-  customer: { color: '#389e0d', label: '客户端', icon: <ShopOutlined />, description: '终端客户视角，管理成员、服装、模板' },
+  platform: { color: '#531dab', label: 'Platform', icon: <BankOutlined />, description: 'Global admin view: manage channels, customers, users, and assets' },
+  channel: { color: '#0958d9', label: 'Channel', icon: <TeamOutlined />, description: 'Channel agent view: manage customers and their accounts' },
+  customer: { color: '#389e0d', label: 'Customer', icon: <ShopOutlined />, description: 'Customer view: manage members, garments, and templates' },
 };
 
 const ROLE_DESCRIPTION: Record<string, string> = {
-  PlatformSuperAdmin: '拥有全部权限，可管理所有渠道、客户、用户、资产',
-  ChannelOwner: '渠道管理员，可查看/创建名下客户，管理客户账号',
-  HQOwner: '客户管理员，可管理成员、服装库、模板库',
-  HQOps: '客户运营，可查看成员、上传/编辑服装、创建/发布模板（无删除/禁用权限）',
+  PlatformSuperAdmin: 'Full access to all features: channels, customers, users, and assets',
+  ChannelOwner: 'Channel admin: view/create customers, manage customer accounts',
+  HQOwner: 'Customer admin: manage members, garments, and templates',
+  HQOps: 'Customer ops: view members, upload/edit garments, create/publish templates (no delete/disable)',
 };
 
 const DEFAULT_ROUTES: Record<PortalType, string> = {
@@ -35,7 +35,7 @@ export default function LoginPage() {
 
   const handleLogin = (account: DemoAccount) => {
     login(account);
-    message.success(`已登录为 ${account.name} (${account.role})`);
+    message.success(`Signed in as ${account.name} (${account.role})`);
     router.push(DEFAULT_ROUTES[account.portal]);
   };
 
@@ -50,14 +50,14 @@ export default function LoginPage() {
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <Title style={{ color: '#fff', marginBottom: 8 }}>
-            试衣镜管理系统
+            Smart Mirror Management
           </Title>
           <Paragraph style={{ color: 'rgba(255,255,255,0.85)', fontSize: 16 }}>
-            多账号权限体系演示 - 请选择一个 Demo 账号登录
+            Multi-Account RBAC Demo - Select a demo account to sign in
           </Paragraph>
           <Alert
-            message="演示说明"
-            description="选择不同角色登录后，可以看到菜单、页面、按钮级别的权限差异。无权限的菜单会隐藏，无权限的按钮会置灰并提示原因。"
+            message="Demo Guide"
+            description="After signing in with different roles, you can observe permission differences at the menu, page, and button levels. Unauthorized menus are hidden, and unauthorized buttons are grayed out with a tooltip."
             type="info"
             showIcon
             style={{ maxWidth: 600, margin: '16px auto', textAlign: 'left' }}
@@ -113,12 +113,12 @@ export default function LoginPage() {
                             </div>
                             <div style={{ marginTop: 4 }}>
                               <Text type="secondary" style={{ fontSize: 11 }}>
-                                权限数: {ROLE_PERMISSIONS[account.role].length}
+                                Permissions: {ROLE_PERMISSIONS[account.role].length}
                               </Text>
                             </div>
                           </div>
                           <Button type="primary" size="small" icon={<LoginOutlined />} style={{ backgroundColor: config.color, borderColor: config.color }}>
-                            登录
+                            Login
                           </Button>
                         </div>
                       </Card>
@@ -133,7 +133,7 @@ export default function LoginPage() {
         <Divider style={{ borderColor: 'rgba(255,255,255,0.3)' }} />
         <div style={{ textAlign: 'center' }}>
           <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>
-            所有账号密码均为 demo | 数据为 Mock 假数据 | 仅用于交互演示
+            All passwords are &quot;demo&quot; | Data is mock only | For demonstration purposes
           </Text>
         </div>
       </div>

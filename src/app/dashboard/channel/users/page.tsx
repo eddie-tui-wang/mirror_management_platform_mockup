@@ -77,7 +77,7 @@ export default function ChannelUsersPage() {
 
   const columns: ColumnsType<CustomerUserRow> = [
     {
-      title: '邮箱',
+      title: 'Email',
       dataIndex: 'email',
       key: 'email',
     },
@@ -88,7 +88,7 @@ export default function ChannelUsersPage() {
       render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
     },
     {
-      title: '所属客户名称',
+      title: 'Customer Name',
       dataIndex: 'org_name',
       key: 'org_name',
     },
@@ -99,7 +99,7 @@ export default function ChannelUsersPage() {
       render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
     },
     {
-      title: '角色',
+      title: 'Role',
       dataIndex: 'role_key',
       key: 'role_key',
       render: (role: RoleKey) => (
@@ -107,7 +107,7 @@ export default function ChannelUsersPage() {
       ),
     },
     {
-      title: '状态',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: Status) => (
@@ -115,13 +115,13 @@ export default function ChannelUsersPage() {
       ),
     },
     {
-      title: '最后登录时间',
+      title: 'Last Login',
       dataIndex: 'last_login',
       key: 'last_login',
       render: (val: string | null) => val ?? '-',
     },
     {
-      title: '操作',
+      title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
@@ -130,10 +130,10 @@ export default function ChannelUsersPage() {
               type="link"
               size="small"
               onClick={() =>
-                message.info(`已重发邀请到 ${record.email}（模拟）`)
+                message.info(`Invitation resent to ${record.email} (simulated)`)
               }
             >
-              重发邀请
+              Resend Invitation
             </Button>
           </PermGuard>
         </Space>
@@ -147,42 +147,42 @@ export default function ChannelUsersPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Title level={4} style={{ margin: 0 }}>
-          {currentUser.org_name} - 客户账号管理
+          {currentUser.org_name} - Customer Account Management
         </Title>
       </div>
 
       <Space style={{ marginBottom: 16 }} wrap>
-        <span>客户：</span>
+        <span>Customer:</span>
         <Select
           value={orgFilter}
           onChange={setOrgFilter}
           style={{ width: 180 }}
           options={[
-            { value: 'all', label: '全部客户' },
+            { value: 'all', label: 'All Customers' },
             ...channelCustomers.map((c) => ({
               value: c.org_id,
               label: c.name,
             })),
           ]}
         />
-        <span>状态：</span>
+        <span>Status:</span>
         <Select
           value={statusFilter}
           onChange={setStatusFilter}
           style={{ width: 120 }}
           options={[
-            { value: 'all', label: '全部' },
+            { value: 'all', label: 'All' },
             { value: 'Active', label: 'Active' },
             { value: 'Disabled', label: 'Disabled' },
           ]}
         />
-        <span>角色：</span>
+        <span>Role:</span>
         <Select
           value={roleFilter}
           onChange={setRoleFilter}
           style={{ width: 140 }}
           options={[
-            { value: 'all', label: '全部' },
+            { value: 'all', label: 'All' },
             { value: 'HQOwner', label: 'HQOwner' },
             { value: 'HQOps', label: 'HQOps' },
           ]}

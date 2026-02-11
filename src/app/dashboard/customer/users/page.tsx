@@ -39,7 +39,7 @@ export default function CustomerUsersPage() {
 
   const handleInvite = () => {
     form.validateFields().then((values) => {
-      message.success(`已邀请 ${values.email} 作为 ${values.role}（模拟）`);
+      message.success(`Invited ${values.email} as ${values.role} (simulated)`);
       setInviteOpen(false);
       form.resetFields();
     });
@@ -47,17 +47,17 @@ export default function CustomerUsersPage() {
 
   const columns: ColumnsType<MemberRow> = [
     {
-      title: '邮箱',
+      title: 'Email',
       dataIndex: 'email',
       key: 'email',
     },
     {
-      title: '姓名',
+      title: 'Name',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: '角色',
+      title: 'Role',
       dataIndex: 'role_key',
       key: 'role_key',
       render: (role: RoleKey) => (
@@ -65,7 +65,7 @@ export default function CustomerUsersPage() {
       ),
     },
     {
-      title: '状态',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: Status) => (
@@ -73,19 +73,19 @@ export default function CustomerUsersPage() {
       ),
     },
     {
-      title: '最后登录',
+      title: 'Last Login',
       dataIndex: 'last_login',
       key: 'last_login',
       render: (val: string | null) => val ?? '-',
     },
     {
-      title: '当前活跃设备',
+      title: 'Active Device',
       dataIndex: 'current_device',
       key: 'current_device',
       render: (val: string | null) => val ?? '-',
     },
     {
-      title: '操作',
+      title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
@@ -95,11 +95,11 @@ export default function CustomerUsersPage() {
               size="small"
               onClick={() =>
                 message.info(
-                  `${record.status === 'Active' ? '禁用' : '启用'} 用户 ${record.name}（模拟）`
+                  `${record.status === 'Active' ? 'Disable' : 'Enable'} user ${record.name} (simulated)`
                 )
               }
             >
-              {record.status === 'Active' ? '禁用' : '启用'}
+              {record.status === 'Active' ? 'Disable' : 'Enable'}
             </Button>
           </PermGuard>
           <PermGuard permission="customer:users:reset_password" fallback="disable">
@@ -107,10 +107,10 @@ export default function CustomerUsersPage() {
               type="link"
               size="small"
               onClick={() =>
-                message.info(`重置 ${record.name} 的密码（模拟）`)
+                message.info(`Reset password for ${record.name} (simulated)`)
               }
             >
-              重置密码
+              Reset Password
             </Button>
           </PermGuard>
         </Space>
@@ -129,7 +129,7 @@ export default function CustomerUsersPage() {
         }}
       >
         <Title level={4} style={{ margin: 0 }}>
-          {orgName} - 组织成员
+          {orgName} - Members
         </Title>
         <PermGuard permission="customer:users:invite">
           <Button
@@ -137,7 +137,7 @@ export default function CustomerUsersPage() {
             icon={<PlusOutlined />}
             onClick={() => setInviteOpen(true)}
           >
-            邀请成员
+            Invite Member
           </Button>
         </PermGuard>
       </div>
@@ -150,34 +150,34 @@ export default function CustomerUsersPage() {
       />
 
       <Modal
-        title="邀请成员"
+        title="Invite Member"
         open={inviteOpen}
         onOk={handleInvite}
         onCancel={() => {
           setInviteOpen(false);
           form.resetFields();
         }}
-        okText="邀请"
-        cancelText="取消"
+        okText="Invite"
+        cancelText="Cancel"
       >
         <Form form={form} layout="vertical">
           <Form.Item
             name="email"
-            label="邮箱"
+            label="Email"
             rules={[
-              { required: true, message: '请输入邮箱' },
-              { type: 'email', message: '请输入有效邮箱' },
+              { required: true, message: 'Please enter email' },
+              { type: 'email', message: 'Please enter a valid email' },
             ]}
           >
-            <Input placeholder="请输入被邀请人邮箱" />
+            <Input placeholder="Please enter invitee's email" />
           </Form.Item>
           <Form.Item
             name="role"
-            label="角色"
-            rules={[{ required: true, message: '请选择角色' }]}
+            label="Role"
+            rules={[{ required: true, message: 'Please select a role' }]}
           >
             <Select
-              placeholder="请选择角色"
+              placeholder="Please select a role"
               options={[
                 { label: 'HQOwner', value: 'HQOwner' },
                 { label: 'HQOps', value: 'HQOps' },

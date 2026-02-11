@@ -8,23 +8,23 @@ import {
 
 export const organizations: Organization[] = [
   // 渠道
-  { org_id: 'org_ch_001', platform_id: 'p1', org_type: 'CHANNEL', name: '渠道A', parent_org_id: null, status: 'Active', created_at: '2026-02-01' },
-  { org_id: 'org_ch_002', platform_id: 'p1', org_type: 'CHANNEL', name: '渠道B', parent_org_id: null, status: 'Disabled', created_at: '2026-01-15' },
-  { org_id: 'org_ch_003', platform_id: 'p1', org_type: 'CHANNEL', name: '渠道C', parent_org_id: null, status: 'Active', created_at: '2026-01-20' },
+  { org_id: 'org_ch_001', platform_id: 'p1', org_type: 'CHANNEL', name: 'Channel A', parent_org_id: null, status: 'Active', created_at: '2026-02-01' },
+  { org_id: 'org_ch_002', platform_id: 'p1', org_type: 'CHANNEL', name: 'Channel B', parent_org_id: null, status: 'Disabled', created_at: '2026-01-15' },
+  { org_id: 'org_ch_003', platform_id: 'p1', org_type: 'CHANNEL', name: 'Channel C', parent_org_id: null, status: 'Active', created_at: '2026-01-20' },
   // 客户（直客）
-  { org_id: 'org_cu_1001', platform_id: 'p1', org_type: 'CUSTOMER', name: '客户X', parent_org_id: null, status: 'Active', created_at: '2026-02-03' },
-  { org_id: 'org_cu_1004', platform_id: 'p1', org_type: 'CUSTOMER', name: '客户W', parent_org_id: null, status: 'Active', created_at: '2026-02-07', is_trial: true, trial_days: 14, trial_start_date: '2026-02-01', trial_max_sales: 50, trial_used_sales: 12 },
+  { org_id: 'org_cu_1001', platform_id: 'p1', org_type: 'CUSTOMER', name: 'Customer X', parent_org_id: null, status: 'Active', created_at: '2026-02-03' },
+  { org_id: 'org_cu_1004', platform_id: 'p1', org_type: 'CUSTOMER', name: 'Customer W', parent_org_id: null, status: 'Active', created_at: '2026-02-07', is_trial: true, trial_days: 14, trial_start_date: '2026-02-01', trial_max_sales: 50, trial_used_sales: 12 },
   // 客户（渠道客户）
-  { org_id: 'org_cu_1002', platform_id: 'p1', org_type: 'CUSTOMER', name: '客户Y', parent_org_id: 'org_ch_001', status: 'Active', created_at: '2026-02-05' },
-  { org_id: 'org_cu_1003', platform_id: 'p1', org_type: 'CUSTOMER', name: '客户Z', parent_org_id: 'org_ch_001', status: 'Active', created_at: '2026-02-06' },
-  { org_id: 'org_cu_1005', platform_id: 'p1', org_type: 'CUSTOMER', name: '客户V', parent_org_id: 'org_ch_003', status: 'Active', created_at: '2026-01-20', is_trial: true, trial_days: 14, trial_start_date: '2026-01-20', trial_max_sales: 30, trial_used_sales: 30 },
+  { org_id: 'org_cu_1002', platform_id: 'p1', org_type: 'CUSTOMER', name: 'Customer Y', parent_org_id: 'org_ch_001', status: 'Active', created_at: '2026-02-05' },
+  { org_id: 'org_cu_1003', platform_id: 'p1', org_type: 'CUSTOMER', name: 'Customer Z', parent_org_id: 'org_ch_001', status: 'Active', created_at: '2026-02-06' },
+  { org_id: 'org_cu_1005', platform_id: 'p1', org_type: 'CUSTOMER', name: 'Customer V', parent_org_id: 'org_ch_003', status: 'Active', created_at: '2026-01-20', is_trial: true, trial_days: 14, trial_start_date: '2026-01-20', trial_max_sales: 30, trial_used_sales: 30 },
 ];
 
 // ==================== 用户数据 ====================
 
 export const users: User[] = [
   // 平台
-  { user_id: 'u_super', email: 'super@platform.com', name: '平台超管', status: 'Active', last_login: '2026-02-10 10:00', current_device: null },
+  { user_id: 'u_super', email: 'super@platform.com', name: 'Platform Admin', status: 'Active', last_login: '2026-02-10 10:00', current_device: null },
   // 渠道A
   { user_id: 'u_001', email: 'admin@channel-a.com', name: 'Alice Chen', status: 'Active', last_login: '2026-02-10 10:01', current_device: 'dev_09' },
   { user_id: 'u_004', email: 'ops@channel-a.com', name: 'Bob Li', status: 'Active', last_login: '2026-02-09 15:30', current_device: null },
@@ -92,43 +92,43 @@ export const garments: GarmentCatalog[] = [
 // ==================== 模板库 ====================
 
 export const templates: TemplateSet[] = [
-  { template_set_id: 'ts_01', template_id: 't_001', org_id: 'org_cu_1001', name: '春季主题模板', version: 'v2.1', status: 'Active', updated_at: '2026-02-09 17:00' },
-  { template_set_id: 'ts_02', template_id: 't_002', org_id: 'org_ch_001', name: '品牌展示模板', version: 'v1.0', status: 'Active', updated_at: '2026-02-08 10:00' },
-  { template_set_id: 'ts_03', template_id: 't_003', org_id: 'org_cu_1002', name: '简约试衣模板', version: 'v1.3', status: 'Active', updated_at: '2026-02-07 14:00' },
-  { template_set_id: 'ts_04', template_id: 't_004', org_id: 'org_cu_1001', name: '促销活动模板', version: 'v3.0', status: 'Disabled', updated_at: '2026-02-06 11:00' },
-  { template_set_id: 'ts_05', template_id: 't_005', org_id: 'org_cu_1003', name: '门店导购模板', version: 'v1.1', status: 'Active', updated_at: '2026-02-05 09:00' },
-  { template_set_id: 'ts_06', template_id: 't_006', org_id: 'org_ch_003', name: '渠道通用模板', version: 'v2.0', status: 'Active', updated_at: '2026-02-04 15:00' },
+  { template_set_id: 'ts_01', template_id: 't_001', org_id: 'org_cu_1001', name: 'Spring Theme Template', version: 'v2.1', status: 'Active', updated_at: '2026-02-09 17:00' },
+  { template_set_id: 'ts_02', template_id: 't_002', org_id: 'org_ch_001', name: 'Brand Showcase Template', version: 'v1.0', status: 'Active', updated_at: '2026-02-08 10:00' },
+  { template_set_id: 'ts_03', template_id: 't_003', org_id: 'org_cu_1002', name: 'Minimal Fitting Template', version: 'v1.3', status: 'Active', updated_at: '2026-02-07 14:00' },
+  { template_set_id: 'ts_04', template_id: 't_004', org_id: 'org_cu_1001', name: 'Promotional Template', version: 'v3.0', status: 'Disabled', updated_at: '2026-02-06 11:00' },
+  { template_set_id: 'ts_05', template_id: 't_005', org_id: 'org_cu_1003', name: 'Store Guide Template', version: 'v1.1', status: 'Active', updated_at: '2026-02-05 09:00' },
+  { template_set_id: 'ts_06', template_id: 't_006', org_id: 'org_ch_003', name: 'Channel Standard Template', version: 'v2.0', status: 'Active', updated_at: '2026-02-04 15:00' },
 ];
 
 // ==================== 设备数据 ====================
 
 export const devices: Device[] = [
-  { device_id: 'dev_09', status: 'Online', last_seen: '2026-02-10 10:05', current_org_id: 'org_cu_1001', current_org_name: '客户X', current_user_id: 'u_002', current_user_email: 'hq.admin@x.com', session_start: '2026-02-10 09:55' },
-  { device_id: 'dev_12', status: 'Offline', last_seen: '2026-02-09 21:10', current_org_id: 'org_cu_1002', current_org_name: '客户Y', current_user_id: null, current_user_email: null, session_start: null },
-  { device_id: 'dev_15', status: 'Online', last_seen: '2026-02-10 09:30', current_org_id: 'org_cu_1003', current_org_name: '客户Z', current_user_id: 'u_012', current_user_email: 'admin@z.com', session_start: '2026-02-10 09:00' },
-  { device_id: 'dev_07', status: 'Offline', last_seen: '2026-02-10 09:12', current_org_id: 'org_ch_001', current_org_name: '渠道A', current_user_id: null, current_user_email: null, session_start: null },
-  { device_id: 'dev_20', status: 'Online', last_seen: '2026-02-10 10:08', current_org_id: 'org_cu_1001', current_org_name: '客户X', current_user_id: 'u_006', current_user_email: 'ops1@x.com', session_start: '2026-02-10 08:30' },
-  { device_id: 'dev_22', status: 'Offline', last_seen: '2026-02-08 18:00', current_org_id: 'org_cu_1004', current_org_name: '客户W', current_user_id: null, current_user_email: null, session_start: null },
+  { device_id: 'dev_09', status: 'Online', last_seen: '2026-02-10 10:05', current_org_id: 'org_cu_1001', current_org_name: 'Customer X', current_user_id: 'u_002', current_user_email: 'hq.admin@x.com', session_start: '2026-02-10 09:55' },
+  { device_id: 'dev_12', status: 'Offline', last_seen: '2026-02-09 21:10', current_org_id: 'org_cu_1002', current_org_name: 'Customer Y', current_user_id: null, current_user_email: null, session_start: null },
+  { device_id: 'dev_15', status: 'Online', last_seen: '2026-02-10 09:30', current_org_id: 'org_cu_1003', current_org_name: 'Customer Z', current_user_id: 'u_012', current_user_email: 'admin@z.com', session_start: '2026-02-10 09:00' },
+  { device_id: 'dev_07', status: 'Offline', last_seen: '2026-02-10 09:12', current_org_id: 'org_ch_001', current_org_name: 'Channel A', current_user_id: null, current_user_email: null, session_start: null },
+  { device_id: 'dev_20', status: 'Online', last_seen: '2026-02-10 10:08', current_org_id: 'org_cu_1001', current_org_name: 'Customer X', current_user_id: 'u_006', current_user_email: 'ops1@x.com', session_start: '2026-02-10 08:30' },
+  { device_id: 'dev_22', status: 'Offline', last_seen: '2026-02-08 18:00', current_org_id: 'org_cu_1004', current_org_name: 'Customer W', current_user_id: null, current_user_email: null, session_start: null },
 ];
 
 // ==================== 会话数据 ====================
 
 export const sessions: Session[] = [
-  { session_id: 's_001', device_id: 'dev_09', user_id: 'u_002', user_email: 'hq.admin@x.com', org_id: 'org_cu_1001', org_name: '客户X', status: 'ACTIVE', login_at: '2026-02-10 09:55', logout_at: null, termination_reason: null },
-  { session_id: 's_002', device_id: 'dev_07', user_id: 'u_001', user_email: 'admin@channel-a.com', org_id: 'org_ch_001', org_name: '渠道A', status: 'TERMINATED', login_at: '2026-02-10 09:10', logout_at: '2026-02-10 09:12', termination_reason: 'NEW_LOGIN_KICK' },
-  { session_id: 's_003', device_id: 'dev_15', user_id: 'u_012', user_email: 'admin@z.com', org_id: 'org_cu_1003', org_name: '客户Z', status: 'ACTIVE', login_at: '2026-02-10 09:00', logout_at: null, termination_reason: null },
-  { session_id: 's_004', device_id: 'dev_20', user_id: 'u_006', user_email: 'ops1@x.com', org_id: 'org_cu_1001', org_name: '客户X', status: 'ACTIVE', login_at: '2026-02-10 08:30', logout_at: null, termination_reason: null },
-  { session_id: 's_005', device_id: 'dev_12', user_id: 'u_010', user_email: 'owner@y.com', org_id: 'org_cu_1002', org_name: '客户Y', status: 'EXPIRED', login_at: '2026-02-09 20:00', logout_at: '2026-02-09 21:10', termination_reason: 'SESSION_EXPIRED' },
-  { session_id: 's_006', device_id: 'dev_22', user_id: 'u_014', user_email: 'admin@w.com', org_id: 'org_cu_1004', org_name: '客户W', status: 'TERMINATED', login_at: '2026-02-08 16:00', logout_at: '2026-02-08 18:00', termination_reason: 'USER_LOGOUT' },
+  { session_id: 's_001', device_id: 'dev_09', user_id: 'u_002', user_email: 'hq.admin@x.com', org_id: 'org_cu_1001', org_name: 'Customer X', status: 'ACTIVE', login_at: '2026-02-10 09:55', logout_at: null, termination_reason: null },
+  { session_id: 's_002', device_id: 'dev_07', user_id: 'u_001', user_email: 'admin@channel-a.com', org_id: 'org_ch_001', org_name: 'Channel A', status: 'TERMINATED', login_at: '2026-02-10 09:10', logout_at: '2026-02-10 09:12', termination_reason: 'NEW_LOGIN_KICK' },
+  { session_id: 's_003', device_id: 'dev_15', user_id: 'u_012', user_email: 'admin@z.com', org_id: 'org_cu_1003', org_name: 'Customer Z', status: 'ACTIVE', login_at: '2026-02-10 09:00', logout_at: null, termination_reason: null },
+  { session_id: 's_004', device_id: 'dev_20', user_id: 'u_006', user_email: 'ops1@x.com', org_id: 'org_cu_1001', org_name: 'Customer X', status: 'ACTIVE', login_at: '2026-02-10 08:30', logout_at: null, termination_reason: null },
+  { session_id: 's_005', device_id: 'dev_12', user_id: 'u_010', user_email: 'owner@y.com', org_id: 'org_cu_1002', org_name: 'Customer Y', status: 'EXPIRED', login_at: '2026-02-09 20:00', logout_at: '2026-02-09 21:10', termination_reason: 'SESSION_EXPIRED' },
+  { session_id: 's_006', device_id: 'dev_22', user_id: 'u_014', user_email: 'admin@w.com', org_id: 'org_cu_1004', org_name: 'Customer W', status: 'TERMINATED', login_at: '2026-02-08 16:00', logout_at: '2026-02-08 18:00', termination_reason: 'USER_LOGOUT' },
 ];
 
 // ==================== Demo 账号 ====================
 
 export const demoAccounts: DemoAccount[] = [
-  { user_id: 'u_super', email: 'super@platform.com', name: '平台超管', role: 'PlatformSuperAdmin', portal: 'platform', org_id: 'platform', org_name: '试衣镜平台', password: 'demo' },
-  { user_id: 'u_001', email: 'admin@channel-a.com', name: 'Alice Chen', role: 'ChannelOwner', portal: 'channel', org_id: 'org_ch_001', org_name: '渠道A', password: 'demo' },
-  { user_id: 'u_002', email: 'hq.admin@x.com', name: 'David Zhang', role: 'HQOwner', portal: 'customer', org_id: 'org_cu_1001', org_name: '客户X', password: 'demo' },
-  { user_id: 'u_006', email: 'ops1@x.com', name: 'Eva Liu', role: 'HQOps', portal: 'customer', org_id: 'org_cu_1001', org_name: '客户X', password: 'demo' },
+  { user_id: 'u_super', email: 'super@platform.com', name: 'Platform Admin', role: 'PlatformSuperAdmin', portal: 'platform', org_id: 'platform', org_name: 'Smart Mirror Platform', password: 'demo' },
+  { user_id: 'u_001', email: 'admin@channel-a.com', name: 'Alice Chen', role: 'ChannelOwner', portal: 'channel', org_id: 'org_ch_001', org_name: 'Channel A', password: 'demo' },
+  { user_id: 'u_002', email: 'hq.admin@x.com', name: 'David Zhang', role: 'HQOwner', portal: 'customer', org_id: 'org_cu_1001', org_name: 'Customer X', password: 'demo' },
+  { user_id: 'u_006', email: 'ops1@x.com', name: 'Eva Liu', role: 'HQOps', portal: 'customer', org_id: 'org_cu_1001', org_name: 'Customer X', password: 'demo' },
 ];
 
 // ==================== 试用辅助函数 ====================

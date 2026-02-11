@@ -47,7 +47,7 @@ export default function TemplatesPage() {
 
   const columns: ColumnsType<TemplateRow> = [
     {
-      title: '模板名',
+      title: 'Template Name',
       dataIndex: 'name',
       key: 'name',
     },
@@ -58,7 +58,7 @@ export default function TemplatesPage() {
       render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
     },
     {
-      title: '所属组织',
+      title: 'Organization',
       key: 'org',
       render: (_, record) => (
         <span>
@@ -68,12 +68,12 @@ export default function TemplatesPage() {
       ),
     },
     {
-      title: '当前版本',
+      title: 'Version',
       dataIndex: 'version',
       key: 'version',
     },
     {
-      title: '状态',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: Status) => (
@@ -81,12 +81,12 @@ export default function TemplatesPage() {
       ),
     },
     {
-      title: '更新时间',
+      title: 'Updated At',
       dataIndex: 'updated_at',
       key: 'updated_at',
     },
     {
-      title: '操作',
+      title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
@@ -94,20 +94,20 @@ export default function TemplatesPage() {
             type="link"
             size="small"
             onClick={() =>
-              message.info(`查看模板 ${record.name} (${record.template_id})`)
+              message.info(`View template ${record.name} (${record.template_id})`)
             }
           >
-            查看
+            View
           </Button>
           <PermGuard permission="platform:templates:edit">
             <Button
               type="link"
               size="small"
               onClick={() =>
-                message.info(`回滚模板 ${record.name} 到上一版本（模拟）`)
+                message.info(`Rollback template ${record.name} to previous version (simulated)`)
               }
             >
-              回滚
+              Rollback
             </Button>
           </PermGuard>
           <PermGuard permission="platform:templates:edit">
@@ -116,10 +116,10 @@ export default function TemplatesPage() {
               size="small"
               danger
               onClick={() =>
-                message.warning(`停用模板 ${record.name}（模拟）`)
+                message.warning(`Disable template ${record.name} (simulated)`)
               }
             >
-              停用
+              Disable
             </Button>
           </PermGuard>
         </Space>
@@ -129,11 +129,11 @@ export default function TemplatesPage() {
 
   return (
     <div>
-      <Title level={4} style={{ marginBottom: 16 }}>模板库（聚合管理）</Title>
+      <Title level={4} style={{ marginBottom: 16 }}>Templates (Aggregated)</Title>
 
       <Space style={{ marginBottom: 16 }} wrap>
         <Select
-          placeholder="组织类型"
+          placeholder="Org Type"
           allowClear
           style={{ width: 160 }}
           value={filterOrgType}
@@ -147,7 +147,7 @@ export default function TemplatesPage() {
           ]}
         />
         <Select
-          placeholder="组织"
+          placeholder="Organization"
           allowClear
           showSearch
           optionFilterProp="label"
@@ -157,7 +157,7 @@ export default function TemplatesPage() {
           options={orgOptions}
         />
         <Select
-          placeholder="状态"
+          placeholder="Status"
           allowClear
           style={{ width: 120 }}
           value={filterStatus}

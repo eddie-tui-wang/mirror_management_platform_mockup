@@ -32,7 +32,7 @@ export default function PermGuard({
   if (fallback === 'hide') return null;
 
   // disable 模式：置灰 + tooltip
-  const tip = tooltip || `无权限: ${PERMISSIONS[permission]}`;
+  const tip = tooltip || `No permission: ${PERMISSIONS[permission]}`;
 
   // 如果 children 是 Button，包裹 tooltip
   return (
@@ -49,7 +49,7 @@ export default function PermGuard({
             ? ((children.props as Record<string, unknown>).children as React.ReactNode)
             : typeof children === 'string'
               ? children
-              : '无权限'}
+              : 'No Permission'}
         </Button>
       </span>
     </Tooltip>

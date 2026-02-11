@@ -51,7 +51,7 @@ export default function GarmentsPage() {
 
   const columns: ColumnsType<GarmentRow> = [
     {
-      title: '服装名称',
+      title: 'Garment Name',
       dataIndex: 'name',
       key: 'name',
     },
@@ -62,7 +62,7 @@ export default function GarmentsPage() {
       render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
     },
     {
-      title: '所属组织类型',
+      title: 'Org Type',
       dataIndex: 'org_type',
       key: 'org_type',
       render: (type: OrgType) => (
@@ -70,7 +70,7 @@ export default function GarmentsPage() {
       ),
     },
     {
-      title: '所属组织名称',
+      title: 'Org Name',
       dataIndex: 'org_name',
       key: 'org_name',
     },
@@ -81,7 +81,7 @@ export default function GarmentsPage() {
       render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
     },
     {
-      title: '状态',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: Status) => (
@@ -89,12 +89,12 @@ export default function GarmentsPage() {
       ),
     },
     {
-      title: '更新时间',
+      title: 'Updated At',
       dataIndex: 'updated_at',
       key: 'updated_at',
     },
     {
-      title: '操作',
+      title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
@@ -103,10 +103,10 @@ export default function GarmentsPage() {
               type="link"
               size="small"
               onClick={() =>
-                message.info(`查看/编辑服装 ${record.name} (${record.garment_id})`)
+                message.info(`View/Edit garment ${record.name} (${record.garment_id})`)
               }
             >
-              查看/编辑
+              View / Edit
             </Button>
           </PermGuard>
         </Space>
@@ -116,11 +116,11 @@ export default function GarmentsPage() {
 
   return (
     <div>
-      <Title level={4} style={{ marginBottom: 16 }}>服装库（聚合管理）</Title>
+      <Title level={4} style={{ marginBottom: 16 }}>Garments (Aggregated)</Title>
 
       <Space style={{ marginBottom: 16 }} wrap>
         <Select
-          placeholder="组织类型"
+          placeholder="Org Type"
           allowClear
           style={{ width: 160 }}
           value={filterOrgType}
@@ -134,7 +134,7 @@ export default function GarmentsPage() {
           ]}
         />
         <Select
-          placeholder="组织"
+          placeholder="Organization"
           allowClear
           showSearch
           optionFilterProp="label"
@@ -144,7 +144,7 @@ export default function GarmentsPage() {
           options={orgOptions}
         />
         <Select
-          placeholder="状态"
+          placeholder="Status"
           allowClear
           style={{ width: 120 }}
           value={filterStatus}

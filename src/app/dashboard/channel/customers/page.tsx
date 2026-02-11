@@ -62,8 +62,8 @@ export default function ChannelCustomersPage() {
 
   const handleCreate = () => {
     form.validateFields().then((values) => {
-      const trialLabel = isTrial ? `（试用 ${values.trialDays ?? 14} 天，试用次数 ${values.trialMaxSales ?? 50} 次）` : '';
-      message.success(`客户 "${values.name}" 创建成功${trialLabel}（模拟）`);
+      const trialLabel = isTrial ? ` (Trial: ${values.trialDays ?? 14} days, ${values.trialMaxSales ?? 50} sales)` : '';
+      message.success(`Customer "${values.name}" created successfully${trialLabel} (simulated)`);
       setCreateModalOpen(false);
       setIsTrial(false);
       form.resetFields();
@@ -72,18 +72,18 @@ export default function ChannelCustomersPage() {
 
   const renderAccountKind = (record: CustomerRow) => {
     if (!record.isTrial) {
-      return <Tag color="blue">正式</Tag>;
+      return <Tag color="blue">Regular</Tag>;
     }
-    const salesInfo = `已用 ${record.trialUsedSales}/${record.trialMaxSales} 次，剩余 ${record.trialRemainingSales} 次`;
-    const daysInfo = `试用截止: ${record.trialEndDate}，剩余 ${record.remainingDays} 天`;
+    const salesInfo = `Used ${record.trialUsedSales}/${record.trialMaxSales}, ${record.trialRemainingSales} remaining`;
+    const daysInfo = `Trial ends: ${record.trialEndDate}, ${record.remainingDays} days remaining`;
     const tip = `${daysInfo}\n${salesInfo}`;
     if (record.trialStatus === 'expired') {
       return (
         <Tooltip title={tip}>
           <Space size={4} direction="vertical">
-            <Tag color="red" icon={<WarningOutlined />}>试用-已过期</Tag>
+            <Tag color="red" icon={<WarningOutlined />}>Trial - Expired</Tag>
             <Typography.Text type="danger" style={{ fontSize: 12 }}>
-              {record.trialRemainingSales <= 0 ? '次数已用完' : `剩余 ${record.trialRemainingSales} 次`}
+              {record.trialRemainingSales <= 0 ? 'Quota exhausted' : `${record.trialRemainingSales} remaining`}
             </Typography.Text>
           </Space>
         </Tooltip>
@@ -92,9 +92,9 @@ export default function ChannelCustomersPage() {
     return (
       <Tooltip title={tip}>
         <Space size={4} direction="vertical">
-          <Tag color="orange">试用中</Tag>
+          <Tag color="orange">Trial</Tag>
           <Typography.Text type="warning" style={{ fontSize: 12 }}>
-            剩余 {record.trialRemainingSales}/{record.trialMaxSales} 次 · {record.remainingDays}天
+            {record.trialRemainingSales}/{record.trialMaxSales} remaining · {record.remainingDays} days
           </Typography.Text>
         </Space>
       </Tooltip>
@@ -103,7 +103,7 @@ export default function ChannelCustomersPage() {
 
   const columns: ColumnsType<CustomerRow> = [
     {
-      title: '客户名称',
+      title: 'Customer Name',
       dataIndex: 'name',
       key: 'name',
     },
@@ -114,7 +114,7 @@ export default function ChannelCustomersPage() {
       render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
     },
     {
-      title: '账户类型',
+      title: 'Account Type',
       key: 'accountKind',
       render: (_, record) => renderAccountKind(record),
     },
@@ -124,17 +124,17 @@ export default function ChannelCustomersPage() {
       key: 'adminEmail',
     },
     {
-      title: '成员数',
+      title: 'Members',
       dataIndex: 'memberCount',
       key: 'memberCount',
     },
     {
-      title: '创建时间',
+      title: 'Created At',
       dataIndex: 'created_at',
       key: 'created_at',
     },
     {
-      title: '状态',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: Status) => (
@@ -142,7 +142,7 @@ export default function ChannelCustomersPage() {
       ),
     },
     {
-      title: '操作',
+      title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
@@ -151,7 +151,7 @@ export default function ChannelCustomersPage() {
             size="small"
             onClick={() => router.push(`/dashboard/channel/users?org=${record.org_id}`)}
           >
-            查看账号
+            View Accounts
           </Button>
         </Space>
       ),
@@ -164,7 +164,7 @@ export default function ChannelCustomersPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Title level={4} style={{ margin: 0 }}>
-          {currentUser.org_name} - 客户管理
+          {currentUser.org_name} - Customer Management
         </Title>
         <Space>
           <PermGuard permission="channel:customers:create">
@@ -173,22 +173,22 @@ export default function ChannelCustomersPage() {
               icon={<PlusOutlined />}
               onClick={() => setCreateModalOpen(true)}
             >
-              新建客户（渠道客户）
+              Create Customer (Reseller)
             </Button>
           </PermGuard>
         </Space>
       </div>
 
       <Space style={{ marginBottom: 16 }} wrap>
-        <span>账户类型：</span>
+        <span>Account Type:</span>
         <Select
           value={accountKindFilter}
           onChange={setAccountKindFilter}
           style={{ width: 120 }}
           options={[
-            { value: 'all', label: '全部' },
-            { value: 'Regular', label: '正式' },
-            { value: 'Trial', label: '试用' },
+            { value: 'all', label: 'All' },
+            { value: 'Regular', label: 'Regular' },
+            { value: 'Trial', label: 'Trial' },
           ]}
         />
       </Space>
@@ -201,7 +201,7 @@ export default function ChannelCustomersPage() {
       />
 
       <Modal
-        title="新建客户（渠道客户）"
+        title="Create Customer (Reseller)"
         open={createModalOpen}
         onOk={handleCreate}
         onCancel={() => {
@@ -209,35 +209,35 @@ export default function ChannelCustomersPage() {
           setIsTrial(false);
           form.resetFields();
         }}
-        okText="确认创建"
-        cancelText="取消"
+        okText="Create"
+        cancelText="Cancel"
       >
         <Form form={form} layout="vertical">
           <Form.Item
             name="name"
-            label="客户名称"
-            rules={[{ required: true, message: '请输入客户名称' }]}
+            label="Customer Name"
+            rules={[{ required: true, message: 'Please enter customer name' }]}
           >
-            <Input placeholder="请输入客户名称" />
+            <Input placeholder="Please enter customer name" />
           </Form.Item>
           <Form.Item
             name="adminEmail"
-            label="HQ Admin邮箱"
+            label="HQ Admin Email"
             rules={[
-              { required: true, message: '请输入HQ Admin邮箱' },
-              { type: 'email', message: '请输入有效的邮箱地址' },
+              { required: true, message: 'Please enter HQ Admin email' },
+              { type: 'email', message: 'Please enter a valid email' },
             ]}
           >
-            <Input placeholder="请输入HQ Admin邮箱" />
+            <Input placeholder="Please enter HQ Admin email" />
           </Form.Item>
 
-          <Form.Item label="试用账户">
+          <Form.Item label="Trial Account">
             <Space>
               <Switch
                 checked={isTrial}
                 onChange={setIsTrial}
               />
-              <span>{isTrial ? '开启试用' : '正式账户'}</span>
+              <span>{isTrial ? 'Trial Enabled' : 'Regular Account'}</span>
             </Space>
           </Form.Item>
 
@@ -245,19 +245,19 @@ export default function ChannelCustomersPage() {
             <>
               <Form.Item
                 name="trialDays"
-                label="试用天数"
+                label="Trial Days"
                 initialValue={14}
-                rules={[{ required: true, message: '请输入试用天数' }]}
+                rules={[{ required: true, message: 'Please enter trial days' }]}
               >
-                <InputNumber min={1} max={90} style={{ width: '100%' }} placeholder="试用期限（天）" />
+                <InputNumber min={1} max={90} style={{ width: '100%' }} placeholder="Trial period (days)" />
               </Form.Item>
               <Form.Item
                 name="trialMaxSales"
-                label="试用次数（销售次数上限）"
+                label="Trial Limit (Max Sales)"
                 initialValue={50}
-                rules={[{ required: true, message: '请输入试用次数' }]}
+                rules={[{ required: true, message: 'Please enter trial limit' }]}
               >
-                <InputNumber min={1} max={9999} style={{ width: '100%' }} placeholder="该客户可使用的试用销售次数" />
+                <InputNumber min={1} max={9999} style={{ width: '100%' }} placeholder="Max sales count for trial" />
               </Form.Item>
             </>
           )}

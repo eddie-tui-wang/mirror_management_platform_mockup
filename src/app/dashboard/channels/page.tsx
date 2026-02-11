@@ -38,7 +38,7 @@ export default function ChannelsPage() {
 
   const handleCreate = () => {
     form.validateFields().then((values) => {
-      message.success(`渠道 "${values.name}" 创建成功（模拟）`);
+      message.success(`Channel "${values.name}" created successfully (simulated)`);
       setCreateModalOpen(false);
       form.resetFields();
     });
@@ -46,7 +46,7 @@ export default function ChannelsPage() {
 
   const columns: ColumnsType<ChannelRow> = [
     {
-      title: '渠道名称',
+      title: 'Channel Name',
       dataIndex: 'name',
       key: 'name',
     },
@@ -57,7 +57,7 @@ export default function ChannelsPage() {
       render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
     },
     {
-      title: '状态',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
@@ -65,27 +65,27 @@ export default function ChannelsPage() {
       ),
     },
     {
-      title: '渠道Admin',
+      title: 'Channel Admin',
       dataIndex: 'adminEmail',
       key: 'adminEmail',
     },
     {
-      title: '成员数',
+      title: 'Members',
       dataIndex: 'memberCount',
       key: 'memberCount',
     },
     {
-      title: '名下客户数',
+      title: 'Customers',
       dataIndex: 'customerCount',
       key: 'customerCount',
     },
     {
-      title: '创建时间',
+      title: 'Created At',
       dataIndex: 'created_at',
       key: 'created_at',
     },
     {
-      title: '操作',
+      title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
@@ -94,21 +94,21 @@ export default function ChannelsPage() {
             size="small"
             onClick={() => router.push(`/dashboard/users?org=${record.org_id}`)}
           >
-            查看成员
+            View Members
           </Button>
           <Button
             type="link"
             size="small"
             onClick={() => router.push(`/dashboard/customers?channel=${record.org_id}`)}
           >
-            查看客户
+            View Customers
           </Button>
           <Button
             type="link"
             size="small"
             onClick={() => router.push(`/dashboard/assets/garments?org=${record.org_id}`)}
           >
-            查看资产
+            View Assets
           </Button>
           <PermGuard permission="platform:channels:disable">
             <Button
@@ -117,11 +117,11 @@ export default function ChannelsPage() {
               danger
               onClick={() =>
                 message.warning(
-                  `${record.status === 'Active' ? '禁用' : '启用'}渠道 ${record.name}（模拟）`
+                  `${record.status === 'Active' ? 'Disable' : 'Enable'} channel ${record.name} (simulated)`
                 )
               }
             >
-              {record.status === 'Active' ? '禁用' : '启用'}
+              {record.status === 'Active' ? 'Disable' : 'Enable'}
             </Button>
           </PermGuard>
         </Space>
@@ -132,7 +132,7 @@ export default function ChannelsPage() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Title level={4} style={{ margin: 0 }}>渠道管理</Title>
+        <Title level={4} style={{ margin: 0 }}>Channel Management</Title>
         <Space>
           <PermGuard permission="platform:channels:create">
             <Button
@@ -140,7 +140,7 @@ export default function ChannelsPage() {
               icon={<PlusOutlined />}
               onClick={() => setCreateModalOpen(true)}
             >
-              新建渠道
+              Create Channel
             </Button>
           </PermGuard>
         </Space>
@@ -154,36 +154,36 @@ export default function ChannelsPage() {
       />
 
       <Modal
-        title="新建渠道"
+        title="Create Channel"
         open={createModalOpen}
         onOk={handleCreate}
         onCancel={() => {
           setCreateModalOpen(false);
           form.resetFields();
         }}
-        okText="确认创建"
-        cancelText="取消"
+        okText="Create"
+        cancelText="Cancel"
       >
         <Form form={form} layout="vertical">
           <Form.Item
             name="name"
-            label="渠道名称"
-            rules={[{ required: true, message: '请输入渠道名称' }]}
+            label="Channel Name"
+            rules={[{ required: true, message: 'Please enter channel name' }]}
           >
-            <Input placeholder="请输入渠道名称" />
+            <Input placeholder="Please enter channel name" />
           </Form.Item>
           <Form.Item
             name="adminEmail"
-            label="渠道Admin邮箱"
+            label="Channel Admin Email"
             rules={[
-              { required: true, message: '请输入Admin邮箱' },
-              { type: 'email', message: '请输入有效的邮箱地址' },
+              { required: true, message: 'Please enter admin email' },
+              { type: 'email', message: 'Please enter a valid email' },
             ]}
           >
-            <Input placeholder="请输入渠道Admin邮箱" />
+            <Input placeholder="Please enter channel admin email" />
           </Form.Item>
-          <Form.Item name="remark" label="备注">
-            <Input.TextArea placeholder="备注信息（选填）" rows={3} />
+          <Form.Item name="remark" label="Remarks">
+            <Input.TextArea placeholder="Optional remarks" rows={3} />
           </Form.Item>
         </Form>
       </Modal>

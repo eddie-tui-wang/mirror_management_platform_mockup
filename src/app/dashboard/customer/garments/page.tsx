@@ -23,7 +23,7 @@ export default function CustomerGarmentsPage() {
 
   const columns: ColumnsType<GarmentCatalog> = [
     {
-      title: '服装名称',
+      title: 'Garment Name',
       dataIndex: 'name',
       key: 'name',
     },
@@ -34,7 +34,7 @@ export default function CustomerGarmentsPage() {
       render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
     },
     {
-      title: '状态',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: Status) => (
@@ -42,12 +42,12 @@ export default function CustomerGarmentsPage() {
       ),
     },
     {
-      title: '更新时间',
+      title: 'Updated At',
       dataIndex: 'updated_at',
       key: 'updated_at',
     },
     {
-      title: '操作',
+      title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
@@ -56,10 +56,10 @@ export default function CustomerGarmentsPage() {
               type="link"
               size="small"
               onClick={() =>
-                message.info(`编辑服装 ${record.name}（模拟）`)
+                message.info(`Edit garment ${record.name} (simulated)`)
               }
             >
-              编辑
+              Edit
             </Button>
           </PermGuard>
           <PermGuard permission="customer:garments:delete" fallback="disable">
@@ -68,10 +68,10 @@ export default function CustomerGarmentsPage() {
               size="small"
               danger
               onClick={() =>
-                message.info(`下架/删除服装 ${record.name}（模拟）`)
+                message.info(`Remove/Delete garment ${record.name} (simulated)`)
               }
             >
-              下架/删除
+              Remove / Delete
             </Button>
           </PermGuard>
         </Space>
@@ -90,15 +90,15 @@ export default function CustomerGarmentsPage() {
         }}
       >
         <Title level={4} style={{ margin: 0 }}>
-          {orgName} - 服装库
+          {orgName} - Garments
         </Title>
         <PermGuard permission="customer:garments:upload">
           <Button
             type="primary"
             icon={<UploadOutlined />}
-            onClick={() => message.info('上传/导入服装（模拟）')}
+            onClick={() => message.info('Upload/Import garment (simulated)')}
           >
-            上传/导入
+            Upload / Import
           </Button>
         </PermGuard>
       </div>

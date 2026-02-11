@@ -2,12 +2,12 @@
 
 import React from 'react';
 import { ConfigProvider } from 'antd';
-import zhCN from 'antd/locale/zh_CN';
+import enUS from 'antd/locale/en_US';
 
 export default function AntdProvider({ children }: { children: React.ReactNode }) {
   return (
     <ConfigProvider
-      locale={zhCN}
+      locale={enUS}
       theme={{
         token: {
           colorPrimary: '#1677ff',

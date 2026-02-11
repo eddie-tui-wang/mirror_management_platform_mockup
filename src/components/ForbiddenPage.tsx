@@ -11,20 +11,20 @@ export default function ForbiddenPage() {
   return (
     <Result
       status="403"
-      title="403 - 无访问权限"
+      title="403 - Access Denied"
       subTitle={
         <>
-          当前角色 <strong>{currentUser?.role ?? '未知'}</strong> 没有访问此页面的权限。
+          Role <strong>{currentUser?.role ?? 'Unknown'}</strong> does not have permission to access this page.
           <br />
-          请联系管理员或切换账号。
+          Please contact an administrator or switch accounts.
         </>
       }
       extra={[
         <Button type="primary" key="back" onClick={() => router.back()}>
-          返回上一页
+          Go Back
         </Button>,
         <Button key="home" onClick={() => router.push('/dashboard')}>
-          回到首页
+          Home
         </Button>,
       ]}
     />

@@ -34,9 +34,9 @@ const PORTAL_COLOR: Record<string, string> = {
 };
 
 const PORTAL_LABEL: Record<string, string> = {
-  platform: '平台端',
-  channel: '渠道端',
-  customer: '客户端',
+  platform: 'Platform',
+  channel: 'Channel',
+  customer: 'Customer',
 };
 
 function buildMenuItems(items: MenuItemConfig[], role: string): MenuProps['items'] {
@@ -104,7 +104,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Tag>{currentUser.role}</Tag>
           </div>
           <div style={{ marginTop: 2 }}>
-            <Text type="secondary" style={{ fontSize: 12 }}>组织: {currentUser.org_name}</Text>
+            <Text type="secondary" style={{ fontSize: 12 }}>Org: {currentUser.org_name}</Text>
           </div>
         </div>
       ),
@@ -114,7 +114,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     {
       key: 'switch',
       icon: <SwapOutlined />,
-      label: '切换账号',
+      label: 'Switch Account',
       onClick: () => {
         logout();
         router.push('/');
@@ -123,7 +123,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: '退出登录',
+      label: 'Logout',
       danger: true,
       onClick: () => {
         logout();
@@ -160,7 +160,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         }}>
           <Space>
             <Badge color={portalColor} />
-            <Text strong style={{ fontSize: 16 }}>试衣镜管理系统</Text>
+            <Text strong style={{ fontSize: 16 }}>Smart Mirror</Text>
           </Space>
         </div>
         <div style={{ padding: '8px 12px' }}>
@@ -187,7 +187,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           height: 64,
         }}>
           <Space>
-            <Text type="secondary">组织: </Text>
+            <Text type="secondary">Org: </Text>
             <Text strong>{currentUser.org_name}</Text>
           </Space>
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>

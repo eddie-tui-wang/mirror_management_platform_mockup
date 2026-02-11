@@ -16,10 +16,10 @@ import PermGuard from '@/components/PermGuard';
 
 const { Title } = Typography;
 
-// ---------- User row type (user joined with membership + org info) ----------
+// ---------- 用户行类型（用户 + 成员关系 + 组织信息的联合视图） ----------
 
 interface UserRow {
-  key: string; // user_id + org_id for uniqueness
+  key: string;
   user_id: string;
   email: string;
   name: string;
@@ -32,7 +32,7 @@ interface UserRow {
   role_key: RoleKey;
 }
 
-// ---------- Role row type ----------
+// ---------- 角色行类型 ----------
 
 interface RoleRow {
   role_key: RoleKey;
@@ -50,7 +50,7 @@ function UsersTab() {
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  // Build joined user list: each membership creates one row
+  // 构建用户联合列表：每条成员关系生成一行
   const allUserRows: UserRow[] = useMemo(() => {
     return memberships.map((m: OrgMembership) => {
       const user = users.find((u: User) => u.user_id === m.user_id);
@@ -71,7 +71,7 @@ function UsersTab() {
     });
   }, []);
 
-  // Unique org options
+  // 唯一组织选项
   const orgOptions = useMemo(() => {
     const orgsMap = new Map<string, string>();
     allUserRows.forEach((r) => {
@@ -85,14 +85,14 @@ function UsersTab() {
     }));
   }, [allUserRows]);
 
-  // Unique role options
+  // 唯一角色选项
   const roleOptions = useMemo(() => {
     const rolesSet = new Set<string>();
     allUserRows.forEach((r) => rolesSet.add(r.role_key));
     return Array.from(rolesSet).map((r) => ({ value: r, label: r }));
   }, [allUserRows]);
 
-  // Filtered data
+  // 过滤后的数据
   const dataSource = useMemo(() => {
     let filtered = allUserRows;
 
@@ -123,7 +123,7 @@ function UsersTab() {
 
   const columns: ColumnsType<UserRow> = [
     {
-      title: '邮箱',
+      title: 'Email',
       dataIndex: 'email',
       key: 'email',
     },
@@ -134,7 +134,7 @@ function UsersTab() {
       render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
     },
     {
-      title: '状态',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: Status) => (
@@ -142,7 +142,7 @@ function UsersTab() {
       ),
     },
     {
-      title: '所属组织类型',
+      title: 'Org Type',
       dataIndex: 'org_type',
       key: 'org_type',
       render: (type: string) => (
@@ -150,7 +150,7 @@ function UsersTab() {
       ),
     },
     {
-      title: '所属组织名称',
+      title: 'Org Name',
       dataIndex: 'org_name',
       key: 'org_name',
     },
@@ -161,19 +161,19 @@ function UsersTab() {
       render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
     },
     {
-      title: '角色',
+      title: 'Role',
       dataIndex: 'role_key',
       key: 'role_key',
       render: (role: RoleKey) => <Tag>{role}</Tag>,
     },
     {
-      title: '最后登录时间',
+      title: 'Last Login',
       dataIndex: 'last_login',
       key: 'last_login',
       render: (val: string | null) => val ?? '-',
     },
     {
-      title: '操作',
+      title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
@@ -184,11 +184,11 @@ function UsersTab() {
               danger={record.status === 'Active'}
               onClick={() =>
                 message.info(
-                  `${record.status === 'Active' ? '禁用' : '启用'}用户 ${record.email}（模拟）`
+                  `${record.status === 'Active' ? 'Disable' : 'Enable'} user ${record.email} (simulated)`
                 )
               }
             >
-              {record.status === 'Active' ? '禁用' : '启用'}
+              {record.status === 'Active' ? 'Disable' : 'Enable'}
             </Button>
           </PermGuard>
           <PermGuard permission="platform:users:reset_password">
@@ -196,10 +196,10 @@ function UsersTab() {
               type="link"
               size="small"
               onClick={() =>
-                message.info(`重置用户 ${record.email} 密码（模拟）`)
+                message.info(`Reset password for ${record.email} (simulated)`)
               }
             >
-              重置密码
+              Reset Password
             </Button>
           </PermGuard>
           <PermGuard permission="platform:users:change_role">
@@ -207,10 +207,10 @@ function UsersTab() {
               type="link"
               size="small"
               onClick={() =>
-                message.info(`变更用户 ${record.email} 角色（模拟）`)
+                message.info(`Change role for ${record.email} (simulated)`)
               }
             >
-              变更角色
+              Change Role
             </Button>
           </PermGuard>
         </Space>
@@ -222,34 +222,34 @@ function UsersTab() {
     <div>
       <Space style={{ marginBottom: 16 }} wrap>
         <Input
-          placeholder="搜索邮箱/姓名/user_id"
+          placeholder="Search by email/name/user_id"
           prefix={<SearchOutlined />}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           allowClear
           style={{ width: 240 }}
         />
-        <span>组织：</span>
+        <span>Organization:</span>
         <Select
           value={orgFilter}
           onChange={setOrgFilter}
           style={{ width: 150 }}
-          options={[{ value: 'all', label: '全部' }, ...orgOptions]}
+          options={[{ value: 'all', label: 'All' }, ...orgOptions]}
         />
-        <span>角色：</span>
+        <span>Role:</span>
         <Select
           value={roleFilter}
           onChange={setRoleFilter}
           style={{ width: 180 }}
-          options={[{ value: 'all', label: '全部' }, ...roleOptions]}
+          options={[{ value: 'all', label: 'All' }, ...roleOptions]}
         />
-        <span>状态：</span>
+        <span>Status:</span>
         <Select
           value={statusFilter}
           onChange={setStatusFilter}
           style={{ width: 120 }}
           options={[
-            { value: 'all', label: '全部' },
+            { value: 'all', label: 'All' },
             { value: 'Active', label: 'Active' },
             { value: 'Disabled', label: 'Disabled' },
           ]}
@@ -279,13 +279,13 @@ function RolesTab() {
 
   const columns: ColumnsType<RoleRow> = [
     {
-      title: '角色名',
+      title: 'Role Name',
       dataIndex: 'role_key',
       key: 'role_key',
       render: (role: RoleKey) => <Tag color="blue">{role}</Tag>,
     },
     {
-      title: '权限数量',
+      title: 'Permission Count',
       dataIndex: 'permissionCount',
       key: 'permissionCount',
     },
@@ -323,19 +323,19 @@ export default function UsersPage() {
   const tabItems = [
     {
       key: 'users',
-      label: '用户管理',
+      label: 'User Management',
       children: <UsersTab />,
     },
     {
       key: 'roles',
-      label: '角色权限',
+      label: 'Role Permissions',
       children: <RolesTab />,
     },
   ];
 
   return (
     <div>
-      <Title level={4} style={{ marginBottom: 16 }}>用户与角色管理</Title>
+      <Title level={4} style={{ marginBottom: 16 }}>Users & Roles</Title>
       <Tabs items={tabItems} defaultActiveKey="users" />
     </div>
   );
