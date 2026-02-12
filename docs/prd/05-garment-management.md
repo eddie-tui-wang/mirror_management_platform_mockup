@@ -1,284 +1,199 @@
 # PRD-05: Garment Management
 
-> 平台端 + 客户端 — 服装管理
-> Routes:
-> - Platform: `/dashboard/assets/garments` (permission: `platform:garments:view`)
-> - Customer: `/dashboard/customer/garments` (permission: `customer:garments:view`)
+> 服装目录 + 分类体系
+> Version: 2.0 | Updated: 2026-02-12
 
 ---
 
-## Code Map
+## Business Context (B)
 
-| Item | Path |
-|------|------|
-| Platform Page | `src/app/dashboard/assets/garments/page.tsx` |
-| Customer Page | `src/app/dashboard/customer/garments/page.tsx` |
-| Data Source | `src/lib/mock-data.ts` → `garments`, `garmentCategories` |
-| Helpers | `getOrgGarments()`, `getOrgGarmentCategories()`, `getGarmentCategoryName()` |
-| Types | `src/lib/types.ts` → `GarmentCatalog`, `GarmentCategory` |
-| Permission Guard | `src/components/PermGuard.tsx` |
+服装（Garment）是智能试衣镜的核心业务资产。每个客户组织管理自己的服装目录，并可通过自定义分类体系来组织服装。平台管理员拥有聚合视图，可以跨组织查看所有服装。
+
+- **平台端**: 聚合视图，展示所有组织的服装，支持按组织筛选
+- **客户端**: 范围视图，仅展示本组织的服装，支持分类管理
+
+> **Visual Reference**: See running prototype for visual reference.
 
 ---
 
-## Data Model
+## Roles & Access (R)
 
-### GarmentCatalog
-
-```typescript
-interface GarmentCatalog {
-  catalog_id: string;     // 目录唯一标识
-  garment_id: string;     // 服装 ID
-  org_id: string;         // 所属组织
-  name: string;           // 服装名称
-  image_url: string;      // 缩略图 URL
-  category_id: string | null;  // 分类 ID（客户自管理）
-  status: Status;         // Active / Disabled
-  updated_at: string;     // 更新时间
-}
-```
-
-### GarmentCategory
-
-```typescript
-interface GarmentCategory {
-  category_id: string;    // 分类唯一标识
-  org_id: string;         // 所属客户组织
-  name: string;           // 分类名称
-  created_at: string;     // 创建时间
-}
-```
-
-### Mock Data Summary
-
-**Garments (8 items):**
-
-| Name | ID | Org | Category | Status |
-|------|----|-----|----------|--------|
-| Black Suit Set | g_9001 | Customer X | Tops | Active |
-| Summer Dress | g_9002 | Channel A | - | Active |
-| Casual Jacket | g_9003 | Customer X | Outerwear | Active |
-| Winter Coat | g_9004 | Customer Y | Outerwear | Active |
-| Silk Blouse | g_9005 | Customer Z | - | Disabled |
-| Denim Series | g_9006 | Channel C | - | Active |
-| Evening Gown | g_9007 | Customer X | Dresses | Active |
-| Sport Wear | g_9008 | Customer W | - | Active |
-
-**Categories (9 items across 3 customer orgs):**
-
-| Customer X | Customer Y | Customer Z |
-|-----------|-----------|-----------|
-| Tops | Tops | Formal |
-| Dresses | Bottoms | Casual |
-| Outerwear | Outerwear | |
-| Accessories | | |
+| Capability | Platform Super Admin | Channel Owner | HQ Owner | HQ Ops |
+|-----------|:-------------------:|:-------------:|:--------:|:------:|
+| 查看所有服装（聚合视图） | Y | - | - | - |
+| 编辑服装（平台端） | Y | - | - | - |
+| 删除服装（平台端） | Y | - | - | - |
+| 查看本组织服装 | - | - | Y | Y |
+| 上传/导入服装 | - | - | Y | Y |
+| 编辑服装 | - | - | Y | Y |
+| 删除/移除服装 | - | - | Y | - |
+| 管理分类 | - | - | Y | - |
+| 设置服装分类 | - | - | Y | Y |
 
 ---
 
-## Role Visibility
+## Actions & Flows (A)
 
-| Role | Platform Garments | Customer Garments |
-|------|:-----------------:|:-----------------:|
-| PlatformSuperAdmin | Y | - |
-| ChannelOwner | - | - |
-| HQOwner | - | Y (full) |
-| HQOps | - | Y (limited) |
+### Entity: Garment
 
----
+| Attribute | Description | Constraints |
+|-----------|------------|-------------|
+| Name | 服装名称 | Required, non-empty |
+| Image | 产品图片 | Required; system gracefully handles missing images |
+| Category | 客户自定义分类 | Optional; must belong to same customer organization |
+| Status | Active or Disabled | Required |
+| Owner Org | 所属组织 | Required |
+| Updated At | 最后更新时间 | System tracked |
 
-## Part A: Platform Garments (Aggregated)
+### Entity: Garment Category
 
-### Information (I)
-
-#### Page Title
-
-`Garments (Aggregated)`
-
-#### Filters
-
-| Filter | Type | Options | Default |
-|--------|------|---------|---------|
-| Org Type | Select | CHANNEL / CUSTOMER | undefined |
-| Organization | Select (searchable) | {filtered orgs} | undefined (支持 URL param `?org=`) |
-| Status | Select | Active / Disabled | undefined |
-
-**Organization filter**: 会根据 Org Type 筛选联动更新可选项。
-
-#### Table
-
-| Column | DataIndex | Render |
-|--------|-----------|--------|
-| Image | `image_url` | `<Image>` 60x60 thumbnail, 圆角 4px, fallback SVG |
-| Garment Name | `name` | 纯文本 |
-| garment_id | `garment_id` | `Typography.Text code` |
-| Org Type | `org_type` | Tag: blue="CHANNEL", orange="CUSTOMER" |
-| Org Name | `org_name` | 纯文本 |
-| Status | `status` | Tag: green/red |
-| Updated At | `updated_at` | 纯文本 |
-| Actions | - | View/Edit, Delete |
-
-**Row Key**: `catalog_id`
-
-**Image Fallback**: Base64 编码的 SVG 占位图 (60x60, 灰色背景 + "N/A" 文字)
-
-### Actions (A)
-
-#### A1: View / Edit
-
-| Item | Detail |
-|------|--------|
-| Button | `View / Edit` |
-| Permission | `platform:garments:edit` |
-| Guard | `PermGuard` (disable mode) |
-| Behavior | `message.info` (simulated) |
-
-#### A2: Delete
-
-| Item | Detail |
-|------|--------|
-| Button | `Delete` (danger link) |
-| Permission | `platform:garments:delete` |
-| Guard | `PermGuard` (disable mode) |
-| Behavior | `Modal.confirm` 二次确认 |
-| Confirm Title | `Delete garment "{name}"?` |
-| Confirm Content | `This garment belongs to {org_name}.` |
-| Confirm OK | "Delete" (danger) |
-| Result | `message.success` (simulated) |
-
-### Exceptions (E)
-
-| # | Scenario | Handling |
-|---|----------|----------|
-| E1 | 图片加载失败 | 显示 fallback SVG 占位图 |
-| E2 | Org Type 切换 | 重置 Organization 筛选 |
-| E3 | 无 `platform:garments:delete` 权限 | Delete 按钮置灰 |
+| Attribute | Description | Constraints |
+|-----------|------------|-------------|
+| Name | 分类名称 | Required, non-empty; unique within same organization |
+| Owner Org | 所属客户组织 | Required |
+| Created At | 创建时间 | System generated |
 
 ---
 
-## Part B: Customer Garments (with Categories)
+### Part A: Platform Garments (Aggregated View)
 
-### Information (I)
+#### View Garments (Platform)
 
-#### Page Title
+**Who**: Platform Super Admin
+**Goal**: 跨组织查看所有服装
+**Available Filters**:
+- Org Type: Channel / Customer
+- Organization: specific organization (searchable; options depend on selected Org Type)
+- Status: Active / Disabled
 
-`{orgName} - Garments`
+**Information Displayed**: 产品图片、服装名称、组织类型、组织名称、状态、更新时间
 
-#### Data Scope
+#### Edit Garment (Platform)
 
-仅显示当前客户组织的服装 (`org_id === currentUser.org_id`)
+**Who**: Platform Super Admin
+**Goal**: 编辑某服装的信息
+**Steps**:
+1. 在服装列表中，点击某服装的"编辑"操作
+2. 系统提供编辑功能
 
-#### Filters
+**Outcome**: 服装信息被更新
 
-| Filter | Type | Options | Default |
-|--------|------|---------|---------|
-| Category | Select (allowClear) | {org categories} + "Uncategorized" | undefined (all) |
+#### Delete Garment (Platform)
 
-**Special filter value**: `__none__` → 筛选 `category_id === null` 的服装
+**Who**: Platform Super Admin
+**Goal**: 删除某服装
+**Steps**:
+1. 在服装列表中，点击某服装的"删除"操作
+2. 系统弹出二次确认，提示该服装所属的组织名称
+3. 用户确认后，服装被删除
 
-#### Table
+**Outcome**: 服装从系统中移除
 
-| Column | DataIndex | Render |
-|--------|-----------|--------|
-| Image | `image_url` | `<Image>` 60x60, fallback SVG |
-| Garment Name | `name` | 纯文本 |
-| garment_id | `garment_id` | `Typography.Text code` |
-| Category | `category_id` | Tag (blue) via `getGarmentCategoryName()` / "-" |
-| Status | `status` | Tag: green/red |
-| Updated At | `updated_at` | 纯文本 |
-| Actions | - | Set Category, Edit, Remove |
+---
 
-### Actions (A)
+### Part B: Customer Garments (with Categories)
 
-#### A1: Upload / Import
+#### View Garments (Customer)
 
-| Item | Detail |
-|------|--------|
-| Button | `Upload / Import` (Header 右侧, Primary) |
-| Permission | `customer:garments:upload` |
-| Guard | `PermGuard` (hide mode) |
-| Behavior | `message.info` (simulated) |
+**Who**: HQ Owner, HQ Ops
+**Goal**: 查看和管理本组织的服装
+**Data Scope**: 仅显示当前客户组织的服装
+**Available Filters**:
+- Category: All / specific category / Uncategorized (无分类)
 
-#### A2: Manage Categories
+**Information Displayed**: 产品图片、服装名称、分类、状态、更新时间
 
-| Item | Detail |
-|------|--------|
-| Button | `Manage Categories` (Header 右侧, 非 Primary) |
-| Permission | `customer:garments:manage_categories` |
-| Visibility | 仅当用户有权限时渲染（`canManageCategories` 条件渲染） |
-| Modal Title | "Manage Categories" |
-| Modal Width | 480px |
+#### Upload / Import Garment
 
-**Modal Content:**
+**Who**: HQ Owner, HQ Ops
+**Goal**: 将新服装添加到本组织的目录中
+**Steps**:
+1. 点击"上传/导入"操作
+2. 系统提供上传/导入功能
 
-1. **Add Category Area**:
-   - `Input` + `Add` Button (`Space.Compact`)
-   - Enter 键触发添加
-   - 去重校验: 名称已存在时 `message.warning`
+**Outcome**: 新服装被添加到当前客户组织的目录
 
-2. **Category List**:
-   - `List` 组件, bordered, small size
-   - 每项显示: 分类名称 + Tag 显示关联服装数量
-   - Delete 按钮 (每项右侧, danger icon)
-   - 空状态: "No categories yet."
+#### Manage Categories
 
-3. **Delete Category Confirmation**:
-   - `Modal.confirm`
-   - Title: `Delete category "{name}"?`
-   - Content: 若有关联服装 → `{count} garment(s) will become uncategorized.`
-   - Content: 若无关联服装 → `No garments are using this category.`
+**Who**: HQ Owner
+**Goal**: 管理本组织的服装分类体系
+**Steps**:
+1. 点击"管理分类"操作，打开分类管理界面
+2. 界面展示当前组织的所有分类，每个分类显示名称和关联的服装数量
 
-#### A3: Set Category (Per Row)
+**Available Operations**:
+- **添加分类**: 输入分类名称并添加；分类名称不能与已有分类重复
+- **删除分类**: 点击某分类的删除操作，系统弹出二次确认：
+  - 若该分类下有关联服装：提示 "{count} garment(s) will become uncategorized"
+  - 若该分类下无关联服装：提示 "No garments are using this category"
+  - 确认后，分类被删除，原来属于该分类的服装变为"未分类"（服装本身不删除）
 
-| Item | Detail |
-|------|--------|
-| Button | `Set Category` (每行 Actions) |
-| Permission | `customer:garments:edit` |
-| Guard | `PermGuard` (disable mode) |
-| Modal Title | `Set Category for "{garment.name}"` |
+**Outcome**: 分类体系更新
 
-**Modal Content:**
-- `Select` (allowClear): 选择分类 / 清除
-- Options: 当前组织所有分类
-- Pre-selected: 当前 `category_id`
+#### Set Category (Per Garment)
 
-**Submit**: `message.success` (simulated, 显示新分类名称)
+**Who**: HQ Owner, HQ Ops
+**Goal**: 为某件服装设置或变更分类
+**Required Information**:
+- Category: 从当前组织的分类列表中选择，或清除分类
 
-#### A4: Edit Garment
+**Outcome**: 该服装的分类被更新
 
-| Item | Detail |
-|------|--------|
-| Button | `Edit` (每行 Actions) |
-| Permission | `customer:garments:edit` |
-| Guard | `PermGuard` (disable mode) |
-| Behavior | `message.info` (simulated) |
+#### Edit Garment (Customer)
 
-#### A5: Remove Garment
+**Who**: HQ Owner, HQ Ops
+**Goal**: 编辑某服装的信息
+**Steps**:
+1. 在服装列表中，点击某服装的"编辑"操作
+2. 系统提供编辑功能
 
-| Item | Detail |
-|------|--------|
-| Button | `Remove` (每行 Actions, danger) |
-| Permission | `customer:garments:delete` |
-| Guard | `PermGuard` (disable mode) |
-| Behavior | `message.info` (simulated) |
+**Outcome**: 服装信息被更新
 
-### Role-Specific Behavior
+#### Remove Garment (Customer)
 
-| Feature | HQOwner | HQOps |
-|---------|:-------:|:-----:|
-| View garment list | Y | Y |
-| Upload / Import | Y | Y |
-| Manage Categories button | Y (visible) | Hidden |
-| Set Category | Y (active) | Y (active) |
-| Edit | Y (active) | Y (active) |
-| Remove | Y (active) | Disabled + tooltip |
+**Who**: HQ Owner
+**Goal**: 从本组织的目录中移除某服装
+**Steps**:
+1. 在服装列表中，点击某服装的"移除"操作
+2. 系统执行移除
 
-### Exceptions (E)
+**Outcome**: 服装从当前组织的目录中移除
 
-| # | Scenario | Handling |
-|---|----------|----------|
-| E1 | 图片加载失败 | SVG fallback |
-| E2 | 无分类 | Category 列显示 "-"（灰色文本） |
-| E3 | 添加重复分类名 | `message.warning("Category already exists")` |
-| E4 | 删除有关联服装的分类 | 确认弹窗提示受影响服装数量 |
-| E5 | HQOps 无 `manage_categories` 权限 | Manage Categories 按钮不渲染 |
-| E6 | HQOps 无 `customer:garments:delete` 权限 | Remove 按钮置灰 + lock icon + tooltip |
-| E7 | 筛选 "Uncategorized" | 仅显示 `category_id === null` 的服装 |
+---
+
+### Role-Specific Behavior (Customer Portal)
+
+| Feature | HQ Owner | HQ Ops |
+|---------|----------|--------|
+| 查看服装列表 | Y | Y |
+| 上传/导入服装 | Y | Y |
+| 管理分类 | Y | Not available (入口不展示) |
+| 设置服装分类 | Y | Y |
+| 编辑服装 | Y | Y |
+| 移除服装 | Y | Not available (操作被禁用并提示无权限) |
+
+---
+
+## Constraints & Rules (C)
+
+- 分类是客户级别的概念，每个客户组织独立管理自己的分类体系
+- 服装的分类只能选择同一客户组织下的分类
+- 删除分类不会删除服装——原来属于该分类的服装变为"未分类"
+- 分类名称在同一组织内不能重复
+- 平台端聚合视图中，Org Type 筛选会联动更新可选的 Organization 列表
+- 图片加载失败时，系统显示占位图
+
+---
+
+## Edge Cases (E)
+
+| Scenario | Expected Behavior |
+|----------|------------------|
+| 图片加载失败 | 显示占位图 |
+| 服装无分类 | 分类列显示为空或"-" |
+| 添加重复分类名 | 提示 "Category already exists"，阻止添加 |
+| 删除有关联服装的分类 | 二次确认提示受影响的服装数量；确认后服装变为未分类 |
+| HQ Ops 无分类管理权限 | "管理分类"入口不展示 |
+| HQ Ops 无删除服装权限 | "移除"操作被禁用，显示无权限提示 |
+| 筛选 "Uncategorized" | 仅显示无分类的服装 |
+| 平台端切换 Org Type | Organization 筛选重置 |

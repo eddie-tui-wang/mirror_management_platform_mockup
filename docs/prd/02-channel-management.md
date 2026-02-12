@@ -1,124 +1,111 @@
 # PRD-02: Channel Management
 
-> 平台端 — 渠道管理
-> Route: `/dashboard/channels`
-> Permission: `platform:channels:view`
+> 渠道生命周期管理
+> Version: 2.0 | Updated: 2026-02-12
 
 ---
 
-## Code Map
+## Business Context (B)
 
-| Item | Path |
-|------|------|
-| Page Component | `src/app/dashboard/channels/page.tsx` |
-| Data Source | `src/lib/mock-data.ts` → `organizations` (filter: `org_type === 'CHANNEL'`) |
-| Summary Helper | `src/lib/mock-data.ts` → `getChannelSummary()` |
-| Permission Guard | `src/components/PermGuard.tsx` |
+渠道（Channel）是平台与终端客户之间的代理/经销层。平台方通过创建和管理渠道来拓展分销网络，每个渠道有自己的管理员和下属客户。渠道管理模块让平台管理员能够掌控整个渠道网络的状态。
+
+> **Visual Reference**: See running prototype for visual reference.
 
 ---
 
-## Role Visibility
+## Roles & Access (R)
 
-| Role | Can Access | Note |
-|------|:----------:|------|
-| PlatformSuperAdmin | Y | 全部功能可用 |
-| ChannelOwner | - | 菜单不可见（无 `platform:channels:view`） |
-| HQOwner | - | 菜单不可见 |
-| HQOps | - | 菜单不可见 |
+| Capability | Platform Super Admin | Channel Owner | HQ Owner | HQ Ops |
+|-----------|:-------------------:|:-------------:|:--------:|:------:|
+| 查看渠道列表 | Y | - | - | - |
+| 创建渠道 | Y | - | - | - |
+| 禁用/启用渠道 | Y | - | - | - |
+| 查看渠道成员 | Y | - | - | - |
+| 查看渠道下属客户 | Y | - | - | - |
+| 查看渠道资产 | Y | - | - | - |
 
----
-
-## Information (I)
-
-### Page Title
-
-`Channel Management`
-
-### Table: Channel List
-
-| Column | DataIndex | Type | Render |
-|--------|-----------|------|--------|
-| Channel Name | `name` | string | 纯文本 |
-| channel_id | `org_id` | string | `Typography.Text code` |
-| Status | `status` | Status | Tag: green="Active", red="Disabled" |
-| Channel Admin | `adminEmail` | string | 纯文本（从 `getChannelSummary` 获取） |
-| Members | `memberCount` | number | 纯文本 |
-| Customers | `customerCount` | number | 纯文本 |
-| Created At | `created_at` | string | 纯文本 |
-| Actions | - | - | 见 Actions 节 |
-
-**Data Row Type**: `ChannelRow extends Organization` + `{ adminEmail, memberCount, customerCount }`
-
-### Mock Data (3 Channels)
-
-| Name | ID | Status | Admin | Members | Customers |
-|------|----|--------|-------|---------|-----------|
-| Channel A | org_ch_001 | Active | admin@channel-a.com | 2 | 2 |
-| Channel B | org_ch_002 | Disabled | owner@channel-b.com | 1 | 0 |
-| Channel C | org_ch_003 | Active | admin@channel-c.com | 1 | 1 |
+> 仅平台超级管理员可访问此模块。其他角色的菜单中不展示渠道管理入口。
 
 ---
 
-## Actions (A)
+## Actions & Flows (A)
 
-### A1: Create Channel
+### Entity: Channel
 
-| Item | Detail |
-|------|--------|
-| Button | `Create Channel` (Header 右侧, Primary) |
-| Permission | `platform:channels:create` |
-| Guard | `PermGuard` (hide mode) |
-| Modal Title | "Create Channel" |
+| Attribute | Description | Constraints |
+|-----------|------------|-------------|
+| Channel Name | 渠道名称 | Required |
+| Status | Active or Disabled | Required |
+| Channel Admin | 渠道管理员邮箱 | Required |
+| Member Count | 渠道下的用户数 | System computed |
+| Customer Count | 渠道下的客户数 | System computed |
+| Created At | 创建时间 | System generated |
 
-**Modal Form:**
+### Create Channel
 
-| Field | Type | Validation |
-|-------|------|------------|
-| Channel Name | Input | Required |
-| Channel Admin Email | Input | Required + email format |
-| Remarks | TextArea | Optional |
+**Who**: Platform Super Admin
+**Goal**: 将新的代理商/经销商纳入系统
+**Required Information**:
+- Channel Name (required)
+- Channel Admin Email (required, must be valid email format)
+- Remarks (optional)
 
-**Submit**: `message.success` (simulated)
+**Outcome**: 系统创建一个新的渠道组织，指定的管理员邮箱成为该渠道的第一个成员（Channel Owner 角色）
 
-### A2: View Members
+### View Channel Members
 
-| Item | Detail |
-|------|--------|
-| Button | `View Members` (每行 Actions) |
-| Permission | 无额外限制（已在页面级验证） |
-| Behavior | `router.push('/dashboard/users?org={org_id}')` |
+**Who**: Platform Super Admin
+**Goal**: 查看某个渠道下的所有用户
+**Steps**:
+1. 在渠道列表中，点击某渠道的"查看成员"操作
+2. 系统跳转到用户管理页面，自动筛选显示该渠道的用户
 
-### A3: View Customers
+**Outcome**: 用户管理页面显示该渠道下的所有成员
 
-| Item | Detail |
-|------|--------|
-| Button | `View Customers` (每行 Actions) |
-| Behavior | `router.push('/dashboard/customers?channel={org_id}')` |
+### View Channel Customers
 
-### A4: View Assets
+**Who**: Platform Super Admin
+**Goal**: 查看某个渠道下的所有客户
+**Steps**:
+1. 在渠道列表中，点击某渠道的"查看客户"操作
+2. 系统跳转到客户管理页面，自动筛选显示该渠道的客户
 
-| Item | Detail |
-|------|--------|
-| Button | `View Assets` (每行 Actions) |
-| Behavior | `router.push('/dashboard/assets/garments?org={org_id}')` |
+**Outcome**: 客户管理页面显示该渠道下的所有客户
 
-### A5: Disable/Enable Channel
+### View Channel Assets
 
-| Item | Detail |
-|------|--------|
-| Button | `Disable` / `Enable`（根据当前状态切换文案） |
-| Permission | `platform:channels:disable` |
-| Guard | `PermGuard` (hide mode) |
-| Style | danger link |
-| Behavior | `message.warning` (simulated) |
+**Who**: Platform Super Admin
+**Goal**: 查看某个渠道关联的资产
+**Steps**:
+1. 在渠道列表中，点击某渠道的"查看资产"操作
+2. 系统跳转到服装管理页面，自动筛选显示该渠道关联的资产
+
+**Outcome**: 服装管理页面显示该渠道关联的资产
+
+### Disable / Enable Channel
+
+**Who**: Platform Super Admin
+**Goal**: 暂停或恢复某个渠道的运营
+**Steps**:
+1. 在渠道列表中，点击某渠道的"禁用"或"启用"操作
+2. 系统切换该渠道的状态
+
+**Outcome**: 渠道状态在 Active 和 Disabled 之间切换
 
 ---
 
-## Exceptions (E)
+## Constraints & Rules (C)
 
-| # | Scenario | Handling |
-|---|----------|----------|
-| E1 | 无 `platform:channels:create` 权限 | Create 按钮被 PermGuard 隐藏 |
-| E2 | 无 `platform:channels:disable` 权限 | Disable/Enable 按钮被 PermGuard 隐藏 |
-| E3 | 创建表单 Channel Name 为空 | Ant Form required 校验阻止提交 |
-| E4 | 创建表单 Email 格式不合法 | Ant Form email type 校验 |
+- 渠道名称为必填项，不能为空
+- 渠道管理员邮箱必须是合法的邮箱格式
+- 渠道列表展示所有渠道（包括 Active 和 Disabled 状态）
+
+---
+
+## Edge Cases (E)
+
+| Scenario | Expected Behavior |
+|----------|------------------|
+| 创建渠道时名称为空 | 表单校验阻止提交 |
+| 创建渠道时邮箱格式不合法 | 表单校验提示邮箱格式错误 |
+| 渠道被禁用后 | 渠道状态变为 Disabled，列表中仍可见 |
