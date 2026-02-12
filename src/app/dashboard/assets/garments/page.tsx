@@ -146,7 +146,9 @@ export default function GarmentsPage() {
 
   return (
     <div>
-      <Title level={4} style={{ marginBottom: 16 }}>Garments (Aggregated)</Title>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <Title level={4} style={{ margin: 0 }}>Garments (Aggregated)</Title>
+      </div>
 
       <Space style={{ marginBottom: 16 }} wrap>
         <Select
@@ -168,7 +170,7 @@ export default function GarmentsPage() {
           allowClear
           showSearch
           optionFilterProp="label"
-          style={{ width: 260 }}
+          style={{ width: 240 }}
           value={filterOrgId}
           onChange={setFilterOrgId}
           options={orgOptions}

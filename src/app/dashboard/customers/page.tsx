@@ -235,7 +235,7 @@ export default function CustomersPage() {
         <Select
           value={typeFilter}
           onChange={setTypeFilter}
-          style={{ width: 150 }}
+          style={{ width: 160 }}
           options={[
             { value: 'all', label: 'All' },
             { value: 'Direct', label: 'Direct' },
@@ -257,7 +257,7 @@ export default function CustomersPage() {
         <Select
           value={channelFilter}
           onChange={setChannelFilter}
-          style={{ width: 150 }}
+          style={{ width: 200 }}
           options={[
             { value: 'all', label: 'All' },
             ...channels.map((ch) => ({

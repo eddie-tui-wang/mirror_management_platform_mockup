@@ -7,7 +7,7 @@
 
 ## 1. Product Overview
 
-Smart Mirror Management 是一个面向智能试衣镜场景的 B2B SaaS 后台管理平台。系统采用 **三层组织架构** + **四角色 RBAC** 模型，为平台运营方、渠道商、终端客户提供差异化的管理视图。
+Smart Mirror Management 是一个面向智能试衣镜场景的 B2B SaaS 后台管理平台。系统采用 **三层组织架构** + **三角色 RBAC** 模型，为平台运营方、渠道商、终端客户提供差异化的管理视图。
 
 本系统为 **Demo / Prototype** 性质，使用模拟数据与预设账号，用于验证业务流程和权限模型。
 
@@ -59,8 +59,7 @@ Platform (系统运营方)
 |------|--------|-------------|
 | Platform Super Admin | Platform Portal | 全权限超级管理员，管理所有渠道、客户、用户及资产 |
 | Channel Owner | Channel Portal | 渠道管理者，可管理下属客户及其账号 |
-| HQ Owner | Customer Portal | 客户组织管理者（品牌 HQ），可管理成员、服装、模板 |
-| HQ Ops | Customer Portal | 客户运营人员，可上传/编辑服装和查看模板，但无删除/邀请/分类管理权限 |
+| HQ Owner | Customer Portal | 客户组织管理者（品牌 HQ），可管理成员、服装、模板、设备 |
 
 ---
 
@@ -90,54 +89,54 @@ Platform (系统运营方)
 
 命名规则: `{portal}:{resource}:{action}`
 
-| Permission Key | Description | SuperAdmin | ChannelOwner | HQOwner | HQOps |
-|----------------|-------------|:----------:|:------------:|:-------:|:-----:|
-| `platform:channels:view` | View channel list | Y | - | - | - |
-| `platform:channels:create` | Create channel | Y | - | - | - |
-| `platform:channels:disable` | Disable/Enable channel | Y | - | - | - |
-| `platform:customers:view` | View customer list | Y | - | - | - |
-| `platform:customers:create` | Create direct customer | Y | - | - | - |
-| `platform:customers:transfer` | Transfer customer ownership | Y | - | - | - |
-| `platform:users:view` | View all users | Y | - | - | - |
-| `platform:users:disable` | Disable/Enable user | Y | - | - | - |
-| `platform:users:reset_password` | Reset user password | Y | - | - | - |
-| `platform:users:change_role` | Change user role | Y | - | - | - |
-| `platform:roles:view` | View role permissions | Y | - | - | - |
-| `platform:garments:view` | View garments (aggregated) | Y | - | - | - |
-| `platform:garments:edit` | Edit garment (fallback) | Y | - | - | - |
-| `platform:garments:delete` | Delete garment | Y | - | - | - |
-| `platform:templates:view` | View templates (aggregated) | Y | - | - | - |
-| `platform:templates:create` | Create new template | Y | - | - | - |
-| `platform:templates:edit` | Edit template | Y | - | - | - |
-| `platform:templates:delete` | Delete template | Y | - | - | - |
-| `platform:templates:assign` | Assign template to customer | Y | - | - | - |
-| `channel:customers:view` | View customers | Y | Y | - | - |
-| `channel:customers:create` | Create channel customer | Y | Y | - | - |
-| `channel:users:view` | View customer accounts | Y | Y | - | - |
-| `channel:users:reinvite` | Resend invitation | Y | Y | - | - |
-| `customer:users:view` | View members | Y | - | Y | Y |
-| `customer:users:invite` | Invite member | Y | - | Y | - |
-| `customer:users:disable` | Disable member | Y | - | Y | - |
-| `customer:users:reset_password` | Reset member password | Y | - | Y | - |
-| `customer:garments:view` | View garments | Y | - | Y | Y |
-| `customer:garments:upload` | Upload/Import garment | Y | - | Y | Y |
-| `customer:garments:edit` | Edit garment | Y | - | Y | Y |
-| `customer:garments:delete` | Remove/Delete garment | Y | - | Y | - |
-| `customer:garments:manage_categories` | Manage garment categories | Y | - | Y | - |
-| `customer:templates:view` | View assigned templates | Y | - | Y | Y |
-| `customer:templates:toggle` | Enable/Disable assigned template | Y | - | Y | - |
+| Permission Key | Description | SuperAdmin | ChannelOwner | HQOwner |
+|----------------|-------------|:----------:|:------------:|:-------:|
+| `platform:channels:view` | View channel list | Y | - | - |
+| `platform:channels:create` | Create channel | Y | - | - |
+| `platform:channels:disable` | Disable/Enable channel | Y | - | - |
+| `platform:customers:view` | View customer list | Y | - | - |
+| `platform:customers:create` | Create direct customer | Y | - | - |
+| `platform:customers:transfer` | Transfer customer ownership | Y | - | - |
+| `platform:users:view` | View all users | Y | - | - |
+| `platform:users:disable` | Disable/Enable user | Y | - | - |
+| `platform:users:reset_password` | Reset user password | Y | - | - |
+| `platform:users:change_role` | Change user role | Y | - | - |
+| `platform:roles:view` | View role permissions | Y | - | - |
+| `platform:garments:view` | View garments (aggregated) | Y | - | - |
+| `platform:garments:edit` | Edit garment (fallback) | Y | - | - |
+| `platform:garments:delete` | Delete garment | Y | - | - |
+| `platform:templates:view` | View templates (aggregated) | Y | - | - |
+| `platform:templates:create` | Create new template | Y | - | - |
+| `platform:templates:edit` | Edit template | Y | - | - |
+| `platform:templates:delete` | Delete template | Y | - | - |
+| `platform:templates:assign` | Assign template to customer | Y | - | - |
+| `channel:customers:view` | View customers | Y | Y | - |
+| `channel:customers:create` | Create channel customer | Y | Y | - |
+| `channel:users:view` | View customer accounts | Y | Y | - |
+| `channel:users:reinvite` | Resend invitation | Y | Y | - |
+| `customer:users:view` | View members | Y | - | Y |
+| `customer:users:invite` | Invite member | Y | - | Y |
+| `customer:users:disable` | Disable member | Y | - | Y |
+| `customer:users:reset_password` | Reset member password | Y | - | Y |
+| `customer:garments:view` | View garments | Y | - | Y |
+| `customer:garments:upload` | Upload/Import garment | Y | - | Y |
+| `customer:garments:edit` | Edit garment | Y | - | Y |
+| `customer:garments:delete` | Remove/Delete garment | Y | - | Y |
+| `customer:garments:manage_categories` | Manage garment categories | Y | - | Y |
+| `customer:templates:view` | View assigned templates | Y | - | Y |
+| `customer:templates:toggle` | Enable/Disable assigned template | Y | - | Y |
 
 ---
 
 ## 8. Module Access by Role
 
-| Module | SuperAdmin | ChannelOwner | HQOwner | HQOps |
-|--------|:----------:|:------------:|:-------:|:-----:|
-| Channel Management | Y | - | - | - |
-| Customer Management | Y (all) | Y (own channel) | - | - |
-| User Management | Y (all) | Y (channel customers) | Y (own org) | Y (view only) |
-| Garment Management | Y (aggregated) | - | Y (own org) | Y (limited) |
-| Template Management | Y (full CRUD + assign) | - | Y (view + toggle) | Y (view only) |
+| Module | SuperAdmin | ChannelOwner | HQOwner |
+|--------|:----------:|:------------:|:-------:|
+| Channel Management | Y | - | - |
+| Customer Management | Y (all) | Y (own channel) | - |
+| User Management | Y (all) | Y (channel customers) | Y (own org) |
+| Garment Management | Y (aggregated) | - | Y (own org) |
+| Template Management | Y (full CRUD + assign) | - | Y (view + toggle) |
 
 ---
 
@@ -148,7 +147,6 @@ Platform (系统运营方)
 | super@platform.com | Platform Admin | Platform Super Admin | Smart Mirror Platform | demo |
 | admin@channel-a.com | Alice Chen | Channel Owner | Channel A | demo |
 | hq.admin@x.com | David Zhang | HQ Owner | Customer X | demo |
-| ops1@x.com | Eva Liu | HQ Ops | Customer X | demo |
 
 > All demo passwords are `demo`.
 

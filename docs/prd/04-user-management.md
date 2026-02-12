@@ -21,19 +21,19 @@
 
 ## Roles & Access (R)
 
-| Capability | Platform Super Admin | Channel Owner | HQ Owner | HQ Ops |
-|-----------|:-------------------:|:-------------:|:--------:|:------:|
-| 查看所有用户 | Y | - | - | - |
-| 禁用/启用用户 | Y | - | - | - |
-| 重置用户密码 | Y | - | - | - |
-| 变更用户角色 | Y | - | - | - |
-| 查看角色权限定义 | Y | - | - | - |
-| 查看渠道客户账号 | - | Y | - | - |
-| 重发邀请 | - | Y | - | - |
-| 查看组织成员 | - | - | Y | Y |
-| 邀请成员 | - | - | Y | - |
-| 禁用/启用成员 | - | - | Y | - |
-| 重置成员密码 | - | - | Y | - |
+| Capability | Platform Super Admin | Channel Owner | HQ Owner |
+|-----------|:-------------------:|:-------------:|:--------:|
+| 查看所有用户 | Y | - | - |
+| 禁用/启用用户 | Y | - | - |
+| 重置用户密码 | Y | - | - |
+| 变更用户角色 | Y | - | - |
+| 查看角色权限定义 | Y | - | - |
+| 查看渠道客户账号 | - | Y | - |
+| 重发邀请 | - | Y | - |
+| 查看组织成员 | - | - | Y |
+| 邀请成员 | - | - | Y |
+| 禁用/启用成员 | - | - | Y |
+| 重置成员密码 | - | - | Y |
 
 ---
 
@@ -109,10 +109,9 @@
 
 | Role | Permission Count |
 |------|:----------------:|
-| Platform Super Admin | 34 (all) |
+| Platform Super Admin | All |
 | Channel Owner | 4 |
 | HQ Owner | 11 |
-| HQ Ops | 5 |
 
 ---
 
@@ -126,7 +125,7 @@
 **Available Filters**:
 - Customer: All / specific customer
 - Status: All / Active / Disabled
-- Role: All / HQ Owner / HQ Ops
+- Role: All / HQ Owner
 
 **Information Displayed**: 邮箱、所属客户名称、角色、状态、最后登录时间
 
@@ -146,7 +145,7 @@
 
 #### View Member List (Customer)
 
-**Who**: HQ Owner, HQ Ops
+**Who**: HQ Owner
 **Goal**: 查看本组织的成员列表
 **Data Scope**: 仅显示当前客户组织的成员
 
@@ -158,7 +157,7 @@
 **Goal**: 邀请新成员加入本组织
 **Required Information**:
 - Email (required, must be valid email format)
-- Role: HQ Owner or HQ Ops (required)
+- Role: HQ Owner (required)
 
 **Outcome**: 系统向指定邮箱发送邀请，该用户将以选定角色加入当前客户组织
 
@@ -184,17 +183,6 @@
 
 ---
 
-### Role-Specific Behavior (Customer Portal)
-
-| Feature | HQ Owner | HQ Ops |
-|---------|----------|--------|
-| 查看成员列表 | Y | Y |
-| 邀请成员 | Y | Not available |
-| 禁用/启用成员 | Y | Not available (操作被禁用并提示无权限) |
-| 重置成员密码 | Y | Not available (操作被禁用并提示无权限) |
-
----
-
 ## Constraints & Rules (C)
 
 - 平台用户列表按成员关系展示：一个用户若在多个组织有成员关系，则出现多行
@@ -209,7 +197,6 @@
 
 | Scenario | Expected Behavior |
 |----------|------------------|
-| HQ Ops 尝试禁用成员 | 操作被禁用，显示无权限提示 |
 | 邀请表单邮箱为空 | 表单校验阻止提交 |
 | 邀请表单角色未选择 | 表单校验阻止提交 |
 | 搜索无结果 | 列表为空 |

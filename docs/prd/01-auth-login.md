@@ -22,7 +22,6 @@
 | Platform Super Admin | 进入 Platform Portal 首页 |
 | Channel Owner | 进入 Channel Portal 首页 |
 | HQ Owner | 进入 Customer Portal 首页 |
-| HQ Ops | 进入 Customer Portal 首页 |
 
 ---
 
@@ -48,7 +47,6 @@
 | super@platform.com | Platform Admin | Platform Super Admin | Smart Mirror Platform |
 | admin@channel-a.com | Alice Chen | Channel Owner | Channel A |
 | hq.admin@x.com | David Zhang | HQ Owner | Customer X |
-| ops1@x.com | Eva Liu | HQ Ops | Customer X |
 
 > All passwords are `demo`.
 

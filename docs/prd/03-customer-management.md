@@ -18,14 +18,14 @@
 
 ## Roles & Access (R)
 
-| Capability | Platform Super Admin | Channel Owner | HQ Owner | HQ Ops |
-|-----------|:-------------------:|:-------------:|:--------:|:------:|
-| 查看所有客户 | Y | - | - | - |
-| 创建直签客户 (Direct) | Y | - | - | - |
-| 查看本渠道客户 | - | Y | - | - |
-| 创建渠道客户 (Reseller) | - | Y | - | - |
-| 查看客户成员 | Y | Y (own channel) | - | - |
-| 查看客户资产 | Y | - | - | - |
+| Capability | Platform Super Admin | Channel Owner | HQ Owner |
+|-----------|:-------------------:|:-------------:|:--------:|
+| 查看所有客户 | Y | - | - |
+| 创建直签客户 (Direct) | Y | - | - |
+| 查看本渠道客户 | - | Y | - |
+| 创建渠道客户 (Reseller) | - | Y | - |
+| 查看客户成员 | Y | Y (own channel) | - |
+| 查看客户资产 | Y | - | - |
 
 ---
 

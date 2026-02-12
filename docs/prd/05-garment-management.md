@@ -18,17 +18,17 @@
 
 ## Roles & Access (R)
 
-| Capability | Platform Super Admin | Channel Owner | HQ Owner | HQ Ops |
-|-----------|:-------------------:|:-------------:|:--------:|:------:|
-| 查看所有服装（聚合视图） | Y | - | - | - |
-| 编辑服装（平台端） | Y | - | - | - |
-| 删除服装（平台端） | Y | - | - | - |
-| 查看本组织服装 | - | - | Y | Y |
-| 上传/导入服装 | - | - | Y | Y |
-| 编辑服装 | - | - | Y | Y |
-| 删除/移除服装 | - | - | Y | - |
-| 管理分类 | - | - | Y | - |
-| 设置服装分类 | - | - | Y | Y |
+| Capability | Platform Super Admin | Channel Owner | HQ Owner |
+|-----------|:-------------------:|:-------------:|:--------:|
+| 查看所有服装（聚合视图） | Y | - | - |
+| 编辑服装（平台端） | Y | - | - |
+| 删除服装（平台端） | Y | - | - |
+| 查看本组织服装 | - | - | Y |
+| 上传/导入服装 | - | - | Y |
+| 编辑服装 | - | - | Y |
+| 删除/移除服装 | - | - | Y |
+| 管理分类 | - | - | Y |
+| 设置服装分类 | - | - | Y |
 
 ---
 
@@ -95,7 +95,7 @@
 
 #### View Garments (Customer)
 
-**Who**: HQ Owner, HQ Ops
+**Who**: HQ Owner
 **Goal**: 查看和管理本组织的服装
 **Data Scope**: 仅显示当前客户组织的服装
 **Available Filters**:
@@ -105,7 +105,7 @@
 
 #### Upload / Import Garment
 
-**Who**: HQ Owner, HQ Ops
+**Who**: HQ Owner
 **Goal**: 将新服装添加到本组织的目录中
 **Steps**:
 1. 点击"上传/导入"操作
@@ -132,7 +132,7 @@
 
 #### Set Category (Per Garment)
 
-**Who**: HQ Owner, HQ Ops
+**Who**: HQ Owner
 **Goal**: 为某件服装设置或变更分类
 **Required Information**:
 - Category: 从当前组织的分类列表中选择，或清除分类
@@ -141,7 +141,7 @@
 
 #### Edit Garment (Customer)
 
-**Who**: HQ Owner, HQ Ops
+**Who**: HQ Owner
 **Goal**: 编辑某服装的信息
 **Steps**:
 1. 在服装列表中，点击某服装的"编辑"操作
@@ -158,19 +158,6 @@
 2. 系统执行移除
 
 **Outcome**: 服装从当前组织的目录中移除
-
----
-
-### Role-Specific Behavior (Customer Portal)
-
-| Feature | HQ Owner | HQ Ops |
-|---------|----------|--------|
-| 查看服装列表 | Y | Y |
-| 上传/导入服装 | Y | Y |
-| 管理分类 | Y | Not available (入口不展示) |
-| 设置服装分类 | Y | Y |
-| 编辑服装 | Y | Y |
-| 移除服装 | Y | Not available (操作被禁用并提示无权限) |
 
 ---
 
@@ -193,7 +180,5 @@
 | 服装无分类 | 分类列显示为空或"-" |
 | 添加重复分类名 | 提示 "Category already exists"，阻止添加 |
 | 删除有关联服装的分类 | 二次确认提示受影响的服装数量；确认后服装变为未分类 |
-| HQ Ops 无分类管理权限 | "管理分类"入口不展示 |
-| HQ Ops 无删除服装权限 | "移除"操作被禁用，显示无权限提示 |
 | 筛选 "Uncategorized" | 仅显示无分类的服装 |
 | 平台端切换 Org Type | Organization 筛选重置 |

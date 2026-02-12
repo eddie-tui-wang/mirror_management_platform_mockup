@@ -89,9 +89,11 @@ export default function CustomerTemplatesPage() {
 
   return (
     <div>
-      <Title level={4} style={{ marginBottom: 16 }}>
-        {orgName} - Templates
-      </Title>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <Title level={4} style={{ margin: 0 }}>
+          {orgName} - Templates
+        </Title>
+      </div>
 
       <Table<AssignedTemplateRow>
         columns={columns}

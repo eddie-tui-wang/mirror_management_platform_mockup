@@ -1,7 +1,7 @@
 // ==================== 数据模型类型 ====================
 
 export type OrgType = 'CHANNEL' | 'CUSTOMER';
-export type RoleKey = 'PlatformSuperAdmin' | 'ChannelOwner' | 'HQOwner' | 'HQOps';
+export type RoleKey = 'PlatformSuperAdmin' | 'ChannelOwner' | 'HQOwner';
 export type PortalType = 'platform' | 'channel' | 'customer';
 export type Status = 'Active' | 'Disabled';
 export type DeviceStatus = 'Online' | 'Offline';
@@ -89,6 +89,7 @@ export interface TemplateAssignment {
 
 export interface Device {
   device_id: string;
+  nickname: string | null;
   status: DeviceStatus;
   last_seen: string;
   current_org_id: string | null;
@@ -96,6 +97,13 @@ export interface Device {
   current_user_id: string | null;
   current_user_email: string | null;
   session_start: string | null;
+}
+
+export interface DeviceGarmentAssignment {
+  device_id: string;
+  catalog_id: string;
+  org_id: string;
+  assigned_at: string;
 }
 
 export interface Session {

@@ -233,14 +233,14 @@ function UsersTab() {
         <Select
           value={orgFilter}
           onChange={setOrgFilter}
-          style={{ width: 150 }}
+          style={{ width: 200 }}
           options={[{ value: 'all', label: 'All' }, ...orgOptions]}
         />
         <span>Role:</span>
         <Select
           value={roleFilter}
           onChange={setRoleFilter}
-          style={{ width: 180 }}
+          style={{ width: 160 }}
           options={[{ value: 'all', label: 'All' }, ...roleOptions]}
         />
         <span>Status:</span>
@@ -335,7 +335,9 @@ export default function UsersPage() {
 
   return (
     <div>
-      <Title level={4} style={{ marginBottom: 16 }}>Users & Roles</Title>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <Title level={4} style={{ margin: 0 }}>Users & Roles</Title>
+      </div>
       <Tabs items={tabItems} defaultActiveKey="users" />
     </div>
   );

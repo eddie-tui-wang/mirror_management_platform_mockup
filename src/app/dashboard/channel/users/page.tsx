@@ -103,7 +103,7 @@ export default function ChannelUsersPage() {
       dataIndex: 'role_key',
       key: 'role_key',
       render: (role: RoleKey) => (
-        <Tag color={role === 'HQOwner' ? 'blue' : 'cyan'}>{role}</Tag>
+        <Tag color="blue">{role}</Tag>
       ),
     },
     {
@@ -156,7 +156,7 @@ export default function ChannelUsersPage() {
         <Select
           value={orgFilter}
           onChange={setOrgFilter}
-          style={{ width: 180 }}
+          style={{ width: 200 }}
           options={[
             { value: 'all', label: 'All Customers' },
             ...channelCustomers.map((c) => ({
@@ -180,11 +180,10 @@ export default function ChannelUsersPage() {
         <Select
           value={roleFilter}
           onChange={setRoleFilter}
-          style={{ width: 140 }}
+          style={{ width: 160 }}
           options={[
             { value: 'all', label: 'All' },
             { value: 'HQOwner', label: 'HQOwner' },
-            { value: 'HQOps', label: 'HQOps' },
           ]}
         />
       </Space>

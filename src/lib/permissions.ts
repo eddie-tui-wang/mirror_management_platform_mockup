@@ -43,6 +43,9 @@ export const PERMISSIONS = {
   'customer:garments:manage_categories': 'Manage garment categories',
   'customer:templates:view': 'View assigned templates',
   'customer:templates:toggle': 'Enable/Disable assigned template',
+  'customer:devices:view': 'View devices',
+  'customer:devices:manage': 'Add device / set nickname',
+  'customer:garments:assign_device': 'Assign garments to devices',
 } as const;
 
 export type PermissionKey = keyof typeof PERMISSIONS;
@@ -71,16 +74,11 @@ export const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'customer:garments:manage_categories',
     'customer:templates:view',
     'customer:templates:toggle',
+    'customer:devices:view',
+    'customer:devices:manage',
+    'customer:garments:assign_device',
   ],
 
-  HQOps: [
-    'customer:users:view',
-    'customer:garments:view',
-    'customer:garments:upload',
-    'customer:garments:edit',
-    'customer:templates:view',
-    // 无 toggle/invite/disable/delete 等管理权限，模板仅可查看
-  ],
 };
 
 // ==================== 角色 → Portal 映射 ====================
@@ -89,7 +87,6 @@ export const ROLE_PORTAL: Record<RoleKey, PortalType> = {
   PlatformSuperAdmin: 'platform',
   ChannelOwner: 'channel',
   HQOwner: 'customer',
-  HQOps: 'customer',
 };
 
 // ==================== 路由权限映射 ====================
@@ -107,6 +104,7 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   '/dashboard/customer/users': 'customer:users:view',
   '/dashboard/customer/garments': 'customer:garments:view',
   '/dashboard/customer/templates': 'customer:templates:view',
+  '/dashboard/customer/devices': 'customer:devices:view',
 };
 
 // ==================== 权限检查工具函数 ====================

@@ -3,13 +3,14 @@
 import React, { useMemo, useState } from 'react';
 import {
   Table, Button, Tag, Space, Typography, Image, Select, Modal,
-  Input, List, message,
+  Input, List, Checkbox, message,
 } from 'antd';
-import { UploadOutlined, AppstoreOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { UploadOutlined, AppstoreOutlined, DeleteOutlined, PlusOutlined, DesktopOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuthStore } from '@/lib/store';
 import {
   getOrgGarments, getOrgGarmentCategories, getGarmentCategoryName,
+  getGarmentAssignedDevices, getOrgDevices,
 } from '@/lib/mock-data';
 import { hasPermission } from '@/lib/permissions';
 import type { GarmentCatalog, Status } from '@/lib/types';
@@ -38,6 +39,11 @@ export default function CustomerGarmentsPage() {
   // 分类筛选
   const [filterCategoryId, setFilterCategoryId] = useState<string | undefined>(undefined);
 
+  // 分配设备弹窗
+  const [assignDevOpen, setAssignDevOpen] = useState(false);
+  const [assignDevGarment, setAssignDevGarment] = useState<GarmentCatalog | null>(null);
+  const [assignDevSelected, setAssignDevSelected] = useState<string[]>([]);
+
   const categories = useMemo(() => getOrgGarmentCategories(orgId), [orgId]);
   const allGarments = useMemo(() => getOrgGarments(orgId), [orgId]);
 
@@ -53,6 +59,24 @@ export default function CustomerGarmentsPage() {
     opts.push({ label: 'Uncategorized', value: '__none__' });
     return opts;
   }, [categories]);
+
+  const orgDevices = useMemo(() => getOrgDevices(orgId), [orgId]);
+
+  // 打开分配设备弹窗
+  const openAssignDevices = (record: GarmentCatalog) => {
+    const assigned = getGarmentAssignedDevices(record.catalog_id);
+    setAssignDevGarment(record);
+    setAssignDevSelected(assigned.map((a) => a.device_id));
+    setAssignDevOpen(true);
+  };
+
+  const handleAssignDevices = () => {
+    message.success(
+      `Garment "${assignDevGarment?.name}" assigned to ${assignDevSelected.length} device(s) (simulated)`
+    );
+    setAssignDevOpen(false);
+    setAssignDevGarment(null);
+  };
 
   // 打开设置分类弹窗
   const openSetCategory = (record: GarmentCatalog) => {
@@ -136,6 +160,16 @@ export default function CustomerGarmentsPage() {
       },
     },
     {
+      title: 'Devices',
+      key: 'devices',
+      render: (_, record) => {
+        const assigned = getGarmentAssignedDevices(record.catalog_id);
+        return assigned.length > 0
+          ? <Tag icon={<DesktopOutlined />}>{assigned.length} device(s)</Tag>
+          : <Typography.Text type="secondary">-</Typography.Text>;
+      },
+    },
+    {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
@@ -171,6 +205,15 @@ export default function CustomerGarmentsPage() {
               }
             >
               Edit
+            </Button>
+          </PermGuard>
+          <PermGuard permission="customer:garments:assign_device" fallback="disable">
+            <Button
+              type="link"
+              size="small"
+              onClick={() => openAssignDevices(record)}
+            >
+              Assign Devices
             </Button>
           </PermGuard>
           <PermGuard permission="customer:garments:delete" fallback="disable">
@@ -319,6 +362,39 @@ export default function CustomerGarmentsPage() {
           onChange={setSelectedCategoryId}
           options={categories.map((c) => ({ label: c.name, value: c.category_id }))}
         />
+      </Modal>
+
+      {/* 分配设备弹窗 */}
+      <Modal
+        title={`Assign Devices — "${assignDevGarment?.name}"`}
+        open={assignDevOpen}
+        onOk={handleAssignDevices}
+        onCancel={() => {
+          setAssignDevOpen(false);
+          setAssignDevGarment(null);
+        }}
+        okText="Save"
+        cancelText="Cancel"
+      >
+        {orgDevices.length > 0 ? (
+          <Checkbox.Group
+            value={assignDevSelected}
+            onChange={(vals) => setAssignDevSelected(vals as string[])}
+            style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+          >
+            {orgDevices.map((d) => (
+              <Checkbox key={d.device_id} value={d.device_id}>
+                <Space>
+                  <Typography.Text code>{d.device_id}</Typography.Text>
+                  <span>{d.nickname ?? ''}</span>
+                  <Tag color={d.status === 'Online' ? 'green' : 'default'}>{d.status}</Tag>
+                </Space>
+              </Checkbox>
+            ))}
+          </Checkbox.Group>
+        ) : (
+          <Typography.Text type="secondary">No devices available for this organization.</Typography.Text>
+        )}
       </Modal>
     </div>
   );

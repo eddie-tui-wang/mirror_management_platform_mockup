@@ -20,15 +20,15 @@
 
 ## Roles & Access (R)
 
-| Capability | Platform Super Admin | Channel Owner | HQ Owner | HQ Ops |
-|-----------|:-------------------:|:-------------:|:--------:|:------:|
-| 查看所有模板 | Y | - | - | - |
-| 创建模板 | Y | - | - | - |
-| 编辑模板 | Y | - | - | - |
-| 删除模板 | Y | - | - | - |
-| 分配模板给客户 | Y | - | - | - |
-| 查看已分配的模板 | - | - | Y | Y |
-| 启用/禁用已分配的模板 | - | - | Y | - |
+| Capability | Platform Super Admin | Channel Owner | HQ Owner |
+|-----------|:-------------------:|:-------------:|:--------:|
+| 查看所有模板 | Y | - | - |
+| 创建模板 | Y | - | - |
+| 编辑模板 | Y | - | - |
+| 删除模板 | Y | - | - |
+| 分配模板给客户 | Y | - | - |
+| 查看已分配的模板 | - | - | Y |
+| 启用/禁用已分配的模板 | - | - | Y |
 
 ---
 
@@ -133,7 +133,7 @@ Master Template (平台拥有, 1)
 
 #### View Assigned Templates
 
-**Who**: HQ Owner, HQ Ops
+**Who**: HQ Owner
 **Goal**: 查看本组织被分配的模板列表
 **Data Scope**: 仅显示分配给当前客户组织的模板
 
@@ -150,16 +150,6 @@ Master Template (平台拥有, 1)
 **Outcome**: 模板在本组织设备上生效或停用
 
 **Special Rule**: 如果平台方已将主模板状态设为 Disabled，则客户无法启用该模板——开关被禁用，并提示"Template disabled by platform"
-
----
-
-### Role-Specific Behavior (Customer Portal)
-
-| Feature | HQ Owner | HQ Ops |
-|---------|----------|--------|
-| 查看模板列表 | Y | Y |
-| 查看提示词内容 | Y | Y |
-| 切换启用/禁用 | Y | Not available (开关被禁用并提示无权限) |
 
 ---
 
@@ -182,7 +172,6 @@ Master Template (平台拥有, 1)
 | 添加重复提示词 | 提示 "This prompt already exists"，阻止添加 |
 | 删除有分配记录的模板 | 二次确认提示受影响的客户数量；确认后模板和所有分配一并删除 |
 | 主模板被平台禁用 | 客户端开关被禁用且强制关闭，显示 "Template disabled by platform" |
-| HQ Ops 尝试切换模板开关 | 开关被禁用，显示 "No permission" |
 | 主模板被删除后客户端访问 | 模板从客户列表中消失 |
 | 客户无任何已分配模板 | 列表为空 |
 | 搜索清空 | 恢复显示全部模板 |

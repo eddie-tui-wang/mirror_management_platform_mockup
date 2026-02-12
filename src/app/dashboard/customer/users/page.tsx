@@ -61,7 +61,7 @@ export default function CustomerUsersPage() {
       dataIndex: 'role_key',
       key: 'role_key',
       render: (role: RoleKey) => (
-        <Tag color={role === 'HQOwner' ? 'blue' : 'green'}>{role}</Tag>
+        <Tag color="blue">{role}</Tag>
       ),
     },
     {
@@ -180,7 +180,6 @@ export default function CustomerUsersPage() {
               placeholder="Please select a role"
               options={[
                 { label: 'HQOwner', value: 'HQOwner' },
-                { label: 'HQOps', value: 'HQOps' },
               ]}
             />
           </Form.Item>

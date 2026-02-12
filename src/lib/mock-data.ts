@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import {
   Organization, User, OrgMembership, GarmentCatalog, GarmentCategory,
-  MasterTemplate, TemplateAssignment, Device, Session, DemoAccount, TrialStatus,
+  MasterTemplate, TemplateAssignment, Device, DeviceGarmentAssignment, Session, DemoAccount, TrialStatus,
 } from './types';
 
 // ==================== 组织数据 ====================
@@ -61,15 +61,15 @@ export const memberships: OrgMembership[] = [
   { user_id: 'u_015', org_id: 'org_ch_003', role_key: 'ChannelOwner', invited_by: null, created_at: '2026-01-20' },
   // 客户X
   { user_id: 'u_002', org_id: 'org_cu_1001', role_key: 'HQOwner', invited_by: null, created_at: '2026-02-03' },
-  { user_id: 'u_006', org_id: 'org_cu_1001', role_key: 'HQOps', invited_by: 'u_002', created_at: '2026-02-03' },
-  { user_id: 'u_007', org_id: 'org_cu_1001', role_key: 'HQOps', invited_by: 'u_002', created_at: '2026-02-04' },
-  { user_id: 'u_016', org_id: 'org_cu_1001', role_key: 'HQOps', invited_by: 'u_002', created_at: '2026-02-05' },
+  { user_id: 'u_006', org_id: 'org_cu_1001', role_key: 'HQOwner', invited_by: 'u_002', created_at: '2026-02-03' },
+  { user_id: 'u_007', org_id: 'org_cu_1001', role_key: 'HQOwner', invited_by: 'u_002', created_at: '2026-02-04' },
+  { user_id: 'u_016', org_id: 'org_cu_1001', role_key: 'HQOwner', invited_by: 'u_002', created_at: '2026-02-05' },
   // 客户Y
   { user_id: 'u_010', org_id: 'org_cu_1002', role_key: 'HQOwner', invited_by: null, created_at: '2026-02-05' },
-  { user_id: 'u_011', org_id: 'org_cu_1002', role_key: 'HQOps', invited_by: 'u_010', created_at: '2026-02-05' },
+  { user_id: 'u_011', org_id: 'org_cu_1002', role_key: 'HQOwner', invited_by: 'u_010', created_at: '2026-02-05' },
   // 客户Z
   { user_id: 'u_012', org_id: 'org_cu_1003', role_key: 'HQOwner', invited_by: null, created_at: '2026-02-06' },
-  { user_id: 'u_013', org_id: 'org_cu_1003', role_key: 'HQOps', invited_by: 'u_012', created_at: '2026-02-06' },
+  { user_id: 'u_013', org_id: 'org_cu_1003', role_key: 'HQOwner', invited_by: 'u_012', created_at: '2026-02-06' },
   // 客户W
   { user_id: 'u_014', org_id: 'org_cu_1004', role_key: 'HQOwner', invited_by: null, created_at: '2026-02-07' },
   // 客户V
@@ -148,12 +148,28 @@ export const templateAssignments: TemplateAssignment[] = [
 // ==================== 设备数据 ====================
 
 export const devices: Device[] = [
-  { device_id: 'dev_09', status: 'Online', last_seen: '2026-02-10 10:05', current_org_id: 'org_cu_1001', current_org_name: 'Customer X', current_user_id: 'u_002', current_user_email: 'hq.admin@x.com', session_start: '2026-02-10 09:55' },
-  { device_id: 'dev_12', status: 'Offline', last_seen: '2026-02-09 21:10', current_org_id: 'org_cu_1002', current_org_name: 'Customer Y', current_user_id: null, current_user_email: null, session_start: null },
-  { device_id: 'dev_15', status: 'Online', last_seen: '2026-02-10 09:30', current_org_id: 'org_cu_1003', current_org_name: 'Customer Z', current_user_id: 'u_012', current_user_email: 'admin@z.com', session_start: '2026-02-10 09:00' },
-  { device_id: 'dev_07', status: 'Offline', last_seen: '2026-02-10 09:12', current_org_id: 'org_ch_001', current_org_name: 'Channel A', current_user_id: null, current_user_email: null, session_start: null },
-  { device_id: 'dev_20', status: 'Online', last_seen: '2026-02-10 10:08', current_org_id: 'org_cu_1001', current_org_name: 'Customer X', current_user_id: 'u_006', current_user_email: 'ops1@x.com', session_start: '2026-02-10 08:30' },
-  { device_id: 'dev_22', status: 'Offline', last_seen: '2026-02-08 18:00', current_org_id: 'org_cu_1004', current_org_name: 'Customer W', current_user_id: null, current_user_email: null, session_start: null },
+  { device_id: 'dev_09', nickname: 'Front Door Mirror', status: 'Online', last_seen: '2026-02-10 10:05', current_org_id: 'org_cu_1001', current_org_name: 'Customer X', current_user_id: 'u_002', current_user_email: 'hq.admin@x.com', session_start: '2026-02-10 09:55' },
+  { device_id: 'dev_12', nickname: 'VIP Lounge', status: 'Offline', last_seen: '2026-02-09 21:10', current_org_id: 'org_cu_1002', current_org_name: 'Customer Y', current_user_id: null, current_user_email: null, session_start: null },
+  { device_id: 'dev_15', nickname: null, status: 'Online', last_seen: '2026-02-10 09:30', current_org_id: 'org_cu_1003', current_org_name: 'Customer Z', current_user_id: 'u_012', current_user_email: 'admin@z.com', session_start: '2026-02-10 09:00' },
+  { device_id: 'dev_07', nickname: 'Showroom A', status: 'Offline', last_seen: '2026-02-10 09:12', current_org_id: 'org_ch_001', current_org_name: 'Channel A', current_user_id: null, current_user_email: null, session_start: null },
+  { device_id: 'dev_20', nickname: 'Fitting Room #2', status: 'Online', last_seen: '2026-02-10 10:08', current_org_id: 'org_cu_1001', current_org_name: 'Customer X', current_user_id: 'u_006', current_user_email: 'ops1@x.com', session_start: '2026-02-10 08:30' },
+  { device_id: 'dev_22', nickname: null, status: 'Offline', last_seen: '2026-02-08 18:00', current_org_id: 'org_cu_1004', current_org_name: 'Customer W', current_user_id: null, current_user_email: null, session_start: null },
+];
+
+// ==================== 设备-服装分配 ====================
+
+export const deviceGarmentAssignments: DeviceGarmentAssignment[] = [
+  // Customer X: dev_09 (Front Door Mirror)
+  { device_id: 'dev_09', catalog_id: 'cat_01', org_id: 'org_cu_1001', assigned_at: '2026-02-08 10:00' },
+  { device_id: 'dev_09', catalog_id: 'cat_03', org_id: 'org_cu_1001', assigned_at: '2026-02-08 10:00' },
+  { device_id: 'dev_09', catalog_id: 'cat_07', org_id: 'org_cu_1001', assigned_at: '2026-02-08 11:00' },
+  // Customer X: dev_20 (Fitting Room #2)
+  { device_id: 'dev_20', catalog_id: 'cat_01', org_id: 'org_cu_1001', assigned_at: '2026-02-09 09:00' },
+  { device_id: 'dev_20', catalog_id: 'cat_07', org_id: 'org_cu_1001', assigned_at: '2026-02-09 09:00' },
+  // Customer Y: dev_12 (VIP Lounge)
+  { device_id: 'dev_12', catalog_id: 'cat_04', org_id: 'org_cu_1002', assigned_at: '2026-02-07 14:00' },
+  // Customer Z: dev_15
+  { device_id: 'dev_15', catalog_id: 'cat_05', org_id: 'org_cu_1003', assigned_at: '2026-02-07 16:00' },
 ];
 
 // ==================== 会话数据 ====================
@@ -173,7 +189,6 @@ export const demoAccounts: DemoAccount[] = [
   { user_id: 'u_super', email: 'super@platform.com', name: 'Platform Admin', role: 'PlatformSuperAdmin', portal: 'platform', org_id: 'platform', org_name: 'Smart Mirror Platform', password: 'demo' },
   { user_id: 'u_001', email: 'admin@channel-a.com', name: 'Alice Chen', role: 'ChannelOwner', portal: 'channel', org_id: 'org_ch_001', org_name: 'Channel A', password: 'demo' },
   { user_id: 'u_002', email: 'hq.admin@x.com', name: 'David Zhang', role: 'HQOwner', portal: 'customer', org_id: 'org_cu_1001', org_name: 'Customer X', password: 'demo' },
-  { user_id: 'u_006', email: 'ops1@x.com', name: 'Eva Liu', role: 'HQOps', portal: 'customer', org_id: 'org_cu_1001', org_name: 'Customer X', password: 'demo' },
 ];
 
 // ==================== 试用辅助函数 ====================
@@ -284,6 +299,24 @@ export function getTemplateUnassignedOrgs(templateId: string) {
 
 export function getOrgDevices(orgId: string) {
   return devices.filter(d => d.current_org_id === orgId);
+}
+
+export function getDeviceAssignedGarments(deviceId: string) {
+  return deviceGarmentAssignments
+    .filter(a => a.device_id === deviceId)
+    .map(a => {
+      const garment = garments.find(g => g.catalog_id === a.catalog_id);
+      return { ...a, garment_name: garment?.name ?? '-', garment_image: garment?.image_url ?? '' };
+    });
+}
+
+export function getGarmentAssignedDevices(catalogId: string) {
+  return deviceGarmentAssignments
+    .filter(a => a.catalog_id === catalogId)
+    .map(a => {
+      const device = devices.find(d => d.device_id === a.device_id);
+      return { ...a, device_nickname: device?.nickname ?? null, device_status: device?.status ?? 'Offline' };
+    });
 }
 
 export function getOrgSessions(orgId: string) {
