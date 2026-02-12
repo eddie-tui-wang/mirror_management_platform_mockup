@@ -1,27 +1,14 @@
 'use client';
 
-import { Card, Typography, Space, Tag, Button, Row, Col, message, Divider, Alert } from 'antd';
-import { UserOutlined, BankOutlined, TeamOutlined, ShopOutlined, LoginOutlined } from '@ant-design/icons';
+import { useState } from 'react';
+import { Button, Input, Form, Typography, message, Checkbox, Divider, Dropdown } from 'antd';
+import { LockOutlined, MailOutlined, EyeInvisibleOutlined, EyeTwoTone, DownOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { demoAccounts } from '@/lib/mock-data';
-import { ROLE_PERMISSIONS } from '@/lib/permissions';
 import { DemoAccount, PortalType } from '@/lib/types';
 
-const { Title, Paragraph, Text } = Typography;
-
-const PORTAL_CONFIG: Record<PortalType, { color: string; label: string; icon: React.ReactNode; description: string }> = {
-  platform: { color: '#531dab', label: 'Platform', icon: <BankOutlined />, description: 'Global admin view: manage channels, customers, users, and assets' },
-  channel: { color: '#0958d9', label: 'Channel', icon: <TeamOutlined />, description: 'Channel agent view: manage customers and their accounts' },
-  customer: { color: '#389e0d', label: 'Customer', icon: <ShopOutlined />, description: 'Customer view: manage members, garments, and templates' },
-};
-
-const ROLE_DESCRIPTION: Record<string, string> = {
-  PlatformSuperAdmin: 'Full access to all features: channels, customers, users, and assets',
-  ChannelOwner: 'Channel admin: view/create customers, manage customer accounts',
-  HQOwner: 'Customer admin: manage members, garments, and templates',
-  HQOps: 'Customer ops: view members, upload/edit garments, create/publish templates (no delete/disable)',
-};
+const { Title, Text, Link } = Typography;
 
 const DEFAULT_ROUTES: Record<PortalType, string> = {
   platform: '/dashboard/channels',
@@ -32,108 +19,209 @@ const DEFAULT_ROUTES: Record<PortalType, string> = {
 export default function LoginPage() {
   const router = useRouter();
   const login = useAuthStore(s => s.login);
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = (account: DemoAccount) => {
     login(account);
-    message.success(`Signed in as ${account.name} (${account.role})`);
+    message.success(`Welcome back, ${account.name}`);
     router.push(DEFAULT_ROUTES[account.portal]);
   };
 
-  const grouped = {
-    platform: demoAccounts.filter(a => a.portal === 'platform'),
-    channel: demoAccounts.filter(a => a.portal === 'channel'),
-    customer: demoAccounts.filter(a => a.portal === 'customer'),
+  const onFinish = (values: { email: string; password: string }) => {
+    setLoading(true);
+
+    // Simulate network delay
+    setTimeout(() => {
+      const account = demoAccounts.find(
+        a => a.email === values.email && a.password === values.password
+      );
+
+      if (account) {
+        handleLogin(account);
+      } else {
+        message.error('Invalid email or password');
+      }
+      setLoading(false);
+    }, 800);
   };
 
+  const quickLoginItems = demoAccounts.map(account => ({
+    key: account.user_id,
+    label: (
+      <div style={{ padding: '4px 0' }}>
+        <div style={{ fontWeight: 500 }}>{account.name}</div>
+        <div style={{ fontSize: 12, color: '#888' }}>{account.email} · {account.org_name}</div>
+      </div>
+    ),
+    onClick: () => {
+      handleLogin(account);
+    },
+  }));
+
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '40px 20px' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <Title style={{ color: '#fff', marginBottom: 8 }}>
-            Smart Mirror Management
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#f0f2f5',
+    }}>
+      {/* Background decoration */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '50vh',
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        zIndex: 0,
+      }} />
+
+      <div style={{
+        position: 'relative',
+        zIndex: 1,
+        width: '100%',
+        maxWidth: 420,
+        padding: '0 20px',
+      }}>
+        {/* Logo & Branding */}
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 56,
+            height: 56,
+            borderRadius: 16,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            marginBottom: 16,
+            boxShadow: '0 8px 24px rgba(102, 126, 234, 0.4)',
+          }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="2" width="18" height="20" rx="2" stroke="white" strokeWidth="1.5" />
+              <circle cx="12" cy="10" r="3" stroke="white" strokeWidth="1.5" />
+              <path d="M7 18c0-2.5 2.2-4 5-4s5 1.5 5 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </div>
+          <Title level={3} style={{ color: '#fff', margin: 0, fontWeight: 600, letterSpacing: '-0.5px' }}>
+            Smart Mirror
           </Title>
-          <Paragraph style={{ color: 'rgba(255,255,255,0.85)', fontSize: 16 }}>
-            Multi-Account RBAC Demo - Select a demo account to sign in
-          </Paragraph>
-          <Alert
-            message="Demo Guide"
-            description="After signing in with different roles, you can observe permission differences at the menu, page, and button levels. Unauthorized menus are hidden, and unauthorized buttons are grayed out with a tooltip."
-            type="info"
-            showIcon
-            style={{ maxWidth: 600, margin: '16px auto', textAlign: 'left' }}
-          />
+          <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>
+            Intelligent Fitting Room Management
+          </Text>
         </div>
 
-        <Row gutter={[24, 24]}>
-          {(['platform', 'channel', 'customer'] as PortalType[]).map(portal => {
-            const config = PORTAL_CONFIG[portal];
-            const accounts = grouped[portal];
-            return (
-              <Col xs={24} md={8} key={portal}>
-                <Card
-                  title={
-                    <Space style={{ color: '#fff' }}>
-                      {config.icon}
-                      <span>{config.label}</span>
-                    </Space>
-                  }
-                  styles={{ header: { background: config.color, color: '#fff' } }}
-                  style={{ height: '100%' }}
-                >
-                  <Paragraph type="secondary" style={{ fontSize: 13, marginBottom: 16 }}>
-                    {config.description}
-                  </Paragraph>
+        {/* Login Card */}
+        <div style={{
+          background: '#fff',
+          borderRadius: 12,
+          padding: '36px 32px 28px',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.12)',
+        }}>
+          <div style={{ marginBottom: 28 }}>
+            <Title level={4} style={{ margin: 0, fontWeight: 600 }}>Sign in</Title>
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              Enter your credentials to access your account
+            </Text>
+          </div>
 
-                  <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                    {accounts.map(account => (
-                      <Card
-                        key={account.user_id}
-                        size="small"
-                        hoverable
-                        style={{ border: `1px solid ${config.color}22` }}
-                        onClick={() => handleLogin(account)}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <div>
-                            <Space>
-                              <UserOutlined />
-                              <Text strong>{account.name}</Text>
-                            </Space>
-                            <div style={{ marginTop: 4 }}>
-                              <Text type="secondary" style={{ fontSize: 12 }}>{account.email}</Text>
-                            </div>
-                            <div style={{ marginTop: 4 }}>
-                              <Tag color={config.color}>{account.role}</Tag>
-                              <Tag>{account.org_name}</Tag>
-                            </div>
-                            <div style={{ marginTop: 6 }}>
-                              <Text type="secondary" style={{ fontSize: 11 }}>
-                                {ROLE_DESCRIPTION[account.role]}
-                              </Text>
-                            </div>
-                            <div style={{ marginTop: 4 }}>
-                              <Text type="secondary" style={{ fontSize: 11 }}>
-                                Permissions: {ROLE_PERMISSIONS[account.role].length}
-                              </Text>
-                            </div>
-                          </div>
-                          <Button type="primary" size="small" icon={<LoginOutlined />} style={{ backgroundColor: config.color, borderColor: config.color }}>
-                            Login
-                          </Button>
-                        </div>
-                      </Card>
-                    ))}
-                  </Space>
-                </Card>
-              </Col>
-            );
-          })}
-        </Row>
+          <Form
+            name="login"
+            onFinish={onFinish}
+            layout="vertical"
+            requiredMark={false}
+            size="large"
+          >
+            <Form.Item
+              name="email"
+              label={<Text strong style={{ fontSize: 13 }}>Email</Text>}
+              rules={[
+                { required: true, message: 'Please enter your email' },
+                { type: 'email', message: 'Please enter a valid email' },
+              ]}
+            >
+              <Input
+                prefix={<MailOutlined style={{ color: '#bbb' }} />}
+                placeholder="name@company.com"
+                autoComplete="email"
+              />
+            </Form.Item>
 
-        <Divider style={{ borderColor: 'rgba(255,255,255,0.3)' }} />
-        <div style={{ textAlign: 'center' }}>
-          <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>
-            All passwords are &quot;demo&quot; | Data is mock only | For demonstration purposes
+            <Form.Item
+              name="password"
+              label={
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                  <Text strong style={{ fontSize: 13 }}>Password</Text>
+                  <Link style={{ fontSize: 12 }} onClick={(e) => { e.preventDefault(); message.info('Password reset is not available in demo mode'); }}>
+                    Forgot password?
+                  </Link>
+                </div>
+              }
+              rules={[{ required: true, message: 'Please enter your password' }]}
+            >
+              <Input.Password
+                prefix={<LockOutlined style={{ color: '#bbb' }} />}
+                placeholder="Enter your password"
+                iconRender={(visible) => visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
+                autoComplete="current-password"
+              />
+            </Form.Item>
+
+            <Form.Item name="remember" valuePropName="checked" style={{ marginBottom: 20 }}>
+              <Checkbox>
+                <Text style={{ fontSize: 13 }}>Remember me for 30 days</Text>
+              </Checkbox>
+            </Form.Item>
+
+            <Form.Item style={{ marginBottom: 16 }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                block
+                style={{
+                  height: 44,
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  border: 'none',
+                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.35)',
+                }}
+              >
+                Sign in
+              </Button>
+            </Form.Item>
+          </Form>
+
+          <Divider style={{ margin: '16px 0', fontSize: 12, color: '#aaa' }}>
+            Demo Quick Access
+          </Divider>
+
+          <Dropdown menu={{ items: quickLoginItems }} trigger={['click']} placement="bottom">
+            <Button
+              block
+              style={{
+                height: 40,
+                borderRadius: 8,
+                borderStyle: 'dashed',
+                color: '#666',
+              }}
+            >
+              Select a demo account <DownOutlined style={{ fontSize: 10, marginLeft: 4 }} />
+            </Button>
+          </Dropdown>
+
+          <div style={{ textAlign: 'center', marginTop: 12 }}>
+            <Text type="secondary" style={{ fontSize: 11 }}>
+              Hint: all demo passwords are <Text code style={{ fontSize: 11 }}>demo</Text>
+            </Text>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{ textAlign: 'center', marginTop: 24 }}>
+          <Text style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11 }}>
+            &copy; 2026 Smart Mirror Technologies · Privacy · Terms
           </Text>
         </div>
       </div>
