@@ -3,10 +3,13 @@
 import React, { useMemo, useState } from 'react';
 import {
   Table, Button, Tag, Space, Typography, Image, Select, Modal,
-  Input, List, Checkbox, message,
+  Input, List, Checkbox, message, Alert,
 } from 'antd';
-import { UploadOutlined, AppstoreOutlined, DeleteOutlined, PlusOutlined, DesktopOutlined } from '@ant-design/icons';
-import type { ColumnsType } from 'antd/es/table';
+import {
+  UploadOutlined, AppstoreOutlined, DeleteOutlined, PlusOutlined,
+  DesktopOutlined, AppstoreAddOutlined,
+} from '@ant-design/icons';
+import type { ColumnsType, TableRowSelection } from 'antd/es/table/interface';
 import { useAuthStore } from '@/lib/store';
 import {
   getOrgGarments, getOrgGarmentCategories, getGarmentCategoryName,
@@ -27,22 +30,29 @@ export default function CustomerGarmentsPage() {
     ? hasPermission(currentUser.role, 'customer:garments:manage_categories')
     : false;
 
-  // 分类管理弹窗状态
+  // ── 分类管理弹窗 ──────────────────────────────────────────
   const [catMgrOpen, setCatMgrOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
 
-  // 设置分类弹窗
+  // ── 设置分类弹窗 ──────────────────────────────────────────
   const [assignCatOpen, setAssignCatOpen] = useState(false);
   const [selectedGarment, setSelectedGarment] = useState<GarmentCatalog | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-  // 分类筛选
+  // ── 分类筛选 ──────────────────────────────────────────────
   const [filterCategoryId, setFilterCategoryId] = useState<string | undefined>(undefined);
 
-  // 分配设备弹窗
+  // ── 分配设备弹窗 ──────────────────────────────────────────
   const [assignDevOpen, setAssignDevOpen] = useState(false);
   const [assignDevGarment, setAssignDevGarment] = useState<GarmentCatalog | null>(null);
   const [assignDevSelected, setAssignDevSelected] = useState<string[]>([]);
+
+  // ── 批量选择 ─────────────────────────────────────────────
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+  // ── 批量设置分类弹窗 ──────────────────────────────────────
+  const [bulkCatOpen, setBulkCatOpen] = useState(false);
+  const [bulkCategoryId, setBulkCategoryId] = useState<string | null>(null);
 
   const categories = useMemo(() => getOrgGarmentCategories(orgId), [orgId]);
   const allGarments = useMemo(() => getOrgGarments(orgId), [orgId]);
@@ -53,7 +63,6 @@ export default function CustomerGarmentsPage() {
     return allGarments.filter((g) => g.category_id === filterCategoryId);
   }, [allGarments, filterCategoryId]);
 
-  // 分类选项（含"未分类"）
   const categoryFilterOptions = useMemo(() => {
     const opts = categories.map((c) => ({ label: c.name, value: c.category_id }));
     opts.push({ label: 'Uncategorized', value: '__none__' });
@@ -62,7 +71,7 @@ export default function CustomerGarmentsPage() {
 
   const orgDevices = useMemo(() => getOrgDevices(orgId), [orgId]);
 
-  // 打开分配设备弹窗
+  // ── 单行操作 ──────────────────────────────────────────────
   const openAssignDevices = (record: GarmentCatalog) => {
     const assigned = getGarmentAssignedDevices(record.catalog_id);
     setAssignDevGarment(record);
@@ -78,14 +87,12 @@ export default function CustomerGarmentsPage() {
     setAssignDevGarment(null);
   };
 
-  // 打开设置分类弹窗
   const openSetCategory = (record: GarmentCatalog) => {
     setSelectedGarment(record);
     setSelectedCategoryId(record.category_id);
     setAssignCatOpen(true);
   };
 
-  // 确认设置分类
   const handleSetCategory = () => {
     const catName = selectedCategoryId
       ? categories.find((c) => c.category_id === selectedCategoryId)?.name ?? '-'
@@ -97,7 +104,7 @@ export default function CustomerGarmentsPage() {
     setSelectedGarment(null);
   };
 
-  // 添加分类
+  // ── 分类管理 ──────────────────────────────────────────────
   const handleAddCategory = () => {
     const trimmed = newCategoryName.trim();
     if (!trimmed) return;
@@ -109,7 +116,6 @@ export default function CustomerGarmentsPage() {
     setNewCategoryName('');
   };
 
-  // 删除分类确认
   const handleDeleteCategory = (categoryId: string, categoryName: string) => {
     const affectedCount = allGarments.filter((g) => g.category_id === categoryId).length;
     Modal.confirm({
@@ -121,6 +127,49 @@ export default function CustomerGarmentsPage() {
       okType: 'danger',
       onOk: () => message.success(`Category "${categoryName}" deleted (simulated)`),
     });
+  };
+
+  // ── 批量操作 ──────────────────────────────────────────────
+  const selectedCount = selectedRowKeys.length;
+
+  const handleBulkDelete = () => {
+    Modal.confirm({
+      title: `Delete ${selectedCount} garment(s)?`,
+      content: 'This action cannot be undone.',
+      okText: 'Delete',
+      okType: 'danger',
+      onOk: () => {
+        message.success(`${selectedCount} garment(s) deleted (simulated)`);
+        setSelectedRowKeys([]);
+      },
+    });
+  };
+
+  const handleBulkSetCategory = () => {
+    setBulkCategoryId(null);
+    setBulkCatOpen(true);
+  };
+
+  const handleBulkCategoryConfirm = () => {
+    const catName = bulkCategoryId
+      ? categories.find((c) => c.category_id === bulkCategoryId)?.name ?? '-'
+      : 'Uncategorized';
+    message.success(
+      `${selectedCount} garment(s) set to category "${catName}" (simulated)`
+    );
+    setBulkCatOpen(false);
+    setSelectedRowKeys([]);
+  };
+
+  // ── 行选择配置 ────────────────────────────────────────────
+  const rowSelection: TableRowSelection<GarmentCatalog> = {
+    selectedRowKeys,
+    onChange: (keys) => setSelectedRowKeys(keys),
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_INVERT,
+      Table.SELECTION_NONE,
+    ],
   };
 
   const columns: ColumnsType<GarmentCatalog> = [
@@ -200,9 +249,7 @@ export default function CustomerGarmentsPage() {
             <Button
               type="link"
               size="small"
-              onClick={() =>
-                message.info(`Edit garment ${record.name} (simulated)`)
-              }
+              onClick={() => message.info(`Edit garment ${record.name} (simulated)`)}
             >
               Edit
             </Button>
@@ -221,9 +268,7 @@ export default function CustomerGarmentsPage() {
               type="link"
               size="small"
               danger
-              onClick={() =>
-                message.info(`Remove/Delete garment ${record.name} (simulated)`)
-              }
+              onClick={() => message.info(`Remove/Delete garment ${record.name} (simulated)`)}
             >
               Remove
             </Button>
@@ -235,23 +280,14 @@ export default function CustomerGarmentsPage() {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 16,
-        }}
-      >
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Title level={4} style={{ margin: 0 }}>
           {orgName} - Garments
         </Title>
         <Space>
           {canManageCategories && (
-            <Button
-              icon={<AppstoreOutlined />}
-              onClick={() => setCatMgrOpen(true)}
-            >
+            <Button icon={<AppstoreOutlined />} onClick={() => setCatMgrOpen(true)}>
               Manage Categories
             </Button>
           )}
@@ -267,8 +303,8 @@ export default function CustomerGarmentsPage() {
         </Space>
       </div>
 
-      {/* 分类筛选 */}
-      <Space style={{ marginBottom: 16 }} wrap>
+      {/* Filter bar */}
+      <Space style={{ marginBottom: 12 }} wrap>
         <Select
           placeholder="Filter by Category"
           allowClear
@@ -279,7 +315,48 @@ export default function CustomerGarmentsPage() {
         />
       </Space>
 
+      {/* Bulk action bar */}
+      {selectedCount > 0 && (
+        <Alert
+          style={{ marginBottom: 12, borderRadius: 8 }}
+          message={
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span>
+                <strong>{selectedCount}</strong> garment{selectedCount > 1 ? 's' : ''} selected
+              </span>
+              <Space>
+                <PermGuard permission="customer:garments:edit" fallback="disable">
+                  <Button
+                    size="small"
+                    icon={<AppstoreAddOutlined />}
+                    onClick={handleBulkSetCategory}
+                  >
+                    Set Category
+                  </Button>
+                </PermGuard>
+                <PermGuard permission="customer:garments:delete" fallback="disable">
+                  <Button
+                    size="small"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={handleBulkDelete}
+                  >
+                    Delete
+                  </Button>
+                </PermGuard>
+                <Button size="small" type="text" onClick={() => setSelectedRowKeys([])}>
+                  Clear
+                </Button>
+              </Space>
+            </div>
+          }
+          type="info"
+          showIcon={false}
+        />
+      )}
+
       <Table<GarmentCatalog>
+        rowSelection={rowSelection}
         columns={columns}
         dataSource={dataSource}
         rowKey="catalog_id"
@@ -290,10 +367,7 @@ export default function CustomerGarmentsPage() {
       <Modal
         title="Manage Categories"
         open={catMgrOpen}
-        onCancel={() => {
-          setCatMgrOpen(false);
-          setNewCategoryName('');
-        }}
+        onCancel={() => { setCatMgrOpen(false); setNewCategoryName(''); }}
         footer={null}
         width={480}
       >
@@ -342,15 +416,12 @@ export default function CustomerGarmentsPage() {
         )}
       </Modal>
 
-      {/* 设置分类弹窗 */}
+      {/* 设置分类弹窗（单行） */}
       <Modal
         title={`Set Category for "${selectedGarment?.name}"`}
         open={assignCatOpen}
         onOk={handleSetCategory}
-        onCancel={() => {
-          setAssignCatOpen(false);
-          setSelectedGarment(null);
-        }}
+        onCancel={() => { setAssignCatOpen(false); setSelectedGarment(null); }}
         okText="Save"
         cancelText="Cancel"
       >
@@ -364,15 +435,34 @@ export default function CustomerGarmentsPage() {
         />
       </Modal>
 
+      {/* 批量设置分类弹窗 */}
+      <Modal
+        title={`Set Category for ${selectedCount} garment(s)`}
+        open={bulkCatOpen}
+        onOk={handleBulkCategoryConfirm}
+        onCancel={() => setBulkCatOpen(false)}
+        okText="Apply"
+        cancelText="Cancel"
+      >
+        <Select
+          placeholder="Select a category"
+          allowClear
+          style={{ width: '100%' }}
+          value={bulkCategoryId}
+          onChange={setBulkCategoryId}
+          options={categories.map((c) => ({ label: c.name, value: c.category_id }))}
+        />
+        <Typography.Text type="secondary" style={{ fontSize: 12, marginTop: 8, display: 'block' }}>
+          Clearing the selection will set the garments to "Uncategorized".
+        </Typography.Text>
+      </Modal>
+
       {/* 分配设备弹窗 */}
       <Modal
         title={`Assign Devices — "${assignDevGarment?.name}"`}
         open={assignDevOpen}
         onOk={handleAssignDevices}
-        onCancel={() => {
-          setAssignDevOpen(false);
-          setAssignDevGarment(null);
-        }}
+        onCancel={() => { setAssignDevOpen(false); setAssignDevGarment(null); }}
         okText="Save"
         cancelText="Cancel"
       >

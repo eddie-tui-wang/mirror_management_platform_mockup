@@ -32,7 +32,6 @@ const channelMenu: MenuItemConfig[] = [
 
 // 客户端菜单
 const customerMenu: MenuItemConfig[] = [
-  { key: 'cu-users', label: 'Members', icon: 'UserOutlined', path: '/dashboard/customer/users', permission: 'customer:users:view' },
   { key: 'cu-garments', label: 'Garments', icon: 'SkinOutlined', path: '/dashboard/customer/garments', permission: 'customer:garments:view' },
   { key: 'cu-templates', label: 'Templates', icon: 'LayoutOutlined', path: '/dashboard/customer/templates', permission: 'customer:templates:view' },
   { key: 'cu-devices', label: 'Devices', icon: 'DesktopOutlined', path: '/dashboard/customer/devices', permission: 'customer:devices:view' },
