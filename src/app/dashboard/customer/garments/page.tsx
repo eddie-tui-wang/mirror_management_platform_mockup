@@ -3,17 +3,17 @@
 import React, { useMemo, useState } from 'react';
 import {
   Table, Button, Tag, Space, Typography, Image, Select, Modal,
-  Input, List, Checkbox, message, Alert,
+  Input, List, Checkbox, message, Alert, Form, Switch,
 } from 'antd';
 import {
   UploadOutlined, AppstoreOutlined, DeleteOutlined, PlusOutlined,
-  DesktopOutlined, AppstoreAddOutlined,
+  DesktopOutlined, AppstoreAddOutlined, EditOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType, TableRowSelection } from 'antd/es/table/interface';
 import { useAuthStore } from '@/lib/store';
 import {
   getOrgGarments, getOrgGarmentCategories, getGarmentCategoryName,
-  getGarmentAssignedDevices, getOrgDevices,
+  getGarmentAssignedDevices, getOrgDevices, getCustomerAssignedTemplates,
 } from '@/lib/mock-data';
 import { hasPermission } from '@/lib/permissions';
 import type { GarmentCatalog, Status } from '@/lib/types';
@@ -34,10 +34,13 @@ export default function CustomerGarmentsPage() {
   const [catMgrOpen, setCatMgrOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
 
-  // ── 设置分类弹窗 ──────────────────────────────────────────
-  const [assignCatOpen, setAssignCatOpen] = useState(false);
-  const [selectedGarment, setSelectedGarment] = useState<GarmentCatalog | null>(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  // ── Edit 弹窗（含 Set Category + Set Templates） ──────────
+  const [editOpen, setEditOpen] = useState(false);
+  const [editGarment, setEditGarment] = useState<GarmentCatalog | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editStatus, setEditStatus] = useState<Status>('Active');
+  const [editCategoryId, setEditCategoryId] = useState<string | null>(null);
+  const [editTemplateIds, setEditTemplateIds] = useState<string[]>([]);
 
   // ── 分类筛选 ──────────────────────────────────────────────
   const [filterCategoryId, setFilterCategoryId] = useState<string | undefined>(undefined);
@@ -57,6 +60,9 @@ export default function CustomerGarmentsPage() {
   const categories = useMemo(() => getOrgGarmentCategories(orgId), [orgId]);
   const allGarments = useMemo(() => getOrgGarments(orgId), [orgId]);
 
+  // 当前客户已被分配的模板列表（用于 Edit 弹窗模板多选）
+  const assignedTemplates = useMemo(() => getCustomerAssignedTemplates(orgId), [orgId]);
+
   const dataSource = useMemo(() => {
     if (!filterCategoryId) return allGarments;
     if (filterCategoryId === '__none__') return allGarments.filter((g) => !g.category_id);
@@ -71,7 +77,23 @@ export default function CustomerGarmentsPage() {
 
   const orgDevices = useMemo(() => getOrgDevices(orgId), [orgId]);
 
-  // ── 单行操作 ──────────────────────────────────────────────
+  // ── 打开 Edit 弹窗 ────────────────────────────────────────
+  const openEdit = (record: GarmentCatalog) => {
+    setEditGarment(record);
+    setEditName(record.name);
+    setEditStatus(record.status);
+    setEditCategoryId(record.category_id);
+    setEditTemplateIds(record.template_ids ?? []);
+    setEditOpen(true);
+  };
+
+  const handleEditSave = () => {
+    message.success(`Garment "${editName}" updated (simulated)`);
+    setEditOpen(false);
+    setEditGarment(null);
+  };
+
+  // ── 分配设备 ──────────────────────────────────────────────
   const openAssignDevices = (record: GarmentCatalog) => {
     const assigned = getGarmentAssignedDevices(record.catalog_id);
     setAssignDevGarment(record);
@@ -85,23 +107,6 @@ export default function CustomerGarmentsPage() {
     );
     setAssignDevOpen(false);
     setAssignDevGarment(null);
-  };
-
-  const openSetCategory = (record: GarmentCatalog) => {
-    setSelectedGarment(record);
-    setSelectedCategoryId(record.category_id);
-    setAssignCatOpen(true);
-  };
-
-  const handleSetCategory = () => {
-    const catName = selectedCategoryId
-      ? categories.find((c) => c.category_id === selectedCategoryId)?.name ?? '-'
-      : 'Uncategorized';
-    message.success(
-      `Garment "${selectedGarment?.name}" set to category "${catName}" (simulated)`
-    );
-    setAssignCatOpen(false);
-    setSelectedGarment(null);
   };
 
   // ── 分类管理 ──────────────────────────────────────────────
@@ -118,11 +123,17 @@ export default function CustomerGarmentsPage() {
 
   const handleDeleteCategory = (categoryId: string, categoryName: string) => {
     const affectedCount = allGarments.filter((g) => g.category_id === categoryId).length;
+    if (affectedCount > 0) {
+      Modal.error({
+        title: `Cannot delete "${categoryName}"`,
+        content: `${affectedCount} garment(s) are using this category. Reassign or remove them first.`,
+        okText: 'OK',
+      });
+      return;
+    }
     Modal.confirm({
       title: `Delete category "${categoryName}"?`,
-      content: affectedCount > 0
-        ? `${affectedCount} garment(s) will become uncategorized.`
-        : 'No garments are using this category.',
+      content: 'No garments are using this category. This action cannot be undone.',
       okText: 'Delete',
       okType: 'danger',
       onOk: () => message.success(`Category "${categoryName}" deleted (simulated)`),
@@ -209,6 +220,16 @@ export default function CustomerGarmentsPage() {
       },
     },
     {
+      title: 'Templates',
+      key: 'templates',
+      render: (_, record) => {
+        const count = (record.template_ids ?? []).length;
+        return count > 0
+          ? <Tag color="purple">{count} template(s)</Tag>
+          : <Typography.Text type="secondary">-</Typography.Text>;
+      },
+    },
+    {
       title: 'Devices',
       key: 'devices',
       render: (_, record) => {
@@ -240,16 +261,8 @@ export default function CustomerGarmentsPage() {
             <Button
               type="link"
               size="small"
-              onClick={() => openSetCategory(record)}
-            >
-              Set Category
-            </Button>
-          </PermGuard>
-          <PermGuard permission="customer:garments:edit" fallback="disable">
-            <Button
-              type="link"
-              size="small"
-              onClick={() => message.info(`Edit garment ${record.name} (simulated)`)}
+              icon={<EditOutlined />}
+              onClick={() => openEdit(record)}
             >
               Edit
             </Button>
@@ -363,7 +376,72 @@ export default function CustomerGarmentsPage() {
         pagination={{ pageSize: 10 }}
       />
 
-      {/* 管理分类弹窗 */}
+      {/* ── Edit 弹窗（Set Category + Set Templates 合并） ── */}
+      <Modal
+        title={`Edit Garment — "${editGarment?.name}"`}
+        open={editOpen}
+        onOk={handleEditSave}
+        onCancel={() => { setEditOpen(false); setEditGarment(null); }}
+        okText="Save"
+        cancelText="Cancel"
+        width={520}
+      >
+        <Form layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item label="Name">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+            />
+          </Form.Item>
+
+          <Form.Item label="Status">
+            <Switch
+              checked={editStatus === 'Active'}
+              onChange={(checked) => setEditStatus(checked ? 'Active' : 'Disabled')}
+              checkedChildren="Active"
+              unCheckedChildren="Disabled"
+            />
+          </Form.Item>
+
+          <Form.Item label="Category">
+            <Select
+              placeholder="Select a category"
+              allowClear
+              style={{ width: '100%' }}
+              value={editCategoryId}
+              onChange={setEditCategoryId}
+              options={categories.map((c) => ({ label: c.name, value: c.category_id }))}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Templates"
+            extra="Select which templates apply to this garment. Only templates assigned to your account are shown."
+          >
+            {assignedTemplates.length === 0 ? (
+              <Typography.Text type="secondary">
+                No templates have been assigned to your account yet.
+              </Typography.Text>
+            ) : (
+              <Select
+                mode="multiple"
+                placeholder="Select templates"
+                style={{ width: '100%' }}
+                value={editTemplateIds}
+                onChange={setEditTemplateIds}
+                optionLabelProp="label"
+                options={assignedTemplates.map((t) => ({
+                  label: t.template_name,
+                  value: t.template_id,
+                  disabled: !t.enabled,
+                }))}
+              />
+            )}
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* ── 管理分类弹窗 ── */}
       <Modal
         title="Manage Categories"
         open={catMgrOpen}
@@ -416,26 +494,7 @@ export default function CustomerGarmentsPage() {
         )}
       </Modal>
 
-      {/* 设置分类弹窗（单行） */}
-      <Modal
-        title={`Set Category for "${selectedGarment?.name}"`}
-        open={assignCatOpen}
-        onOk={handleSetCategory}
-        onCancel={() => { setAssignCatOpen(false); setSelectedGarment(null); }}
-        okText="Save"
-        cancelText="Cancel"
-      >
-        <Select
-          placeholder="Select a category"
-          allowClear
-          style={{ width: '100%' }}
-          value={selectedCategoryId}
-          onChange={setSelectedCategoryId}
-          options={categories.map((c) => ({ label: c.name, value: c.category_id }))}
-        />
-      </Modal>
-
-      {/* 批量设置分类弹窗 */}
+      {/* ── 批量设置分类弹窗 ── */}
       <Modal
         title={`Set Category for ${selectedCount} garment(s)`}
         open={bulkCatOpen}
@@ -457,7 +516,7 @@ export default function CustomerGarmentsPage() {
         </Typography.Text>
       </Modal>
 
-      {/* 分配设备弹窗 */}
+      {/* ── 分配设备弹窗 ── */}
       <Modal
         title={`Assign Devices — "${assignDevGarment?.name}"`}
         open={assignDevOpen}

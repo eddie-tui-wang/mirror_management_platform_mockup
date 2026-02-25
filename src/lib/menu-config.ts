@@ -17,8 +17,9 @@ const platformMenu: MenuItemConfig[] = [
   {
     key: 'assets', label: 'Assets', icon: 'AppstoreOutlined',
     children: [
-      { key: 'garments', label: 'Garments', icon: 'SkinOutlined', path: '/dashboard/assets/garments', permission: 'platform:garments:view' },
-      { key: 'templates', label: 'Template Management', icon: 'LayoutOutlined', path: '/dashboard/assets/templates', permission: 'platform:templates:view' },
+      { key: 'garments',  label: 'Garments',             icon: 'SkinOutlined',         path: '/dashboard/assets/garments',  permission: 'platform:garments:view' },
+      { key: 'templates', label: 'Template Management',  icon: 'LayoutOutlined',        path: '/dashboard/assets/templates', permission: 'platform:templates:view' },
+      { key: 'devices',   label: 'Device Activity',      icon: 'DesktopOutlined',       path: '/dashboard/assets/devices',   permission: 'platform:devices:view' },
     ],
   },
 ];

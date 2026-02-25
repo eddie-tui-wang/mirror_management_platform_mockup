@@ -55,6 +55,7 @@ export interface GarmentCatalog {
   name: string;
   image_url: string;
   category_id: string | null; // 关联服装分类，客户自行管理
+  template_ids: string[];     // 该服装启用的模板 ID 列表
   status: Status;
   updated_at: string;
 }
@@ -97,6 +98,8 @@ export interface Device {
   current_user_id: string | null;
   current_user_email: string | null;
   session_start: string | null;
+  is_new?: boolean;   // 该设备是否为首次登录该账号（未经管理员确认）
+  first_seen?: string; // 首次出现时间
 }
 
 export interface DeviceGarmentAssignment {

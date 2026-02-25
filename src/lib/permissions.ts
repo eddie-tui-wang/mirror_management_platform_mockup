@@ -24,6 +24,7 @@ export const PERMISSIONS = {
   'platform:templates:edit': 'Edit template',
   'platform:templates:delete': 'Delete template',
   'platform:templates:assign': 'Assign template to customer',
+  'platform:devices:view': 'View all devices (aggregated)',
 
   // ---- 渠道端 ----
   'channel:customers:view': 'View customers',
@@ -96,6 +97,7 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   '/dashboard/customers': 'platform:customers:view',
   '/dashboard/assets/garments': 'platform:garments:view',
   '/dashboard/assets/templates': 'platform:templates:view',
+  '/dashboard/assets/devices': 'platform:devices:view',
   // 渠道端
   '/dashboard/channel/customers': 'channel:customers:view',
   '/dashboard/channel/users': 'channel:users:view',

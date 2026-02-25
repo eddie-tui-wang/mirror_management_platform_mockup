@@ -79,14 +79,19 @@ export const memberships: OrgMembership[] = [
 // ==================== 服装库 ====================
 
 export const garments: GarmentCatalog[] = [
-  { catalog_id: 'cat_01', garment_id: 'g_9001', org_id: 'org_cu_1001', name: 'Black Suit Set', image_url: 'https://picsum.photos/seed/g9001/80/80', category_id: 'gc_01', status: 'Active', updated_at: '2026-02-09 18:32' },
-  { catalog_id: 'cat_02', garment_id: 'g_9002', org_id: 'org_ch_001', name: 'Summer Dress', image_url: 'https://picsum.photos/seed/g9002/80/80', category_id: null, status: 'Active', updated_at: '2026-02-08 11:05' },
-  { catalog_id: 'cat_03', garment_id: 'g_9003', org_id: 'org_cu_1001', name: 'Casual Jacket', image_url: 'https://picsum.photos/seed/g9003/80/80', category_id: 'gc_03', status: 'Active', updated_at: '2026-02-07 14:22' },
-  { catalog_id: 'cat_04', garment_id: 'g_9004', org_id: 'org_cu_1002', name: 'Winter Coat', image_url: 'https://picsum.photos/seed/g9004/80/80', category_id: 'gc_07', status: 'Active', updated_at: '2026-02-06 09:10' },
-  { catalog_id: 'cat_05', garment_id: 'g_9005', org_id: 'org_cu_1003', name: 'Silk Blouse', image_url: 'https://picsum.photos/seed/g9005/80/80', category_id: null, status: 'Disabled', updated_at: '2026-02-05 16:45' },
-  { catalog_id: 'cat_06', garment_id: 'g_9006', org_id: 'org_ch_003', name: 'Denim Series', image_url: 'https://picsum.photos/seed/g9006/80/80', category_id: null, status: 'Active', updated_at: '2026-02-04 12:00' },
-  { catalog_id: 'cat_07', garment_id: 'g_9007', org_id: 'org_cu_1001', name: 'Evening Gown', image_url: 'https://picsum.photos/seed/g9007/80/80', category_id: 'gc_02', status: 'Active', updated_at: '2026-02-03 20:15' },
-  { catalog_id: 'cat_08', garment_id: 'g_9008', org_id: 'org_cu_1004', name: 'Sport Wear', image_url: 'https://picsum.photos/seed/g9008/80/80', category_id: null, status: 'Active', updated_at: '2026-02-02 10:30' },
+  // Customer X (org_cu_1001): assigned templates tpl_001, tpl_003, tpl_006
+  { catalog_id: 'cat_01', garment_id: 'g_9001', org_id: 'org_cu_1001', name: 'Black Suit Set',  image_url: 'https://picsum.photos/seed/g9001/80/80', category_id: 'gc_01', template_ids: ['tpl_001', 'tpl_006'], status: 'Active',   updated_at: '2026-02-09 18:32' },
+  { catalog_id: 'cat_03', garment_id: 'g_9003', org_id: 'org_cu_1001', name: 'Casual Jacket',   image_url: 'https://picsum.photos/seed/g9003/80/80', category_id: 'gc_03', template_ids: ['tpl_003'],         status: 'Active',   updated_at: '2026-02-07 14:22' },
+  { catalog_id: 'cat_07', garment_id: 'g_9007', org_id: 'org_cu_1001', name: 'Evening Gown',    image_url: 'https://picsum.photos/seed/g9007/80/80', category_id: 'gc_02', template_ids: ['tpl_001', 'tpl_003', 'tpl_006'], status: 'Active', updated_at: '2026-02-03 20:15' },
+  // Customer Y (org_cu_1002): assigned templates tpl_002, tpl_003
+  { catalog_id: 'cat_04', garment_id: 'g_9004', org_id: 'org_cu_1002', name: 'Winter Coat',     image_url: 'https://picsum.photos/seed/g9004/80/80', category_id: 'gc_07', template_ids: ['tpl_002'],         status: 'Active',   updated_at: '2026-02-06 09:10' },
+  // Customer Z (org_cu_1003): assigned templates tpl_005, tpl_006, tpl_010
+  { catalog_id: 'cat_05', garment_id: 'g_9005', org_id: 'org_cu_1003', name: 'Silk Blouse',     image_url: 'https://picsum.photos/seed/g9005/80/80', category_id: null,    template_ids: [],                 status: 'Disabled', updated_at: '2026-02-05 16:45' },
+  // Customer W (org_cu_1004): assigned templates tpl_001, tpl_007
+  { catalog_id: 'cat_08', garment_id: 'g_9008', org_id: 'org_cu_1004', name: 'Sport Wear',      image_url: 'https://picsum.photos/seed/g9008/80/80', category_id: null,    template_ids: ['tpl_007'],        status: 'Active',   updated_at: '2026-02-02 10:30' },
+  // Channel-owned (no customer template assignments)
+  { catalog_id: 'cat_02', garment_id: 'g_9002', org_id: 'org_ch_001',  name: 'Summer Dress',    image_url: 'https://picsum.photos/seed/g9002/80/80', category_id: null,    template_ids: [],                 status: 'Active',   updated_at: '2026-02-08 11:05' },
+  { catalog_id: 'cat_06', garment_id: 'g_9006', org_id: 'org_ch_003',  name: 'Denim Series',    image_url: 'https://picsum.photos/seed/g9006/80/80', category_id: null,    template_ids: [],                 status: 'Active',   updated_at: '2026-02-04 12:00' },
 ];
 
 // ==================== 服装分类（客户端管理） ====================
@@ -148,12 +153,16 @@ export const templateAssignments: TemplateAssignment[] = [
 // ==================== 设备数据 ====================
 
 export const devices: Device[] = [
-  { device_id: 'dev_09', nickname: 'Front Door Mirror', status: 'Online', last_seen: '2026-02-10 10:05', current_org_id: 'org_cu_1001', current_org_name: 'Customer X', current_user_id: 'u_002', current_user_email: 'hq.admin@x.com', session_start: '2026-02-10 09:55' },
-  { device_id: 'dev_12', nickname: 'VIP Lounge', status: 'Offline', last_seen: '2026-02-09 21:10', current_org_id: 'org_cu_1002', current_org_name: 'Customer Y', current_user_id: null, current_user_email: null, session_start: null },
-  { device_id: 'dev_15', nickname: null, status: 'Online', last_seen: '2026-02-10 09:30', current_org_id: 'org_cu_1003', current_org_name: 'Customer Z', current_user_id: 'u_012', current_user_email: 'admin@z.com', session_start: '2026-02-10 09:00' },
-  { device_id: 'dev_07', nickname: 'Showroom A', status: 'Offline', last_seen: '2026-02-10 09:12', current_org_id: 'org_ch_001', current_org_name: 'Channel A', current_user_id: null, current_user_email: null, session_start: null },
-  { device_id: 'dev_20', nickname: 'Fitting Room #2', status: 'Online', last_seen: '2026-02-10 10:08', current_org_id: 'org_cu_1001', current_org_name: 'Customer X', current_user_id: 'u_006', current_user_email: 'ops1@x.com', session_start: '2026-02-10 08:30' },
-  { device_id: 'dev_22', nickname: null, status: 'Offline', last_seen: '2026-02-08 18:00', current_org_id: 'org_cu_1004', current_org_name: 'Customer W', current_user_id: null, current_user_email: null, session_start: null },
+  { device_id: 'dev_09', nickname: 'Front Door Mirror',  status: 'Online',  last_seen: '2026-02-10 10:05', current_org_id: 'org_cu_1001', current_org_name: 'Customer X', current_user_id: 'u_002', current_user_email: 'hq.admin@x.com', session_start: '2026-02-10 09:55' },
+  { device_id: 'dev_20', nickname: 'Fitting Room #2',    status: 'Online',  last_seen: '2026-02-10 10:08', current_org_id: 'org_cu_1001', current_org_name: 'Customer X', current_user_id: 'u_006', current_user_email: 'ops1@x.com',    session_start: '2026-02-10 08:30' },
+  // ── 新设备：首次登录 Customer X，尚未被管理员确认 ──
+  { device_id: 'dev_31', nickname: null, status: 'Online',  last_seen: '2026-02-10 10:22', current_org_id: 'org_cu_1001', current_org_name: 'Customer X', current_user_id: 'u_016', current_user_email: 'sales@x.com',       session_start: '2026-02-10 10:22', is_new: true, first_seen: '2026-02-10 10:22' },
+  { device_id: 'dev_34', nickname: null, status: 'Online',  last_seen: '2026-02-10 10:35', current_org_id: 'org_cu_1001', current_org_name: 'Customer X', current_user_id: 'u_006', current_user_email: 'ops1@x.com',        session_start: '2026-02-10 10:35', is_new: true, first_seen: '2026-02-10 10:35' },
+  // ── 其他 org 设备 ──
+  { device_id: 'dev_12', nickname: 'VIP Lounge',         status: 'Offline', last_seen: '2026-02-09 21:10', current_org_id: 'org_cu_1002', current_org_name: 'Customer Y', current_user_id: null,    current_user_email: null,            session_start: null },
+  { device_id: 'dev_15', nickname: null,                  status: 'Online',  last_seen: '2026-02-10 09:30', current_org_id: 'org_cu_1003', current_org_name: 'Customer Z', current_user_id: 'u_012', current_user_email: 'admin@z.com',   session_start: '2026-02-10 09:00' },
+  { device_id: 'dev_07', nickname: 'Showroom A',          status: 'Offline', last_seen: '2026-02-10 09:12', current_org_id: 'org_ch_001',  current_org_name: 'Channel A',  current_user_id: null,    current_user_email: null,            session_start: null },
+  { device_id: 'dev_22', nickname: null,                  status: 'Offline', last_seen: '2026-02-08 18:00', current_org_id: 'org_cu_1004', current_org_name: 'Customer W', current_user_id: null,    current_user_email: null,            session_start: null },
 ];
 
 // ==================== 设备-服装分配 ====================
@@ -180,7 +189,10 @@ export const sessions: Session[] = [
   { session_id: 's_003', device_id: 'dev_15', user_id: 'u_012', user_email: 'admin@z.com', org_id: 'org_cu_1003', org_name: 'Customer Z', status: 'ACTIVE', login_at: '2026-02-10 09:00', logout_at: null, termination_reason: null },
   { session_id: 's_004', device_id: 'dev_20', user_id: 'u_006', user_email: 'ops1@x.com', org_id: 'org_cu_1001', org_name: 'Customer X', status: 'ACTIVE', login_at: '2026-02-10 08:30', logout_at: null, termination_reason: null },
   { session_id: 's_005', device_id: 'dev_12', user_id: 'u_010', user_email: 'owner@y.com', org_id: 'org_cu_1002', org_name: 'Customer Y', status: 'EXPIRED', login_at: '2026-02-09 20:00', logout_at: '2026-02-09 21:10', termination_reason: 'SESSION_EXPIRED' },
-  { session_id: 's_006', device_id: 'dev_22', user_id: 'u_014', user_email: 'admin@w.com', org_id: 'org_cu_1004', org_name: 'Customer W', status: 'TERMINATED', login_at: '2026-02-08 16:00', logout_at: '2026-02-08 18:00', termination_reason: 'USER_LOGOUT' },
+  { session_id: 's_006', device_id: 'dev_22', user_id: 'u_014', user_email: 'admin@w.com',    org_id: 'org_cu_1004', org_name: 'Customer W', status: 'TERMINATED', login_at: '2026-02-08 16:00', logout_at: '2026-02-08 18:00', termination_reason: 'USER_LOGOUT' },
+  // 新设备首次登录 session
+  { session_id: 's_007', device_id: 'dev_31', user_id: 'u_016', user_email: 'sales@x.com',    org_id: 'org_cu_1001', org_name: 'Customer X', status: 'ACTIVE',     login_at: '2026-02-10 10:22', logout_at: null,              termination_reason: null },
+  { session_id: 's_008', device_id: 'dev_34', user_id: 'u_006', user_email: 'ops1@x.com',     org_id: 'org_cu_1001', org_name: 'Customer X', status: 'ACTIVE',     login_at: '2026-02-10 10:35', logout_at: null,              termination_reason: null },
 ];
 
 // ==================== Demo 账号 ====================
@@ -321,6 +333,16 @@ export function getGarmentAssignedDevices(catalogId: string) {
 
 export function getOrgSessions(orgId: string) {
   return sessions.filter(s => s.org_id === orgId);
+}
+
+/** 获取某服装绑定的模板 ID 列表 */
+export function getGarmentTemplateIds(catalogId: string): string[] {
+  return garments.find(g => g.catalog_id === catalogId)?.template_ids ?? [];
+}
+
+/** 获取某组织下首次登录、尚未被确认的新设备列表 */
+export function getOrgNewDevices(orgId: string): Device[] {
+  return devices.filter(d => d.current_org_id === orgId && d.is_new === true);
 }
 
 /** 获取渠道的汇总信息 */

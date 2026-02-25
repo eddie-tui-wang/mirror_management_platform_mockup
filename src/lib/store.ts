@@ -9,6 +9,10 @@ interface AuthStore {
   isAuthenticated: boolean;
   login: (account: DemoAccount) => void;
   logout: () => void;
+  // 已被管理员确认/忽略的新设备 ID 集合（持久化，按 org 隔离）
+  acknowledgedDeviceIds: string[];
+  acknowledgeDevices: (ids: string[]) => void;
+  clearAcknowledged: () => void;
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -17,7 +21,13 @@ export const useAuthStore = create<AuthStore>()(
       currentUser: null,
       isAuthenticated: false,
       login: (account: DemoAccount) => set({ currentUser: account, isAuthenticated: true }),
-      logout: () => set({ currentUser: null, isAuthenticated: false }),
+      logout: () => set({ currentUser: null, isAuthenticated: false, acknowledgedDeviceIds: [] }),
+      acknowledgedDeviceIds: [],
+      acknowledgeDevices: (ids: string[]) =>
+        set((state) => ({
+          acknowledgedDeviceIds: Array.from(new Set([...state.acknowledgedDeviceIds, ...ids])),
+        })),
+      clearAcknowledged: () => set({ acknowledgedDeviceIds: [] }),
     }),
     { name: 'smart-mirror-auth' }
   )
