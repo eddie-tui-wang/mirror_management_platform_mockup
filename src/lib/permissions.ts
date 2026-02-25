@@ -94,7 +94,6 @@ export const ROLE_PORTAL: Record<RoleKey, PortalType> = {
 export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   '/dashboard/channels': 'platform:channels:view',
   '/dashboard/customers': 'platform:customers:view',
-  '/dashboard/users': 'platform:users:view',
   '/dashboard/assets/garments': 'platform:garments:view',
   '/dashboard/assets/templates': 'platform:templates:view',
   // 渠道端

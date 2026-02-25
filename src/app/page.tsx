@@ -167,18 +167,9 @@ export default function LoginPage() {
 
                 <Form.Item
                   name="password"
-                  label={
-                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                      <Text strong style={{ fontSize: 13 }}>Password</Text>
-                      <Link
-                        style={{ fontSize: 12 }}
-                        onClick={(e) => { e.preventDefault(); router.push('/forgot-password'); }}
-                      >
-                        Forgot password?
-                      </Link>
-                    </div>
-                  }
+                  label={<Text strong style={{ fontSize: 13 }}>Password</Text>}
                   rules={[{ required: true, message: 'Please enter your password' }]}
+                  style={{ marginBottom: 4 }}
                 >
                   <Input.Password
                     prefix={<LockOutlined style={{ color: '#bbb' }} />}
@@ -187,6 +178,15 @@ export default function LoginPage() {
                     autoComplete="current-password"
                   />
                 </Form.Item>
+
+                <div style={{ textAlign: 'right', marginBottom: 20 }}>
+                  <Link
+                    style={{ fontSize: 12 }}
+                    onClick={(e) => { e.preventDefault(); router.push('/forgot-password'); }}
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
 
                 <Form.Item name="remember" valuePropName="checked" style={{ marginBottom: 20 }}>
                   <Checkbox>

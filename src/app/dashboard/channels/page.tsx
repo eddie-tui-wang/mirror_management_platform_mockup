@@ -2,18 +2,21 @@
 
 import React, { useMemo, useState } from 'react';
 import { Table, Button, Tag, Space, Modal, Form, Input, Typography, message } from 'antd';
-import { PlusOutlined, StopOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useRouter } from 'next/navigation';
 import { organizations, getChannelSummary } from '@/lib/mock-data';
-import type { Organization } from '@/lib/types';
+import type { Organization, Status } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
 
 const { Title } = Typography;
 
-interface ChannelRow extends Organization {
+interface ChannelRow {
+  org_id: string;
+  name: string;
+  status: Status;
+  created_at: string;
   adminEmail: string;
-  memberCount: number;
   customerCount: number;
 }
 
@@ -22,19 +25,49 @@ export default function ChannelsPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [form] = Form.useForm();
 
-  const dataSource: ChannelRow[] = useMemo(() => {
+  // Local mutable state for channel statuses
+  const [statusOverrides, setStatusOverrides] = useState<Record<string, Status>>({});
+
+  const baseData: ChannelRow[] = useMemo(() => {
     return organizations
       .filter((org) => org.org_type === 'CHANNEL')
       .map((org) => {
         const summary = getChannelSummary(org.org_id);
         return {
-          ...org,
+          org_id: org.org_id,
+          name: org.name,
+          status: org.status as Status,
+          created_at: org.created_at,
           adminEmail: summary.adminEmail,
-          memberCount: summary.memberCount,
           customerCount: summary.customerCount,
         };
       });
   }, []);
+
+  const dataSource: ChannelRow[] = useMemo(() => {
+    return baseData.map((row) => ({
+      ...row,
+      status: statusOverrides[row.org_id] ?? row.status,
+    }));
+  }, [baseData, statusOverrides]);
+
+  const toggleStatus = (record: ChannelRow) => {
+    const current = statusOverrides[record.org_id] ?? record.status;
+    const next: Status = current === 'Active' ? 'Disabled' : 'Active';
+    const action = next === 'Disabled' ? 'disabled' : 'enabled';
+    Modal.confirm({
+      title: `${next === 'Disabled' ? 'Disable' : 'Enable'} channel "${record.name}"?`,
+      content: next === 'Disabled'
+        ? 'Channel users will lose access until re-enabled.'
+        : 'The channel will be restored to active status.',
+      okText: next === 'Disabled' ? 'Disable' : 'Enable',
+      okType: next === 'Disabled' ? 'danger' : 'primary',
+      onOk: () => {
+        setStatusOverrides((prev) => ({ ...prev, [record.org_id]: next }));
+        message.success(`Channel "${record.name}" has been ${action}.`);
+      },
+    });
+  };
 
   const handleCreate = () => {
     form.validateFields().then((values) => {
@@ -60,7 +93,7 @@ export default function ChannelsPage() {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => (
+      render: (status: Status) => (
         <Tag color={status === 'Active' ? 'green' : 'red'}>{status}</Tag>
       ),
     },
@@ -68,11 +101,6 @@ export default function ChannelsPage() {
       title: 'Channel Admin',
       dataIndex: 'adminEmail',
       key: 'adminEmail',
-    },
-    {
-      title: 'Members',
-      dataIndex: 'memberCount',
-      key: 'memberCount',
     },
     {
       title: 'Customers',
@@ -87,45 +115,37 @@ export default function ChannelsPage() {
     {
       title: 'Actions',
       key: 'actions',
-      render: (_, record) => (
-        <Space size="small">
-          <Button
-            type="link"
-            size="small"
-            onClick={() => router.push(`/dashboard/users?org=${record.org_id}`)}
-          >
-            View Members
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => router.push(`/dashboard/customers?channel=${record.org_id}`)}
-          >
-            View Customers
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => router.push(`/dashboard/assets/garments?org=${record.org_id}`)}
-          >
-            View Assets
-          </Button>
-          <PermGuard permission="platform:channels:disable">
+      render: (_, record) => {
+        const currentStatus = statusOverrides[record.org_id] ?? record.status;
+        return (
+          <Space size="small">
             <Button
               type="link"
               size="small"
-              danger
-              onClick={() =>
-                message.warning(
-                  `${record.status === 'Active' ? 'Disable' : 'Enable'} channel ${record.name} (simulated)`
-                )
-              }
+              onClick={() => router.push(`/dashboard/customers?channel=${record.org_id}`)}
             >
-              {record.status === 'Active' ? 'Disable' : 'Enable'}
+              View Customers
             </Button>
-          </PermGuard>
-        </Space>
-      ),
+            <Button
+              type="link"
+              size="small"
+              onClick={() => router.push(`/dashboard/assets/garments?org=${record.org_id}`)}
+            >
+              View Assets
+            </Button>
+            <PermGuard permission="platform:channels:disable">
+              <Button
+                type="link"
+                size="small"
+                danger={currentStatus === 'Active'}
+                onClick={() => toggleStatus(record)}
+              >
+                {currentStatus === 'Active' ? 'Disable' : 'Enable'}
+              </Button>
+            </PermGuard>
+          </Space>
+        );
+      },
     },
   ];
 

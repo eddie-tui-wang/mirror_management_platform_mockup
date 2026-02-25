@@ -1,7 +1,10 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Table, Button, Tag, Space, Typography, message, Select, Modal, Form, Input, Switch, InputNumber, Tooltip } from 'antd';
+import {
+  Table, Button, Tag, Space, Typography, message, Select, Modal, Form,
+  Input, Switch, InputNumber, Tooltip,
+} from 'antd';
 import { PlusOutlined, WarningOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -11,11 +14,14 @@ import PermGuard from '@/components/PermGuard';
 
 const { Title } = Typography;
 
-interface CustomerRow extends Organization {
+interface CustomerRow {
+  org_id: string;
+  name: string;
+  status: Status;
+  created_at: string;
   customerType: CustomerType;
   channelName: string;
   adminEmail: string;
-  memberCount: number;
   onlineDeviceCount: number;
   isTrial: boolean;
   trialStatus: TrialStatus;
@@ -24,6 +30,7 @@ interface CustomerRow extends Organization {
   trialMaxSales: number;
   trialUsedSales: number;
   trialRemainingSales: number;
+  parent_org_id: string | null;
 }
 
 export default function CustomersPage() {
@@ -38,22 +45,28 @@ export default function CustomersPage() {
   const [isTrial, setIsTrial] = useState(false);
   const [form] = Form.useForm();
 
+  // Local mutable state for customer statuses
+  const [statusOverrides, setStatusOverrides] = useState<Record<string, Status>>({});
+
   const channels = useMemo(
     () => organizations.filter((o) => o.org_type === 'CHANNEL'),
     []
   );
 
-  const allCustomers: CustomerRow[] = useMemo(() => {
+  const baseCustomers: CustomerRow[] = useMemo(() => {
     return organizations
       .filter((org) => org.org_type === 'CUSTOMER')
       .map((org) => {
         const summary = getCustomerSummary(org.org_id);
         return {
-          ...org,
+          org_id: org.org_id,
+          name: org.name,
+          status: org.status as Status,
+          created_at: org.created_at,
+          parent_org_id: org.parent_org_id ?? null,
           customerType: summary.customerType,
           channelName: summary.channelName,
           adminEmail: summary.adminEmail,
-          memberCount: summary.memberCount,
           onlineDeviceCount: summary.onlineDeviceCount,
           isTrial: summary.isTrial,
           trialStatus: summary.trialStatus,
@@ -66,35 +79,48 @@ export default function CustomersPage() {
       });
   }, []);
 
+  const allCustomers: CustomerRow[] = useMemo(() => {
+    return baseCustomers.map((row) => ({
+      ...row,
+      status: statusOverrides[row.org_id] ?? row.status,
+    }));
+  }, [baseCustomers, statusOverrides]);
+
   const dataSource = useMemo(() => {
     let filtered = allCustomers;
-
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter((c) => c.customerType === typeFilter);
-    }
-
-    if (channelFilter !== 'all') {
-      filtered = filtered.filter((c) => c.parent_org_id === channelFilter);
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter((c) => c.status === statusFilter);
-    }
-
+    if (typeFilter !== 'all') filtered = filtered.filter((c) => c.customerType === typeFilter);
+    if (channelFilter !== 'all') filtered = filtered.filter((c) => c.parent_org_id === channelFilter);
+    if (statusFilter !== 'all') filtered = filtered.filter((c) => c.status === statusFilter);
     if (accountKindFilter !== 'all') {
-      if (accountKindFilter === 'Trial') {
-        filtered = filtered.filter((c) => c.isTrial);
-      } else {
-        filtered = filtered.filter((c) => !c.isTrial);
-      }
+      if (accountKindFilter === 'Trial') filtered = filtered.filter((c) => c.isTrial);
+      else filtered = filtered.filter((c) => !c.isTrial);
     }
-
     return filtered;
   }, [allCustomers, typeFilter, channelFilter, statusFilter, accountKindFilter]);
 
+  const toggleStatus = (record: CustomerRow) => {
+    const current = statusOverrides[record.org_id] ?? record.status;
+    const next: Status = current === 'Active' ? 'Disabled' : 'Active';
+    const action = next === 'Disabled' ? 'disabled' : 'enabled';
+    Modal.confirm({
+      title: `${next === 'Disabled' ? 'Disable' : 'Enable'} customer "${record.name}"?`,
+      content: next === 'Disabled'
+        ? 'All users under this customer will lose access until re-enabled.'
+        : 'The customer account will be restored to active status.',
+      okText: next === 'Disabled' ? 'Disable' : 'Enable',
+      okType: next === 'Disabled' ? 'danger' : 'primary',
+      onOk: () => {
+        setStatusOverrides((prev) => ({ ...prev, [record.org_id]: next }));
+        message.success(`Customer "${record.name}" has been ${action}.`);
+      },
+    });
+  };
+
   const handleCreate = () => {
     form.validateFields().then((values) => {
-      const trialLabel = isTrial ? ` (Trial: ${values.trialDays ?? 14} days, ${values.trialMaxSales ?? 50} sales)` : '';
+      const trialLabel = isTrial
+        ? ` (Trial: ${values.trialDays ?? 14} days, ${values.trialMaxSales ?? 50} sales)`
+        : '';
       message.success(`Customer "${values.name}" created successfully${trialLabel} (simulated)`);
       setCreateModalOpen(false);
       setIsTrial(false);
@@ -103,9 +129,7 @@ export default function CustomersPage() {
   };
 
   const renderAccountKind = (record: CustomerRow) => {
-    if (!record.isTrial) {
-      return <Tag color="blue">Regular</Tag>;
-    }
+    if (!record.isTrial) return <Tag color="blue">Regular</Tag>;
     const salesInfo = `Used ${record.trialUsedSales}/${record.trialMaxSales}, ${record.trialRemainingSales} remaining`;
     const daysInfo = `Trial ends: ${record.trialEndDate}, ${record.remainingDays} days remaining`;
     const tip = `${daysInfo}\n${salesInfo}`;
@@ -134,11 +158,7 @@ export default function CustomersPage() {
   };
 
   const columns: ColumnsType<CustomerRow> = [
-    {
-      title: 'Customer Name',
-      dataIndex: 'name',
-      key: 'name',
-    },
+    { title: 'Customer Name', dataIndex: 'name', key: 'name' },
     {
       title: 'customer_id',
       dataIndex: 'org_id',
@@ -166,50 +186,52 @@ export default function CustomersPage() {
       key: 'channelName',
       render: (name: string) => (name === '-' ? '-' : name),
     },
-    {
-      title: 'HQ Admin',
-      dataIndex: 'adminEmail',
-      key: 'adminEmail',
-    },
-    {
-      title: 'Members',
-      dataIndex: 'memberCount',
-      key: 'memberCount',
-    },
-    {
-      title: 'Created At',
-      dataIndex: 'created_at',
-      key: 'created_at',
-    },
+    { title: 'HQ Admin', dataIndex: 'adminEmail', key: 'adminEmail' },
+    { title: 'Created At', dataIndex: 'created_at', key: 'created_at' },
     {
       title: 'Status',
-      dataIndex: 'status',
       key: 'status',
-      render: (status: Status) => (
-        <Tag color={status === 'Active' ? 'green' : 'red'}>{status}</Tag>
-      ),
+      render: (_, record) => {
+        const current = statusOverrides[record.org_id] ?? record.status;
+        return <Tag color={current === 'Active' ? 'green' : 'red'}>{current}</Tag>;
+      },
     },
     {
       title: 'Actions',
       key: 'actions',
-      render: (_, record) => (
-        <Space size="small">
-          <Button
-            type="link"
-            size="small"
-            onClick={() => router.push(`/dashboard/users?org=${record.org_id}`)}
-          >
-            View Members
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => router.push(`/dashboard/assets/garments?org=${record.org_id}`)}
-          >
-            View Assets
-          </Button>
-        </Space>
-      ),
+      render: (_, record) => {
+        const current = statusOverrides[record.org_id] ?? record.status;
+        return (
+          <Space size="small">
+            <Button
+              type="link"
+              size="small"
+              onClick={() => router.push(`/dashboard/assets/garments?org=${record.org_id}`)}
+            >
+              View Assets
+            </Button>
+            <PermGuard permission="platform:customers:transfer" fallback="disable">
+              <Button
+                type="link"
+                size="small"
+                onClick={() =>
+                  message.info(`Transfer ownership of "${record.name}" (simulated)`)
+                }
+              >
+                Transfer
+              </Button>
+            </PermGuard>
+            <Button
+              type="link"
+              size="small"
+              danger={current === 'Active'}
+              onClick={() => toggleStatus(record)}
+            >
+              {current === 'Active' ? 'Disable' : 'Enable'}
+            </Button>
+          </Space>
+        );
+      },
     },
   ];
 
@@ -260,10 +282,7 @@ export default function CustomersPage() {
           style={{ width: 200 }}
           options={[
             { value: 'all', label: 'All' },
-            ...channels.map((ch) => ({
-              value: ch.org_id,
-              label: ch.name,
-            })),
+            ...channels.map((ch) => ({ value: ch.org_id, label: ch.name })),
           ]}
         />
         <span>Status:</span>
@@ -316,17 +335,12 @@ export default function CustomersPage() {
           >
             <Input placeholder="Please enter HQ Admin email" />
           </Form.Item>
-
           <Form.Item label="Trial Account">
             <Space>
-              <Switch
-                checked={isTrial}
-                onChange={setIsTrial}
-              />
+              <Switch checked={isTrial} onChange={setIsTrial} />
               <span>{isTrial ? 'Trial Enabled' : 'Regular Account'}</span>
             </Space>
           </Form.Item>
-
           {isTrial && (
             <>
               <Form.Item

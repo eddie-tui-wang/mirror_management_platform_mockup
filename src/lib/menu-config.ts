@@ -14,7 +14,6 @@ export interface MenuItemConfig {
 const platformMenu: MenuItemConfig[] = [
   { key: 'channels', label: 'Channel Management', icon: 'BankOutlined', path: '/dashboard/channels', permission: 'platform:channels:view' },
   { key: 'customers', label: 'Customer Management', icon: 'TeamOutlined', path: '/dashboard/customers', permission: 'platform:customers:view' },
-  { key: 'users', label: 'Users & Roles', icon: 'UserOutlined', path: '/dashboard/users', permission: 'platform:users:view' },
   {
     key: 'assets', label: 'Assets', icon: 'AppstoreOutlined',
     children: [
