@@ -32,6 +32,7 @@ export default function ChannelCustomersPage() {
   const [isTrial, setIsTrial] = useState(false);
   const [accountKindFilter, setAccountKindFilter] = useState<string>('all');
   const [accountStatusFilter, setAccountStatusFilter] = useState<string>('all');
+  const [statusOverrides, setStatusOverrides] = useState<Record<string, Status>>({});
   const [form] = Form.useForm();
 
   const dataSource: CustomerRow[] = useMemo(() => {
@@ -106,37 +107,47 @@ export default function ChannelCustomersPage() {
     );
   };
 
+  const toggleStatus = (record: CustomerRow) => {
+    const current = statusOverrides[record.org_id] ?? record.status;
+    const next: Status = current === 'Active' ? 'Disabled' : 'Active';
+    const action = next === 'Disabled' ? 'disabled' : 'enabled';
+    Modal.confirm({
+      title: `${next === 'Disabled' ? 'Disable' : 'Enable'} customer "${record.name}"?`,
+      content: next === 'Disabled'
+        ? 'All users under this customer will lose access until re-enabled.'
+        : 'The customer account will be restored to active status.',
+      okText: next === 'Disabled' ? 'Disable' : 'Enable',
+      okType: next === 'Disabled' ? 'danger' : 'primary',
+      onOk: () => {
+        setStatusOverrides((prev) => ({ ...prev, [record.org_id]: next }));
+        message.success(`Customer "${record.name}" has been ${action}.`);
+      },
+    });
+  };
+
   const columns: ColumnsType<CustomerRow> = [
     {
-      title: 'Customer Name',
+      title: 'Name',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Account Type',
+      title: 'Account',
       key: 'accountKind',
       render: (_, record) => renderAccountKind(record),
     },
     {
-      title: 'HQ Admin Email',
+      title: 'Admin',
       dataIndex: 'adminEmail',
       key: 'adminEmail',
     },
     {
-      title: 'Account Status',
+      title: 'Status',
       key: 'adminStatus',
-      render: (_, record) => (
-        <Tag color={record.adminStatus === 'Active' ? 'green' : 'red'}>{record.adminStatus}</Tag>
-      ),
-    },
-    {
-      title: 'Last Login',
-      key: 'adminLastLogin',
-      render: (_, record) => (
-        <Typography.Text type={record.adminLastLogin ? undefined : 'secondary'}>
-          {record.adminLastLogin ?? 'Never logged in'}
-        </Typography.Text>
-      ),
+      render: (_, record) => {
+        const current = statusOverrides[record.org_id] ?? record.adminStatus;
+        return <Tag color={current === 'Active' ? 'green' : 'red'}>{current}</Tag>;
+      },
     },
     {
       title: 'Created At',
@@ -146,21 +157,32 @@ export default function ChannelCustomersPage() {
     {
       title: 'Actions',
       key: 'actions',
-      render: (_, record) => (
-        <Space size="small">
-          {record.adminLastLogin === null && (
-            <PermGuard permission="channel:users:reinvite" fallback="disable">
-              <Button
-                type="link"
-                size="small"
-                onClick={() => message.success(`Invitation resent to ${record.adminEmail} (simulated)`)}
-              >
-                Resend Invitation
-              </Button>
-            </PermGuard>
-          )}
-        </Space>
-      ),
+      render: (_, record) => {
+        const current = statusOverrides[record.org_id] ?? record.status;
+        return (
+          <Space size="small">
+            {record.adminLastLogin === null && (
+              <PermGuard permission="channel:users:reinvite" fallback="disable">
+                <Button
+                  type="link"
+                  size="small"
+                  onClick={() => message.success(`Invitation resent to ${record.adminEmail} (simulated)`)}
+                >
+                  Resend Invitation
+                </Button>
+              </PermGuard>
+            )}
+            <Button
+              type="link"
+              size="small"
+              danger={current === 'Active'}
+              onClick={() => toggleStatus(record)}
+            >
+              {current === 'Active' ? 'Disable' : 'Enable'}
+            </Button>
+          </Space>
+        );
+      },
     },
   ];
 

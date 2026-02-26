@@ -158,7 +158,7 @@ export default function CustomersPage() {
   };
 
   const columns: ColumnsType<CustomerRow> = [
-    { title: 'Customer Name', dataIndex: 'name', key: 'name' },
+    { title: 'Name', dataIndex: 'name', key: 'name' },
     {
       title: 'customer_id',
       dataIndex: 'org_id',
@@ -166,7 +166,7 @@ export default function CustomersPage() {
       render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
     },
     {
-      title: 'Customer Type',
+      title: 'Type',
       dataIndex: 'customerType',
       key: 'customerType',
       render: (type: CustomerType) => (
@@ -176,7 +176,7 @@ export default function CustomersPage() {
       ),
     },
     {
-      title: 'Account Type',
+      title: 'Account',
       key: 'accountKind',
       render: (_, record) => renderAccountKind(record),
     },
@@ -210,17 +210,6 @@ export default function CustomersPage() {
             >
               View Assets
             </Button>
-            <PermGuard permission="platform:customers:transfer" fallback="disable">
-              <Button
-                type="link"
-                size="small"
-                onClick={() =>
-                  message.info(`Transfer ownership of "${record.name}" (simulated)`)
-                }
-              >
-                Transfer
-              </Button>
-            </PermGuard>
             <Button
               type="link"
               size="small"

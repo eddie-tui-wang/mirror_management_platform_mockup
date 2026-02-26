@@ -10,14 +10,13 @@ import type { ColumnsType } from 'antd/es/table';
 import {
   masterTemplates, getTemplateAssignedOrgs, getTemplateUnassignedOrgs,
 } from '@/lib/mock-data';
-import type { MasterTemplate, Status } from '@/lib/types';
+import type { MasterTemplate } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
 
 const { Title } = Typography;
 
 export default function TemplatesPage() {
   // 筛选状态
-  const [filterStatus, setFilterStatus] = useState<Status | undefined>(undefined);
   const [searchText, setSearchText] = useState('');
 
   // 弹窗状态
@@ -35,7 +34,6 @@ export default function TemplatesPage() {
   // 筛选数据
   const dataSource = useMemo(() => {
     return masterTemplates.filter((t) => {
-      if (filterStatus && t.status !== filterStatus) return false;
       if (searchText) {
         const lower = searchText.toLowerCase();
         const matchName = t.name.toLowerCase().includes(lower);
@@ -191,28 +189,14 @@ export default function TemplatesPage() {
   // 表格列定义
   const columns: ColumnsType<MasterTemplate> = [
     {
-      title: 'Template Name',
+      title: 'Name',
       dataIndex: 'name',
       key: 'name',
-    },
-    {
-      title: 'template_id',
-      dataIndex: 'template_id',
-      key: 'template_id',
-      render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
     },
     {
       title: 'Prompts',
       key: 'prompts',
       render: (_, record) => <Tag>{record.prompts.length} prompt(s)</Tag>,
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: Status) => (
-        <Tag color={status === 'Active' ? 'green' : 'red'}>{status}</Tag>
-      ),
     },
     {
       title: 'Assignments',
@@ -221,11 +205,6 @@ export default function TemplatesPage() {
         const count = getTemplateAssignedOrgs(record.template_id).length;
         return <Tag>{count} customer(s)</Tag>;
       },
-    },
-    {
-      title: 'Updated At',
-      dataIndex: 'updated_at',
-      key: 'updated_at',
     },
     {
       title: 'Actions',
@@ -299,17 +278,6 @@ export default function TemplatesPage() {
           onChange={(e) => {
             if (!e.target.value) setSearchText('');
           }}
-        />
-        <Select
-          placeholder="Status"
-          allowClear
-          style={{ width: 120 }}
-          value={filterStatus}
-          onChange={setFilterStatus}
-          options={[
-            { label: 'Active', value: 'Active' },
-            { label: 'Disabled', value: 'Disabled' },
-          ]}
         />
       </Space>
 

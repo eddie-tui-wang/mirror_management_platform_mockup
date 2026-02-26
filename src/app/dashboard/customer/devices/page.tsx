@@ -5,7 +5,7 @@ import {
   Table, Button, Tag, Space, Typography, Modal, Input, message, Alert,
 } from 'antd';
 import {
-  PlusOutlined, EditOutlined, CheckOutlined, DesktopOutlined,
+  EditOutlined, CheckOutlined, SkinOutlined, DesktopOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuthStore } from '@/lib/store';
@@ -23,9 +23,6 @@ export default function CustomerDevicesPage() {
 
   const orgId = currentUser?.org_id ?? '';
   const orgName = currentUser?.org_name ?? '';
-
-  const [addOpen, setAddOpen] = useState(false);
-  const [addNickname, setAddNickname] = useState('');
 
   const [editOpen, setEditOpen] = useState(false);
   const [editDevice, setEditDevice] = useState<Device | null>(null);
@@ -50,15 +47,6 @@ export default function CustomerDevicesPage() {
   const handleAcknowledgeAll = () => {
     acknowledgeDevices(unacknowledgedNew.map((d) => d.device_id));
     message.success(`${unacknowledgedNew.length} new device(s) acknowledged.`);
-  };
-
-  const handleAddDevice = () => {
-    const trimmed = addNickname.trim();
-    message.success(
-      trimmed ? `Device added with nickname "${trimmed}" (simulated)` : 'Device added (simulated)'
-    );
-    setAddOpen(false);
-    setAddNickname('');
   };
 
   const openEditNickname = (device: Device) => {
@@ -104,37 +92,12 @@ export default function CustomerDevicesPage() {
       ),
     },
     {
-      title: 'First / Last Seen',
-      key: 'seen',
-      render: (_, record) => (
-        <div>
-          {record.is_new && record.first_seen && (
-            <div>
-              <Text type="secondary" style={{ fontSize: 11 }}>First login: </Text>
-              <Text style={{ fontSize: 12 }}>{record.first_seen}</Text>
-            </div>
-          )}
-          <div>
-            <Text type="secondary" style={{ fontSize: 11 }}>Last seen: </Text>
-            <Text style={{ fontSize: 12 }}>{record.last_seen}</Text>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'Current User',
-      dataIndex: 'current_user_email',
-      key: 'current_user_email',
-      render: (val: string | null) =>
-        val ?? <Typography.Text type="secondary">—</Typography.Text>,
-    },
-    {
       title: 'Garments',
       key: 'garments',
       render: (_, record) => {
         const assigned = getDeviceAssignedGarments(record.device_id);
         return assigned.length > 0 ? (
-          <Tag icon={<DesktopOutlined />}>{assigned.length} garment(s)</Tag>
+          <Tag icon={<SkinOutlined />}>{assigned.length} garment(s)</Tag>
         ) : (
           <Typography.Text type="secondary">—</Typography.Text>
         );
@@ -175,13 +138,8 @@ export default function CustomerDevicesPage() {
   return (
     <div>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div style={{ marginBottom: 16 }}>
         <Title level={4} style={{ margin: 0 }}>{orgName} — Devices</Title>
-        <PermGuard permission="customer:devices:manage">
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setAddOpen(true)}>
-            Add Device
-          </Button>
-        </PermGuard>
       </div>
 
       {/* ── 新设备 Banner ── */}
@@ -237,26 +195,6 @@ export default function CustomerDevicesPage() {
             : ''
         }
       />
-
-      {/* Add Device Modal */}
-      <Modal
-        title="Add Device"
-        open={addOpen}
-        onOk={handleAddDevice}
-        onCancel={() => { setAddOpen(false); setAddNickname(''); }}
-        okText="Add"
-        cancelText="Cancel"
-      >
-        <div style={{ marginBottom: 8 }}>
-          <Typography.Text>Nickname (optional)</Typography.Text>
-        </div>
-        <Input
-          value={addNickname}
-          onChange={(e) => setAddNickname(e.target.value)}
-          placeholder="e.g. Front Door Mirror"
-          onPressEnter={handleAddDevice}
-        />
-      </Modal>
 
       {/* Edit Nickname Modal */}
       <Modal

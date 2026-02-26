@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { Table, Button, Tag, Space, Modal, Form, Input, Typography, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useRouter } from 'next/navigation';
 import { organizations, getChannelSummary } from '@/lib/mock-data';
@@ -25,6 +25,8 @@ export default function ChannelsPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [form] = Form.useForm();
 
+  const [searchText, setSearchText] = useState('');
+
   // Local mutable state for channel statuses
   const [statusOverrides, setStatusOverrides] = useState<Record<string, Status>>({});
 
@@ -45,11 +47,11 @@ export default function ChannelsPage() {
   }, []);
 
   const dataSource: ChannelRow[] = useMemo(() => {
-    return baseData.map((row) => ({
-      ...row,
-      status: statusOverrides[row.org_id] ?? row.status,
-    }));
-  }, [baseData, statusOverrides]);
+    const lower = searchText.toLowerCase();
+    return baseData
+      .map((row) => ({ ...row, status: statusOverrides[row.org_id] ?? row.status }))
+      .filter((row) => !lower || row.name.toLowerCase().includes(lower));
+  }, [baseData, statusOverrides, searchText]);
 
   const toggleStatus = (record: ChannelRow) => {
     const current = statusOverrides[record.org_id] ?? record.status;
@@ -79,7 +81,7 @@ export default function ChannelsPage() {
 
   const columns: ColumnsType<ChannelRow> = [
     {
-      title: 'Channel Name',
+      title: 'Name',
       dataIndex: 'name',
       key: 'name',
     },
@@ -98,7 +100,7 @@ export default function ChannelsPage() {
       ),
     },
     {
-      title: 'Channel Admin',
+      title: 'Admin',
       dataIndex: 'adminEmail',
       key: 'adminEmail',
     },
@@ -125,13 +127,6 @@ export default function ChannelsPage() {
               onClick={() => router.push(`/dashboard/customers?channel=${record.org_id}`)}
             >
               View Customers
-            </Button>
-            <Button
-              type="link"
-              size="small"
-              onClick={() => router.push(`/dashboard/assets/garments?org=${record.org_id}`)}
-            >
-              View Assets
             </Button>
             <PermGuard permission="platform:channels:disable">
               <Button
@@ -164,6 +159,17 @@ export default function ChannelsPage() {
             </Button>
           </PermGuard>
         </Space>
+      </div>
+
+      <div style={{ marginBottom: 16 }}>
+        <Input
+          prefix={<SearchOutlined style={{ color: '#bbb' }} />}
+          placeholder="Search by channel name"
+          allowClear
+          style={{ width: 260 }}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
       </div>
 
       <Table<ChannelRow>

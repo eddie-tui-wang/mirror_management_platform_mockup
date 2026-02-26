@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Typography, Card, Avatar, Tag, Divider, Button,
   Form, Input, Steps, Result, Space, Row, Col,
@@ -9,8 +9,10 @@ import {
   UserOutlined, MailOutlined, LockOutlined,
   SafetyCertificateOutlined, EyeInvisibleOutlined, EyeTwoTone,
   CheckCircleOutlined, ArrowLeftOutlined, KeyOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '@/lib/store';
+import { getCustomerSummary } from '@/lib/mock-data';
 
 const { Title, Text } = Typography;
 
@@ -26,7 +28,7 @@ const PORTAL_LABEL: Record<string, string> = {
   customer: 'Customer',
 };
 
-type PasswordStep = 'idle' | 'currentPwd' | 'verify' | 'newPwd' | 'success';
+type PasswordStep = 'idle' | 'verify' | 'newPwd' | 'success';
 
 export default function SettingsPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
@@ -34,21 +36,25 @@ export default function SettingsPage() {
   // ── Change Password wizard state ─────────────────────────
   const [pwdStep, setPwdStep] = useState<PasswordStep>('idle');
   const [loading, setLoading] = useState(false);
-  const [currentPwdForm] = Form.useForm();
   const [verifyForm] = Form.useForm();
   const [newPwdForm] = Form.useForm();
+
+  // ── Trial info (customer portal only) ────────────────────
+  const trialInfo = useMemo(() => {
+    if (!currentUser || currentUser.portal !== 'customer') return null;
+    const summary = getCustomerSummary(currentUser.org_id);
+    if (!summary.isTrial) return null;
+    return summary;
+  }, [currentUser]);
 
   if (!currentUser) return null;
 
   const portalColor = PORTAL_COLOR[currentUser.portal] ?? '#1677ff';
 
   // ── Step handlers ─────────────────────────────────────────
-  const handleCurrentPwdSubmit = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setPwdStep('verify');
-    }, 700);
+  const handleStartChangePassword = () => {
+    setPwdStep('verify');
+    // In a real app: trigger sending the code to currentUser.email here
   };
 
   const handleVerifySubmit = () => {
@@ -68,16 +74,14 @@ export default function SettingsPage() {
   };
 
   const handleReset = () => {
-    currentPwdForm.resetFields();
     verifyForm.resetFields();
     newPwdForm.resetFields();
     setPwdStep('idle');
   };
 
-  const stepIndex: Record<Exclude<PasswordStep, 'idle' | 'success'>, number> = {
-    currentPwd: 0,
-    verify: 1,
-    newPwd: 2,
+  const stepIndex: Record<'verify' | 'newPwd', number> = {
+    verify: 0,
+    newPwd: 1,
   };
 
   const primaryBtnStyle = {
@@ -138,6 +142,52 @@ export default function SettingsPage() {
             </Text>
             <Text>{PORTAL_LABEL[currentUser.portal]}</Text>
           </Col>
+
+          {/* Trial info row */}
+          {trialInfo && (
+            <Col span={24}>
+              <Divider style={{ margin: '4px 0 12px' }} />
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                background: trialInfo.trialStatus === 'expired' ? '#fff2f0' : '#fffbe6',
+                border: `1px solid ${trialInfo.trialStatus === 'expired' ? '#ffccc7' : '#ffe58f'}`,
+                borderRadius: 8,
+                padding: '10px 14px',
+              }}>
+                <ClockCircleOutlined style={{
+                  fontSize: 18,
+                  color: trialInfo.trialStatus === 'expired' ? '#ff4d4f' : '#faad14',
+                }} />
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                    <Text strong style={{ fontSize: 13 }}>Trial Account</Text>
+                    {trialInfo.trialStatus === 'expired' ? (
+                      <Tag color="red">Expired</Tag>
+                    ) : (
+                      <Tag color="orange">Active</Tag>
+                    )}
+                  </div>
+                  {trialInfo.trialStatus === 'expired' ? (
+                    <Text type="danger" style={{ fontSize: 12 }}>
+                      Trial has expired. Please contact your account manager to upgrade.
+                    </Text>
+                  ) : (
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      <Text strong style={{ fontSize: 12, color: '#d46b08' }}>
+                        {trialInfo.remainingDays} day{trialInfo.remainingDays !== 1 ? 's' : ''} remaining
+                      </Text>
+                      {' · '}
+                      Expires {trialInfo.trialEndDate}
+                      {' · '}
+                      {trialInfo.trialRemainingSales}/{trialInfo.trialMaxSales} sales remaining
+                    </Text>
+                  )}
+                </div>
+              </div>
+            </Col>
+          )}
         </Row>
       </Card>
 
@@ -156,75 +206,26 @@ export default function SettingsPage() {
             </div>
             <Button
               icon={<KeyOutlined />}
-              onClick={() => setPwdStep('currentPwd')}
+              onClick={handleStartChangePassword}
             >
               Change Password
             </Button>
           </div>
         )}
 
-        {pwdStep !== 'idle' && pwdStep !== 'success' && (
+        {(pwdStep === 'verify' || pwdStep === 'newPwd') && (
           <>
             <Steps
-              current={stepIndex[pwdStep as Exclude<PasswordStep, 'idle' | 'success'>]}
+              current={stepIndex[pwdStep as 'verify' | 'newPwd']}
               size="small"
               style={{ marginBottom: 28 }}
               items={[
-                { title: 'Current Password', icon: <LockOutlined /> },
                 { title: 'Verify Email', icon: <SafetyCertificateOutlined /> },
                 { title: 'New Password', icon: <KeyOutlined /> },
               ]}
             />
 
-            {/* ── Step 1: Current Password ── */}
-            {pwdStep === 'currentPwd' && (
-              <>
-                <div style={{ marginBottom: 20 }}>
-                  <Text strong style={{ fontSize: 15 }}>Confirm your current password</Text>
-                  <div>
-                    <Text type="secondary" style={{ fontSize: 13 }}>
-                      Enter your current password to verify your identity before we send a code to{' '}
-                      <Text strong>{currentUser.email}</Text>.
-                    </Text>
-                  </div>
-                </div>
-                <Form
-                  form={currentPwdForm}
-                  layout="vertical"
-                  requiredMark={false}
-                  onFinish={handleCurrentPwdSubmit}
-                  style={{ maxWidth: 360 }}
-                >
-                  <Form.Item
-                    name="currentPassword"
-                    label={<Text strong style={{ fontSize: 13 }}>Current password</Text>}
-                    rules={[{ required: true, message: 'Please enter your current password' }]}
-                  >
-                    <Input.Password
-                      prefix={<LockOutlined style={{ color: '#bbb' }} />}
-                      placeholder="Enter current password"
-                      iconRender={(v) => (v ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
-                      size="large"
-                    />
-                  </Form.Item>
-                  <Space>
-                    <Button
-                      type="primary"
-                      htmlType="submit"
-                      loading={loading}
-                      style={primaryBtnStyle}
-                    >
-                      Send verification code
-                    </Button>
-                    <Button type="text" onClick={handleReset} style={{ color: '#888' }}>
-                      Cancel
-                    </Button>
-                  </Space>
-                </Form>
-              </>
-            )}
-
-            {/* ── Step 2: Email Verification ── */}
+            {/* ── Step 1: Email Verification ── */}
             {pwdStep === 'verify' && (
               <>
                 <div style={{ marginBottom: 20 }}>
@@ -279,20 +280,15 @@ export default function SettingsPage() {
                     >
                       Verify code
                     </Button>
-                    <Button
-                      type="text"
-                      icon={<ArrowLeftOutlined />}
-                      onClick={() => setPwdStep('currentPwd')}
-                      style={{ color: '#888' }}
-                    >
-                      Back
+                    <Button type="text" onClick={handleReset} style={{ color: '#888' }}>
+                      Cancel
                     </Button>
                   </Space>
                 </Form>
               </>
             )}
 
-            {/* ── Step 3: New Password ── */}
+            {/* ── Step 2: New Password ── */}
             {pwdStep === 'newPwd' && (
               <>
                 <div style={{ marginBottom: 20 }}>
@@ -372,7 +368,7 @@ export default function SettingsPage() {
           </>
         )}
 
-        {/* ── Step 4: Success ── */}
+        {/* ── Success ── */}
         {pwdStep === 'success' && (
           <Result
             icon={<CheckCircleOutlined style={{ color: '#52c41a' }} />}

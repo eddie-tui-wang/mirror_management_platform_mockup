@@ -2,11 +2,11 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  Table, Tag, Typography, Select, Space, Badge, Tooltip,
+  Table, Tag, Typography, Select, Space, Badge,
 } from 'antd';
 import { DesktopOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { devices, organizations, sessions } from '@/lib/mock-data';
+import { devices } from '@/lib/mock-data';
 import type { Device, DeviceStatus } from '@/lib/types';
 
 const { Title, Text } = Typography;
@@ -42,11 +42,7 @@ export default function PlatformDevicesPage() {
         return true;
       })
       .map((d) => {
-        const lastSession = sessions
-          .filter((s) => s.device_id === d.device_id)
-          .sort((a, b) => b.login_at.localeCompare(a.login_at))[0];
-        const orgType = organizations.find((o) => o.org_id === d.current_org_id)?.org_type ?? null;
-        return { ...d, lastSession, orgType };
+        return { ...d };
       });
   }, [filterOrgId, filterStatus, filterNew]);
 
@@ -67,13 +63,6 @@ export default function PlatformDevicesPage() {
       ),
     },
     {
-      title: 'Nickname',
-      dataIndex: 'nickname',
-      key: 'nickname',
-      render: (val: string | null) =>
-        val ? <Text>{val}</Text> : <Text type="secondary">—</Text>,
-    },
-    {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
@@ -88,17 +77,7 @@ export default function PlatformDevicesPage() {
       title: 'Org',
       key: 'org',
       render: (_, record) => (
-        <div>
-          <Text>{record.current_org_name ?? '—'}</Text>
-          {record.orgType && (
-            <Tag
-              style={{ marginLeft: 6, fontSize: 11 }}
-              color={record.orgType === 'CUSTOMER' ? 'green' : 'blue'}
-            >
-              {record.orgType}
-            </Tag>
-          )}
-        </div>
+        <Text>{record.current_org_name ?? '—'}</Text>
       ),
     },
     {
@@ -107,49 +86,6 @@ export default function PlatformDevicesPage() {
       key: 'current_user_email',
       render: (val: string | null) =>
         val ? <Text>{val}</Text> : <Text type="secondary">—</Text>,
-    },
-    {
-      title: 'Session Start',
-      dataIndex: 'session_start',
-      key: 'session_start',
-      render: (val: string | null) =>
-        val ? <Text>{val}</Text> : <Text type="secondary">—</Text>,
-    },
-    {
-      title: 'First / Last Seen',
-      key: 'seen',
-      render: (_, record) => (
-        <div>
-          {record.is_new && record.first_seen && (
-            <div>
-              <Text type="secondary" style={{ fontSize: 11 }}>First login: </Text>
-              <Text style={{ fontSize: 12 }}>{record.first_seen}</Text>
-            </div>
-          )}
-          <div>
-            <Text type="secondary" style={{ fontSize: 11 }}>Last seen: </Text>
-            <Text style={{ fontSize: 12 }}>{record.last_seen}</Text>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'Last Session Status',
-      key: 'session_status',
-      render: (_, record) => {
-        const s = record.lastSession;
-        if (!s) return <Text type="secondary">—</Text>;
-        const colorMap: Record<string, string> = {
-          ACTIVE: 'green',
-          TERMINATED: 'red',
-          EXPIRED: 'orange',
-        };
-        return (
-          <Tooltip title={s.termination_reason ?? undefined}>
-            <Tag color={colorMap[s.status] ?? 'default'}>{s.status}</Tag>
-          </Tooltip>
-        );
-      },
     },
   ];
 

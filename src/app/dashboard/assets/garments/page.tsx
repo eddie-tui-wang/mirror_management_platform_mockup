@@ -1,12 +1,11 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Table, Button, Tag, Space, Typography, Select, Image, Modal, message } from 'antd';
+import { Table, Tag, Typography, Select, Image } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useSearchParams } from 'next/navigation';
 import { organizations, garments, getOrgById } from '@/lib/mock-data';
 import type { GarmentCatalog, OrgType, Status } from '@/lib/types';
-import PermGuard from '@/components/PermGuard';
 
 const { Title } = Typography;
 
@@ -19,17 +18,12 @@ export default function GarmentsPage() {
   const searchParams = useSearchParams();
   const initialOrgId = searchParams.get('org') ?? undefined;
 
-  const [filterOrgType, setFilterOrgType] = useState<OrgType | undefined>(undefined);
   const [filterOrgId, setFilterOrgId] = useState<string | undefined>(initialOrgId);
   const [filterStatus, setFilterStatus] = useState<Status | undefined>(undefined);
 
   const orgOptions = useMemo(() => {
-    let orgs = organizations;
-    if (filterOrgType) {
-      orgs = orgs.filter((o) => o.org_type === filterOrgType);
-    }
-    return orgs.map((o) => ({ label: `${o.name} (${o.org_id})`, value: o.org_id }));
-  }, [filterOrgType]);
+    return organizations.map((o) => ({ label: `${o.name} (${o.org_id})`, value: o.org_id }));
+  }, []);
 
   const dataSource: GarmentRow[] = useMemo(() => {
     return garments
@@ -42,22 +36,11 @@ export default function GarmentsPage() {
         };
       })
       .filter((g) => {
-        if (filterOrgType && g.org_type !== filterOrgType) return false;
         if (filterOrgId && g.org_id !== filterOrgId) return false;
         if (filterStatus && g.status !== filterStatus) return false;
         return true;
       });
   }, [filterOrgType, filterOrgId, filterStatus]);
-
-  const confirmDelete = (record: GarmentRow) => {
-    Modal.confirm({
-      title: `Delete garment "${record.name}"?`,
-      content: `This garment belongs to ${record.org_name}.`,
-      okText: 'Delete',
-      okType: 'danger',
-      onOk: () => message.success(`Garment "${record.name}" deleted (simulated)`),
-    });
-  };
 
   const columns: ColumnsType<GarmentRow> = [
     {
@@ -77,26 +60,12 @@ export default function GarmentsPage() {
       ),
     },
     {
-      title: 'Garment Name',
+      title: 'Name',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'garment_id',
-      dataIndex: 'garment_id',
-      key: 'garment_id',
-      render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
-    },
-    {
-      title: 'Org Type',
-      dataIndex: 'org_type',
-      key: 'org_type',
-      render: (type: OrgType) => (
-        <Tag color={type === 'CHANNEL' ? 'blue' : 'orange'}>{type}</Tag>
-      ),
-    },
-    {
-      title: 'Org Name',
+      title: 'Org',
       dataIndex: 'org_name',
       key: 'org_name',
     },
@@ -113,35 +82,6 @@ export default function GarmentsPage() {
       dataIndex: 'updated_at',
       key: 'updated_at',
     },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (_, record) => (
-        <Space size="small">
-          <PermGuard permission="platform:garments:edit" fallback="disable">
-            <Button
-              type="link"
-              size="small"
-              onClick={() =>
-                message.info(`View/Edit garment ${record.name} (${record.garment_id})`)
-              }
-            >
-              View / Edit
-            </Button>
-          </PermGuard>
-          <PermGuard permission="platform:garments:delete" fallback="disable">
-            <Button
-              type="link"
-              size="small"
-              danger
-              onClick={() => confirmDelete(record)}
-            >
-              Delete
-            </Button>
-          </PermGuard>
-        </Space>
-      ),
-    },
   ];
 
   return (
@@ -151,20 +91,6 @@ export default function GarmentsPage() {
       </div>
 
       <Space style={{ marginBottom: 16 }} wrap>
-        <Select
-          placeholder="Org Type"
-          allowClear
-          style={{ width: 160 }}
-          value={filterOrgType}
-          onChange={(val) => {
-            setFilterOrgType(val);
-            setFilterOrgId(undefined);
-          }}
-          options={[
-            { label: 'CHANNEL', value: 'CHANNEL' },
-            { label: 'CUSTOMER', value: 'CUSTOMER' },
-          ]}
-        />
         <Select
           placeholder="Organization"
           allowClear
