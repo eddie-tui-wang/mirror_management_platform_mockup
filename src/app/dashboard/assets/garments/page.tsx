@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Table, Tag, Typography, Select, Image } from 'antd';
+import { Table, Tag, Typography, Select, Image, Space } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useSearchParams } from 'next/navigation';
 import { organizations, garments, getOrgById } from '@/lib/mock-data';
@@ -40,7 +40,7 @@ export default function GarmentsPage() {
         if (filterStatus && g.status !== filterStatus) return false;
         return true;
       });
-  }, [filterOrgType, filterOrgId, filterStatus]);
+  }, [filterOrgId, filterStatus]);
 
   const columns: ColumnsType<GarmentRow> = [
     {

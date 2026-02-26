@@ -42,7 +42,7 @@ export default function TemplatesPage() {
       }
       return true;
     });
-  }, [filterStatus, searchText]);
+  }, [searchText]);
 
   // 添加提示词
   const addPrompt = () => {
