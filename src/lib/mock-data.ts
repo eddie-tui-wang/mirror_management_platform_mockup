@@ -373,6 +373,8 @@ export function getCustomerSummary(customerOrgId: string) {
     onlineDeviceCount: onlineDevices,
     adminEmail: adminUser?.email ?? '-',
     adminName: adminUser?.name ?? '-',
+    adminStatus: adminUser?.status ?? 'Disabled',
+    adminLastLogin: adminUser?.last_login ?? null,
     customerType: parentOrg?.parent_org_id ? 'Reseller' as const : 'Direct' as const,
     channelName: channelOrg?.name ?? '-',
     channelOrgId: channelOrg?.org_id ?? null,

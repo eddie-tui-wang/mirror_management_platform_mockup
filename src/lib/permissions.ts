@@ -100,7 +100,6 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   '/dashboard/assets/devices': 'platform:devices:view',
   // 渠道端
   '/dashboard/channel/customers': 'channel:customers:view',
-  '/dashboard/channel/users': 'channel:users:view',
   // 客户端
   '/dashboard/customer/users': 'customer:users:view',
   '/dashboard/customer/garments': 'customer:garments:view',

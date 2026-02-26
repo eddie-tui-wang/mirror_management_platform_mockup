@@ -27,7 +27,6 @@ const platformMenu: MenuItemConfig[] = [
 // 渠道端菜单
 const channelMenu: MenuItemConfig[] = [
   { key: 'ch-customers', label: 'Customer Management', icon: 'TeamOutlined', path: '/dashboard/channel/customers', permission: 'channel:customers:view' },
-  { key: 'ch-users', label: 'Customer Accounts', icon: 'UserOutlined', path: '/dashboard/channel/users', permission: 'channel:users:view' },
 ];
 
 // 客户端菜单

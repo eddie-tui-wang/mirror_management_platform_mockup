@@ -99,7 +99,7 @@ export default function LoginPage() {
         padding: '0 20px',
       }}>
         {/* Logo & Branding */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 32 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="AI Mirror Fitting" style={{ height: 36, width: 'auto', filter: 'invert(1) brightness(2)', marginBottom: 12 }} />
           <div>

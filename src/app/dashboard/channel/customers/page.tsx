@@ -4,7 +4,6 @@ import React, { useMemo, useState } from 'react';
 import { Table, Button, Tag, Space, Modal, Form, Input, Switch, InputNumber, Typography, Select, Tooltip, message } from 'antd';
 import { PlusOutlined, WarningOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { getChannelCustomers, getCustomerSummary } from '@/lib/mock-data';
 import type { Organization, Status, TrialStatus } from '@/lib/types';
@@ -14,6 +13,8 @@ const { Title } = Typography;
 
 interface CustomerRow extends Organization {
   adminEmail: string;
+  adminStatus: Status;
+  adminLastLogin: string | null;
   memberCount: number;
   onlineDeviceCount: number;
   isTrial: boolean;
@@ -26,11 +27,11 @@ interface CustomerRow extends Organization {
 }
 
 export default function ChannelCustomersPage() {
-  const router = useRouter();
   const currentUser = useAuthStore((s) => s.currentUser);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [isTrial, setIsTrial] = useState(false);
   const [accountKindFilter, setAccountKindFilter] = useState<string>('all');
+  const [accountStatusFilter, setAccountStatusFilter] = useState<string>('all');
   const [form] = Form.useForm();
 
   const dataSource: CustomerRow[] = useMemo(() => {
@@ -41,6 +42,8 @@ export default function ChannelCustomersPage() {
       return {
         ...org,
         adminEmail: summary.adminEmail,
+        adminStatus: summary.adminStatus,
+        adminLastLogin: summary.adminLastLogin,
         memberCount: summary.memberCount,
         onlineDeviceCount: summary.onlineDeviceCount,
         isTrial: summary.isTrial,
@@ -55,10 +58,12 @@ export default function ChannelCustomersPage() {
   }, [currentUser]);
 
   const filteredData = useMemo(() => {
-    if (accountKindFilter === 'all') return dataSource;
-    if (accountKindFilter === 'Trial') return dataSource.filter((c) => c.isTrial);
-    return dataSource.filter((c) => !c.isTrial);
-  }, [dataSource, accountKindFilter]);
+    let result = dataSource;
+    if (accountKindFilter === 'Trial') result = result.filter((c) => c.isTrial);
+    else if (accountKindFilter === 'Regular') result = result.filter((c) => !c.isTrial);
+    if (accountStatusFilter !== 'all') result = result.filter((c) => c.adminStatus === accountStatusFilter);
+    return result;
+  }, [dataSource, accountKindFilter, accountStatusFilter]);
 
   const handleCreate = () => {
     form.validateFields().then((values) => {
@@ -83,7 +88,7 @@ export default function ChannelCustomersPage() {
           <Space size={4} direction="vertical">
             <Tag color="red" icon={<WarningOutlined />}>Trial - Expired</Tag>
             <Typography.Text type="danger" style={{ fontSize: 12 }}>
-              {record.trialRemainingSales <= 0 ? 'Quota exhausted' : `${record.trialRemainingSales} remaining`}
+              {record.trialRemainingSales <= 0 ? 'Quota exhausted' : `${record.remainingDays} days left`}
             </Typography.Text>
           </Space>
         </Tooltip>
@@ -108,25 +113,30 @@ export default function ChannelCustomersPage() {
       key: 'name',
     },
     {
-      title: 'customer_id',
-      dataIndex: 'org_id',
-      key: 'org_id',
-      render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
-    },
-    {
       title: 'Account Type',
       key: 'accountKind',
       render: (_, record) => renderAccountKind(record),
     },
     {
-      title: 'HQ Admin',
+      title: 'HQ Admin Email',
       dataIndex: 'adminEmail',
       key: 'adminEmail',
     },
     {
-      title: 'Members',
-      dataIndex: 'memberCount',
-      key: 'memberCount',
+      title: 'Account Status',
+      key: 'adminStatus',
+      render: (_, record) => (
+        <Tag color={record.adminStatus === 'Active' ? 'green' : 'red'}>{record.adminStatus}</Tag>
+      ),
+    },
+    {
+      title: 'Last Login',
+      key: 'adminLastLogin',
+      render: (_, record) => (
+        <Typography.Text type={record.adminLastLogin ? undefined : 'secondary'}>
+          {record.adminLastLogin ?? 'Never logged in'}
+        </Typography.Text>
+      ),
     },
     {
       title: 'Created At',
@@ -134,25 +144,21 @@ export default function ChannelCustomersPage() {
       key: 'created_at',
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: Status) => (
-        <Tag color={status === 'Active' ? 'green' : 'red'}>{status}</Tag>
-      ),
-    },
-    {
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
-          <Button
-            type="link"
-            size="small"
-            onClick={() => router.push(`/dashboard/channel/users?org=${record.org_id}`)}
-          >
-            View Accounts
-          </Button>
+          {record.adminLastLogin === null && (
+            <PermGuard permission="channel:users:reinvite" fallback="disable">
+              <Button
+                type="link"
+                size="small"
+                onClick={() => message.success(`Invitation resent to ${record.adminEmail} (simulated)`)}
+              >
+                Resend Invitation
+              </Button>
+            </PermGuard>
+          )}
         </Space>
       ),
     },
@@ -166,17 +172,15 @@ export default function ChannelCustomersPage() {
         <Title level={4} style={{ margin: 0 }}>
           {currentUser.org_name} - Customer Management
         </Title>
-        <Space>
-          <PermGuard permission="channel:customers:create">
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => setCreateModalOpen(true)}
-            >
-              Create Customer (Reseller)
-            </Button>
-          </PermGuard>
-        </Space>
+        <PermGuard permission="channel:customers:create">
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setCreateModalOpen(true)}
+          >
+            Create Customer (Reseller)
+          </Button>
+        </PermGuard>
       </div>
 
       <Space style={{ marginBottom: 16 }} wrap>
@@ -189,6 +193,17 @@ export default function ChannelCustomersPage() {
             { value: 'all', label: 'All' },
             { value: 'Regular', label: 'Regular' },
             { value: 'Trial', label: 'Trial' },
+          ]}
+        />
+        <span>Account Status:</span>
+        <Select
+          value={accountStatusFilter}
+          onChange={setAccountStatusFilter}
+          style={{ width: 120 }}
+          options={[
+            { value: 'all', label: 'All' },
+            { value: 'Active', label: 'Active' },
+            { value: 'Disabled', label: 'Disabled' },
           ]}
         />
       </Space>
@@ -228,15 +243,12 @@ export default function ChannelCustomersPage() {
               { type: 'email', message: 'Please enter a valid email' },
             ]}
           >
-            <Input placeholder="Please enter HQ Admin email" />
+            <Input placeholder="Will become this customer's HQ Owner account" />
           </Form.Item>
 
           <Form.Item label="Trial Account">
             <Space>
-              <Switch
-                checked={isTrial}
-                onChange={setIsTrial}
-              />
+              <Switch checked={isTrial} onChange={setIsTrial} />
               <span>{isTrial ? 'Trial Enabled' : 'Regular Account'}</span>
             </Space>
           </Form.Item>
