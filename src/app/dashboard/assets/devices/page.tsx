@@ -2,9 +2,9 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  Table, Tag, Typography, Select, Space, Badge, Tooltip, Button,
+  Table, Tag, Typography, Select, Space, Badge, Tooltip,
 } from 'antd';
-import { DesktopOutlined, ReloadOutlined } from '@ant-design/icons';
+import { DesktopOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { devices, organizations, sessions } from '@/lib/mock-data';
 import type { Device, DeviceStatus } from '@/lib/types';
@@ -156,7 +156,7 @@ export default function PlatformDevicesPage() {
   return (
     <div>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div style={{ marginBottom: 16 }}>
         <Space align="center">
           <Title level={4} style={{ margin: 0 }}>
             <DesktopOutlined style={{ marginRight: 8 }} />
@@ -166,9 +166,6 @@ export default function PlatformDevicesPage() {
             <Tag color="blue">{newDeviceCount} new</Tag>
           )}
         </Space>
-        <Tooltip title="Refresh (simulated)">
-          <Button icon={<ReloadOutlined />} onClick={() => {}} />
-        </Tooltip>
       </div>
 
       {/* Filters */}

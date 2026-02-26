@@ -5,7 +5,7 @@ import { Layout, Menu, Avatar, Dropdown, Tag, Typography, Space, theme, Badge, T
 import {
   BankOutlined, TeamOutlined, UserOutlined, AppstoreOutlined,
   SkinOutlined, LayoutOutlined, DesktopOutlined, ClockCircleOutlined,
-  LogoutOutlined, SwapOutlined, SettingOutlined, BellOutlined,
+  LogoutOutlined, SettingOutlined, BellOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
@@ -117,16 +117,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       label: 'Personal Settings',
       onClick: () => router.push('/dashboard/settings'),
     },
-    { type: 'divider' },
-    {
-      key: 'switch',
-      icon: <SwapOutlined />,
-      label: 'Switch Account',
-      onClick: () => {
-        logout();
-        router.push('/');
-      },
-    },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
@@ -221,12 +211,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           alignItems: 'center',
           justifyContent: 'center',
           borderBottom: `1px solid ${token.colorBorderSecondary}`,
-          padding: '0 16px',
+          padding: '0 20px',
         }}>
-          <Space>
-            <Badge color={portalColor} />
-            <Text strong style={{ fontSize: 16 }}>Smart Mirror</Text>
-          </Space>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="AI Mirror Fitting" style={{ height: 22, width: 'auto' }} />
         </div>
         <div style={{ padding: '8px 12px' }}>
           <Tag color={portalColor} style={{ width: '100%', textAlign: 'center', padding: '4px 0', fontSize: 13 }}>

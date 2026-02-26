@@ -80,29 +80,13 @@ export default function ForgotPasswordPage() {
       }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 56,
-            height: 56,
-            borderRadius: 16,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            marginBottom: 16,
-            boxShadow: '0 8px 24px rgba(102, 126, 234, 0.4)',
-          }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="2" width="18" height="20" rx="2" stroke="white" strokeWidth="1.5" />
-              <circle cx="12" cy="10" r="3" stroke="white" strokeWidth="1.5" />
-              <path d="M7 18c0-2.5 2.2-4 5-4s5 1.5 5 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="AI Mirror Fitting" style={{ height: 36, width: 'auto', filter: 'invert(1) brightness(2)', marginBottom: 12 }} />
+          <div>
+            <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>
+              Reset your password
+            </Text>
           </div>
-          <Title level={3} style={{ color: '#fff', margin: 0, fontWeight: 600, letterSpacing: '-0.5px' }}>
-            Smart Mirror
-          </Title>
-          <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>
-            Reset your password
-          </Text>
         </div>
 
         {/* Card */}

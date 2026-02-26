@@ -161,7 +161,7 @@ export const devices: Device[] = [
   // ── 其他 org 设备 ──
   { device_id: 'dev_12', nickname: 'VIP Lounge',         status: 'Offline', last_seen: '2026-02-09 21:10', current_org_id: 'org_cu_1002', current_org_name: 'Customer Y', current_user_id: null,    current_user_email: null,            session_start: null },
   { device_id: 'dev_15', nickname: null,                  status: 'Online',  last_seen: '2026-02-10 09:30', current_org_id: 'org_cu_1003', current_org_name: 'Customer Z', current_user_id: 'u_012', current_user_email: 'admin@z.com',   session_start: '2026-02-10 09:00' },
-  { device_id: 'dev_07', nickname: 'Showroom A',          status: 'Offline', last_seen: '2026-02-10 09:12', current_org_id: 'org_ch_001',  current_org_name: 'Channel A',  current_user_id: null,    current_user_email: null,            session_start: null },
+  { device_id: 'dev_07', nickname: 'Showroom A',          status: 'Offline', last_seen: '2026-02-10 09:12', current_org_id: null,          current_org_name: null,         current_user_id: null,    current_user_email: null,            session_start: null },
   { device_id: 'dev_22', nickname: null,                  status: 'Offline', last_seen: '2026-02-08 18:00', current_org_id: 'org_cu_1004', current_org_name: 'Customer W', current_user_id: null,    current_user_email: null,            session_start: null },
 ];
 
@@ -185,7 +185,7 @@ export const deviceGarmentAssignments: DeviceGarmentAssignment[] = [
 
 export const sessions: Session[] = [
   { session_id: 's_001', device_id: 'dev_09', user_id: 'u_002', user_email: 'hq.admin@x.com', org_id: 'org_cu_1001', org_name: 'Customer X', status: 'ACTIVE', login_at: '2026-02-10 09:55', logout_at: null, termination_reason: null },
-  { session_id: 's_002', device_id: 'dev_07', user_id: 'u_001', user_email: 'admin@channel-a.com', org_id: 'org_ch_001', org_name: 'Channel A', status: 'TERMINATED', login_at: '2026-02-10 09:10', logout_at: '2026-02-10 09:12', termination_reason: 'NEW_LOGIN_KICK' },
+  // s_002 removed: channel accounts cannot log in to devices
   { session_id: 's_003', device_id: 'dev_15', user_id: 'u_012', user_email: 'admin@z.com', org_id: 'org_cu_1003', org_name: 'Customer Z', status: 'ACTIVE', login_at: '2026-02-10 09:00', logout_at: null, termination_reason: null },
   { session_id: 's_004', device_id: 'dev_20', user_id: 'u_006', user_email: 'ops1@x.com', org_id: 'org_cu_1001', org_name: 'Customer X', status: 'ACTIVE', login_at: '2026-02-10 08:30', logout_at: null, termination_reason: null },
   { session_id: 's_005', device_id: 'dev_12', user_id: 'u_010', user_email: 'owner@y.com', org_id: 'org_cu_1002', org_name: 'Customer Y', status: 'EXPIRED', login_at: '2026-02-09 20:00', logout_at: '2026-02-09 21:10', termination_reason: 'SESSION_EXPIRED' },
