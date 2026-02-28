@@ -7,8 +7,7 @@ export type Status = 'Active' | 'Disabled';
 export type DeviceStatus = 'Online' | 'Offline';
 export type SessionStatus = 'ACTIVE' | 'TERMINATED' | 'EXPIRED';
 export type CustomerType = 'Direct' | 'Reseller';
-export type AccountKind = 'Regular' | 'Trial';
-export type TrialStatus = 'active' | 'expired' | 'not_trial';
+export type CodeType = 'Regular' | 'Trial';
 
 export interface Platform {
   platform_id: string;
@@ -20,15 +19,9 @@ export interface Organization {
   platform_id: string;
   org_type: OrgType;
   name: string;
-  parent_org_id: string | null; // 渠道客户指向所属渠道
+  parent_org_id: string | null;
   status: Status;
   created_at: string;
-  // 试用账户字段（可选，向后兼容）
-  is_trial?: boolean;
-  trial_days?: number;
-  trial_start_date?: string;
-  trial_max_sales?: number;   // 试用销售次数上限（创建时输入）
-  trial_used_sales?: number;  // 已使用的试用销售次数
 }
 
 export interface User {
@@ -54,13 +47,12 @@ export interface GarmentCatalog {
   org_id: string;
   name: string;
   image_url: string;
-  category_id: string | null; // 关联服装分类，客户自行管理
-  template_ids: string[];     // 该服装启用的模板 ID 列表
+  category_id: string | null;
+  template_ids: string[];
   status: Status;
   updated_at: string;
 }
 
-// 服装分类（客户端自行创建和管理）
 export interface GarmentCategory {
   category_id: string;
   org_id: string;
@@ -68,17 +60,15 @@ export interface GarmentCategory {
   created_at: string;
 }
 
-// 平台统一管理的主模板（模块化场景）
 export interface MasterTemplate {
   template_id: string;
-  name: string;           // 模块统称，如"生活场景"
-  prompts: string[];      // 提示词列表
+  name: string;
+  prompts: string[];
   status: Status;
   created_at: string;
   updated_at: string;
 }
 
-// 模板分配记录：将主模板绑定到客户组织
 export interface TemplateAssignment {
   assignment_id: string;
   template_id: string;
@@ -98,8 +88,8 @@ export interface Device {
   current_user_id: string | null;
   current_user_email: string | null;
   session_start: string | null;
-  is_new?: boolean;   // 该设备是否为首次登录该账号（未经管理员确认）
-  first_seen?: string; // 首次出现时间
+  is_new?: boolean;
+  first_seen?: string;
 }
 
 export interface DeviceGarmentAssignment {
@@ -113,7 +103,7 @@ export type ActivationCodeStatus = 'Unused' | 'Bound' | 'Expired' | 'Revoked';
 
 export interface ActivationCode {
   code_id: string;
-  code: string;                      // e.g., "SMRT-A1B2-C3D4"
+  code: string;
   org_id: string;
   created_by_portal: 'platform' | 'channel';
   created_at: string;
@@ -122,6 +112,12 @@ export interface ActivationCode {
   bound_device_id: string | null;
   bound_at: string | null;
   nickname: string | null;
+  // Code type
+  code_type: CodeType;
+  // Trial-only fields (null for Regular)
+  trial_duration_days: number | null;   // days of device access after binding
+  trial_max_sessions: number | null;    // max try-on sessions allowed
+  trial_used_sessions: number | null;   // sessions consumed so far
 }
 
 export interface Session {
@@ -147,7 +143,7 @@ export interface DemoAccount {
   portal: PortalType;
   org_id: string;
   org_name: string;
-  password: string; // demo 密码
+  password: string;
 }
 
 export interface AuthState {
@@ -164,6 +160,6 @@ export interface MenuItem {
   label: string;
   icon?: string;
   path?: string;
-  permission?: string; // 需要的 permission_key
+  permission?: string;
   children?: MenuItem[];
 }
