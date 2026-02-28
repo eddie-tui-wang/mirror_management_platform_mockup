@@ -1,17 +1,16 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Layout, Menu, Avatar, Dropdown, Tag, Typography, Space, theme, Badge, Tooltip } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Tag, Typography, Space, theme } from 'antd';
 import {
   BankOutlined, TeamOutlined, UserOutlined, AppstoreOutlined,
   SkinOutlined, LayoutOutlined, DesktopOutlined, ClockCircleOutlined,
-  LogoutOutlined, SettingOutlined, BellOutlined,
+  LogoutOutlined, SettingOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { hasPermission } from '@/lib/permissions';
 import { PORTAL_MENUS, MenuItemConfig } from '@/lib/menu-config';
-import { getOrgNewDevices } from '@/lib/mock-data';
 import type { MenuProps } from 'antd';
 
 const { Header, Sider, Content } = Layout;
@@ -43,7 +42,6 @@ const PORTAL_LABEL: Record<string, string> = {
 function buildMenuItems(items: MenuItemConfig[], role: string): MenuProps['items'] {
   return items
     .filter(item => {
-      // 如果有子菜单，只要有一个子项有权限就显示
       if (item.children) {
         return item.children.some(child =>
           !child.permission || hasPermission(role as any, child.permission)
@@ -129,71 +127,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     },
   ];
 
-  const acknowledgedDeviceIds = useAuthStore((s) => s.acknowledgedDeviceIds);
-  const acknowledgeDevices = useAuthStore((s) => s.acknowledgeDevices);
-
-  // 新设备通知（仅 customer portal）
-  const newDevices = useMemo(() => {
-    if (currentUser.portal !== 'customer') return [];
-    return getOrgNewDevices(currentUser.org_id).filter(
-      (d) => !acknowledgedDeviceIds.includes(d.device_id)
-    );
-  }, [currentUser, acknowledgedDeviceIds]);
-
-  const bellMenuItems: MenuProps['items'] = newDevices.length === 0
-    ? [{ key: 'empty', label: <Text type="secondary" style={{ padding: '4px 0', display: 'block' }}>No new notifications</Text>, disabled: true }]
-    : [
-        ...newDevices.map((d) => ({
-          key: d.device_id,
-          label: (
-            <div
-              style={{ padding: '4px 0', maxWidth: 260 }}
-              onClick={() => {
-                acknowledgeDevices([d.device_id]);
-                router.push('/dashboard/customer/devices');
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <DesktopOutlined style={{ color: '#1677ff', fontSize: 16 }} />
-                <div>
-                  <div>
-                    <Text strong style={{ fontSize: 13 }}>{d.device_id}</Text>
-                    <Tag color="blue" style={{ marginLeft: 6, fontSize: 11 }}>New</Tag>
-                  </div>
-                  <div>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                      First login · {d.first_seen ?? d.last_seen}
-                    </Text>
-                  </div>
-                  <div>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                      by {d.current_user_email ?? '-'}
-                    </Text>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ),
-        })),
-        { type: 'divider' as const },
-        {
-          key: 'ack-all',
-          label: (
-            <Text style={{ color: '#1677ff', fontSize: 13 }}>
-              Mark all as read
-            </Text>
-          ),
-          onClick: () => acknowledgeDevices(newDevices.map((d) => d.device_id)),
-        },
-      ];
-
   const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
     if (key.startsWith('/')) {
       router.push(key);
     }
   };
 
-  // 计算选中的 menu key
   const selectedKeys = [pathname];
 
   return (
@@ -244,20 +183,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Text strong>{currentUser.org_name}</Text>
           </Space>
           <Space size={16}>
-            {currentUser.portal === 'customer' && (
-              <Dropdown
-                menu={{ items: bellMenuItems }}
-                placement="bottomRight"
-                trigger={['click']}
-                overlayStyle={{ width: 320 }}
-              >
-                <Tooltip title={newDevices.length > 0 ? `${newDevices.length} new device(s)` : 'Notifications'}>
-                  <Badge count={newDevices.length} size="small" style={{ cursor: 'pointer' }}>
-                    <BellOutlined style={{ fontSize: 18, cursor: 'pointer', color: token.colorTextSecondary }} />
-                  </Badge>
-                </Tooltip>
-              </Dropdown>
-            )}
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
               <Space style={{ cursor: 'pointer' }}>
                 <Avatar style={{ backgroundColor: portalColor }} icon={<UserOutlined />} />

@@ -2,14 +2,22 @@
 
 import React, { useMemo, useState } from 'react';
 import { Table, Button, Tag, Space, Modal, Form, Input, Switch, InputNumber, Typography, Select, Tooltip, message } from 'antd';
-import { PlusOutlined, WarningOutlined } from '@ant-design/icons';
+import { PlusOutlined, WarningOutlined, KeyOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuthStore } from '@/lib/store';
-import { getChannelCustomers, getCustomerSummary } from '@/lib/mock-data';
-import type { Organization, Status, TrialStatus } from '@/lib/types';
+import { getChannelCustomers, getCustomerSummary, getOrgActivationCodes } from '@/lib/mock-data';
+import type { Organization, Status, TrialStatus, ActivationCode, ActivationCodeStatus } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
+
+const CODE_LIMIT = 5;
+const CODE_STATUS_COLOR: Record<ActivationCodeStatus, string> = {
+  Unused: 'blue',
+  Bound: 'green',
+  Expired: 'default',
+  Revoked: 'red',
+};
 
 interface CustomerRow extends Organization {
   adminEmail: string;
@@ -34,6 +42,17 @@ export default function ChannelCustomersPage() {
   const [accountStatusFilter, setAccountStatusFilter] = useState<string>('all');
   const [statusOverrides, setStatusOverrides] = useState<Record<string, Status>>({});
   const [form] = Form.useForm();
+
+  const [codesModalOpen, setCodesModalOpen] = useState(false);
+  const [codesOrg, setCodesOrg] = useState<CustomerRow | null>(null);
+  const orgCodes = useMemo(
+    () => (codesOrg ? getOrgActivationCodes(codesOrg.org_id) : []),
+    [codesOrg]
+  );
+  const unusedCount = useMemo(
+    () => orgCodes.filter((c) => c.status === 'Unused').length,
+    [orgCodes]
+  );
 
   const dataSource: CustomerRow[] = useMemo(() => {
     if (!currentUser) return [];
@@ -161,6 +180,16 @@ export default function ChannelCustomersPage() {
         const current = statusOverrides[record.org_id] ?? record.status;
         return (
           <Space size="small">
+            <PermGuard permission="channel:customers:create_code">
+              <Button
+                type="link"
+                size="small"
+                icon={<KeyOutlined />}
+                onClick={() => { setCodesOrg(record); setCodesModalOpen(true); }}
+              >
+                Manage Codes
+              </Button>
+            </PermGuard>
             {record.adminLastLogin === null && (
               <PermGuard permission="channel:users:reinvite" fallback="disable">
                 <Button
@@ -236,6 +265,117 @@ export default function ChannelCustomersPage() {
         rowKey="org_id"
         pagination={{ pageSize: 10 }}
       />
+
+      {/* Manage Codes Modal */}
+      <Modal
+        title={
+          <Space>
+            <KeyOutlined />
+            <span>Activation Codes — {codesOrg?.name}</span>
+          </Space>
+        }
+        open={codesModalOpen}
+        onCancel={() => { setCodesModalOpen(false); setCodesOrg(null); }}
+        footer={null}
+        width={760}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <Text type="secondary">
+            {unusedCount} / {CODE_LIMIT} Unused slots used
+            {(statusOverrides[codesOrg?.org_id ?? ''] ?? codesOrg?.status) === 'Disabled' && (
+              <Text type="danger" style={{ marginLeft: 8 }}>— Account is disabled</Text>
+            )}
+          </Text>
+          <PermGuard permission="channel:customers:create_code">
+            <Button
+              type="primary"
+              size="small"
+              icon={<PlusOutlined />}
+              disabled={
+                unusedCount >= CODE_LIMIT ||
+                (statusOverrides[codesOrg?.org_id ?? ''] ?? codesOrg?.status) === 'Disabled'
+              }
+              onClick={() =>
+                message.success(`New activation code created for ${codesOrg?.name} (simulated)`)
+              }
+            >
+              Create Code
+            </Button>
+          </PermGuard>
+        </div>
+        <Table<ActivationCode>
+          size="small"
+          dataSource={orgCodes}
+          rowKey="code_id"
+          pagination={false}
+          columns={[
+            {
+              title: 'Code',
+              dataIndex: 'code',
+              key: 'code',
+              render: (c: string) => <Text code style={{ fontSize: 12 }}>{c}</Text>,
+            },
+            {
+              title: 'Status',
+              dataIndex: 'status',
+              key: 'status',
+              render: (s: ActivationCodeStatus) => <Tag color={CODE_STATUS_COLOR[s]}>{s}</Tag>,
+            },
+            {
+              title: 'Device ID',
+              dataIndex: 'bound_device_id',
+              key: 'bound_device_id',
+              render: (id: string | null) =>
+                id ? <Text code style={{ fontSize: 12 }}>{id}</Text> : <Text type="secondary">—</Text>,
+            },
+            {
+              title: 'Nickname',
+              dataIndex: 'nickname',
+              key: 'nickname',
+              render: (v: string | null) => v ?? <Text type="secondary">—</Text>,
+            },
+            {
+              title: 'Created By',
+              dataIndex: 'created_by_portal',
+              key: 'created_by_portal',
+              render: (p: 'platform' | 'channel') => (
+                <Tag color={p === 'platform' ? 'purple' : 'cyan'}>
+                  {p === 'platform' ? 'Platform' : 'Channel'}
+                </Tag>
+              ),
+            },
+            {
+              title: 'Created At',
+              dataIndex: 'created_at',
+              key: 'created_at',
+              render: (v: string) => <Text style={{ fontSize: 12 }}>{v}</Text>,
+            },
+            {
+              title: 'Actions',
+              key: 'actions',
+              render: (_: unknown, rec: ActivationCode) =>
+                rec.status === 'Unused' ? (
+                  <Button
+                    type="link"
+                    size="small"
+                    danger
+                    onClick={() =>
+                      Modal.confirm({
+                        title: `Revoke code ${rec.code}?`,
+                        content: 'This code will be permanently revoked and cannot be used to bind a device.',
+                        okText: 'Revoke',
+                        okType: 'danger',
+                        onOk: () => message.success('Code revoked (simulated)'),
+                      })
+                    }
+                  >
+                    Revoke
+                  </Button>
+                ) : null,
+            },
+          ]}
+        />
+      </Modal>
 
       <Modal
         title="Create Customer (Reseller)"

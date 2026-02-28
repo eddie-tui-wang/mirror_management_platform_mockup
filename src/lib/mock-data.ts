@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import {
   Organization, User, OrgMembership, GarmentCatalog, GarmentCategory,
   MasterTemplate, TemplateAssignment, Device, DeviceGarmentAssignment, Session, DemoAccount, TrialStatus,
+  ActivationCode,
 } from './types';
 
 // ==================== 组织数据 ====================
@@ -195,6 +196,28 @@ export const sessions: Session[] = [
   { session_id: 's_008', device_id: 'dev_34', user_id: 'u_006', user_email: 'ops1@x.com',     org_id: 'org_cu_1001', org_name: 'Customer X', status: 'ACTIVE',     login_at: '2026-02-10 10:35', logout_at: null,              termination_reason: null },
 ];
 
+// ==================== 激活码 ====================
+
+export const activationCodes: ActivationCode[] = [
+  // Customer X (org_cu_1001): 2 Bound, 1 Unused, 1 Revoked
+  { code_id: 'ac_001', code: 'SMRT-A1B2-C3D4', org_id: 'org_cu_1001', created_by_portal: 'platform', created_at: '2026-02-01 10:00', expires_at: '2026-02-08 10:00', status: 'Bound',   bound_device_id: 'dev_09', bound_at: '2026-02-03 09:00', nickname: 'Front Door Mirror' },
+  { code_id: 'ac_002', code: 'SMRT-E5F6-G7H8', org_id: 'org_cu_1001', created_by_portal: 'platform', created_at: '2026-02-02 11:00', expires_at: '2026-02-09 11:00', status: 'Bound',   bound_device_id: 'dev_20', bound_at: '2026-02-05 14:00', nickname: 'Fitting Room #2' },
+  { code_id: 'ac_003', code: 'SMRT-I9J0-K1L2', org_id: 'org_cu_1001', created_by_portal: 'channel',  created_at: '2026-02-09 09:00', expires_at: '2026-02-16 09:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null },
+  { code_id: 'ac_004', code: 'SMRT-M3N4-O5P6', org_id: 'org_cu_1001', created_by_portal: 'channel',  created_at: '2026-02-01 08:00', expires_at: '2026-02-08 08:00', status: 'Revoked', bound_device_id: null,     bound_at: null,              nickname: null },
+  // Customer Y (org_cu_1002): 1 Bound, 1 Unused, 1 Expired
+  { code_id: 'ac_005', code: 'SMRT-Q7R8-S9T0', org_id: 'org_cu_1002', created_by_portal: 'channel',  created_at: '2026-02-05 10:00', expires_at: '2026-02-12 10:00', status: 'Bound',   bound_device_id: 'dev_12', bound_at: '2026-02-07 11:00', nickname: 'VIP Lounge' },
+  { code_id: 'ac_006', code: 'SMRT-U1V2-W3X4', org_id: 'org_cu_1002', created_by_portal: 'channel',  created_at: '2026-02-09 14:00', expires_at: '2026-02-16 14:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null },
+  { code_id: 'ac_007', code: 'SMRT-Y5Z6-A7B8', org_id: 'org_cu_1002', created_by_portal: 'channel',  created_at: '2026-02-01 09:00', expires_at: '2026-02-08 09:00', status: 'Expired', bound_device_id: null,     bound_at: null,              nickname: null },
+  // Customer Z (org_cu_1003): 1 Bound, 1 Unused
+  { code_id: 'ac_008', code: 'SMRT-C9D0-E1F2', org_id: 'org_cu_1003', created_by_portal: 'channel',  created_at: '2026-02-06 10:00', expires_at: '2026-02-13 10:00', status: 'Bound',   bound_device_id: 'dev_15', bound_at: '2026-02-08 16:00', nickname: null },
+  { code_id: 'ac_009', code: 'SMRT-G3H4-I5J6', org_id: 'org_cu_1003', created_by_portal: 'channel',  created_at: '2026-02-09 15:00', expires_at: '2026-02-16 15:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null },
+  // Customer W (org_cu_1004): 1 Bound, 1 Unused (trial)
+  { code_id: 'ac_010', code: 'SMRT-K7L8-M9N0', org_id: 'org_cu_1004', created_by_portal: 'platform', created_at: '2026-02-07 09:00', expires_at: '2026-02-14 09:00', status: 'Bound',   bound_device_id: 'dev_22', bound_at: '2026-02-08 10:00', nickname: null },
+  { code_id: 'ac_011', code: 'SMRT-O1P2-Q3R4', org_id: 'org_cu_1004', created_by_portal: 'platform', created_at: '2026-02-09 10:00', expires_at: '2026-02-16 10:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null },
+  // Customer V (org_cu_1005): 1 Unused (trial, channel)
+  { code_id: 'ac_012', code: 'SMRT-S5T6-U7V8', org_id: 'org_cu_1005', created_by_portal: 'channel',  created_at: '2026-02-09 11:00', expires_at: '2026-02-16 11:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null },
+];
+
 // ==================== Demo 账号 ====================
 
 export const demoAccounts: DemoAccount[] = [
@@ -343,6 +366,11 @@ export function getGarmentTemplateIds(catalogId: string): string[] {
 /** 获取某组织下首次登录、尚未被确认的新设备列表 */
 export function getOrgNewDevices(orgId: string): Device[] {
   return devices.filter(d => d.current_org_id === orgId && d.is_new === true);
+}
+
+/** 获取某客户账号下的所有激活码 */
+export function getOrgActivationCodes(orgId: string): ActivationCode[] {
+  return activationCodes.filter(ac => ac.org_id === orgId);
 }
 
 /** 获取渠道的汇总信息 */

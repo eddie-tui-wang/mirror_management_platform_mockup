@@ -72,6 +72,13 @@ HQOwner             →  /dashboard/customer/users
 |------|---------|
 | 创建直签客户 | `platform:customers:create` |
 | 禁用 / 启用客户 | —（无 PermGuard，直接操作） |
+| 创建 / 撤销激活码 | `platform:customers:create_code` |
+
+**激活码规则**
+- 每个客户账号同时 Unused 激活码上限 **5 个**
+- Unused 码有效期 **7 天**，到期自动 Expired
+- 目标客户 Disabled 时，Create Code 按钮置灰
+- 仅 Unused 状态的码可 Revoke
 
 **异常状态**
 - 客户名称为空 → 阻止提交
@@ -130,10 +137,13 @@ HQOwner             →  /dashboard/customer/users
 
 ---
 
-## P-6 设备管理（超管聚合视图）`/dashboard/assets/devices`
+## P-6 激活码管理（超管聚合视图）`/dashboard/assets/devices`
 
 **访问**：`PlatformSuperAdmin` only
-**只读**，无编辑 / 删除操作
+**只读**，全系统激活码聚合展示
+
+**展示字段**：激活码、归属客户、状态、绑定设备 ID、昵称、创建来源、创建时间
+**筛选**：按客户（Org）、按状态（Unused / Bound / Expired / Revoked）
 
 **异常状态**
 - 无异常操作，纯展示
@@ -149,6 +159,9 @@ HQOwner             →  /dashboard/customer/users
 | 创建渠道客户 | `channel:customers:create` |
 | 重发邀请 | `channel:users:reinvite` |
 | 禁用 / 启用客户账号 | — （无 PermGuard，直接操作） |
+| 创建 / 撤销激活码 | `channel:customers:create_code` |
+
+**激活码规则**（同 P-2，仅限当前渠道下的客户）
 
 **异常状态**
 - 客户名称为空 → 阻止提交
@@ -212,20 +225,17 @@ HQOwner             →  /dashboard/customer/users
 ## K-4 客户端·设备管理 `/dashboard/customer/devices`
 
 **访问**：`HQOwner` only
+**只读**，客户不能创建、撤销或编辑激活码
 
-| 操作 | 权限 Key |
-|------|---------|
-| Acknowledge 新设备 | `customer:devices:manage` |
-| 编辑昵称 | `customer:devices:manage` |
+**展示字段**：激活码、状态（Unused / Bound / Expired / Revoked）、绑定设备 ID（Bound 后自动填入）、昵称、创建来源（Platform / Channel）、创建时间、到期时间
+
+**激活码生命周期**
+- `Unused` → 设备用码登录后变为 `Bound`（一次性，不可重用）
+- `Unused` 超 7 天未绑定 → 自动 `Expired`
+- 管理员撤销 → `Revoked`
 
 **异常状态**
-- 新设备（未 Acknowledge）→ 行高亮 + Header Bell 角标 +1
-- 设备列表为空 → 空状态
-- 设备 Offline → 仍可编辑昵称，状态色标为灰色
-
-**Bell 通知**
-- 未确认设备数 > 0 → Bell 显示红点数字
-- 全部 Acknowledge 后 → 角标归零
+- 列表为空 → 空状态"暂无激活码，请联系账号管理员获取"
 
 ---
 

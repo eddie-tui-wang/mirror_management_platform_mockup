@@ -1,114 +1,112 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import {
-  Table, Tag, Typography, Select, Space, Badge,
-} from 'antd';
-import { DesktopOutlined } from '@ant-design/icons';
+import { Table, Tag, Typography, Select, Space } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { devices } from '@/lib/mock-data';
-import type { Device, DeviceStatus } from '@/lib/types';
+import { activationCodes, organizations } from '@/lib/mock-data';
+import type { ActivationCode, ActivationCodeStatus } from '@/lib/types';
 
 const { Title, Text } = Typography;
 
-// 从 devices 数组派生出所有涉及的 org 列表（用于筛选）
-function buildOrgOptions() {
-  const seen = new Set<string>();
-  const opts: { label: string; value: string }[] = [];
-  devices.forEach((d) => {
-    if (d.current_org_id && !seen.has(d.current_org_id)) {
-      seen.add(d.current_org_id);
-      opts.push({ label: d.current_org_name ?? d.current_org_id, value: d.current_org_id });
-    }
-  });
-  return opts.sort((a, b) => a.label.localeCompare(b.label));
-}
+const STATUS_COLOR: Record<ActivationCodeStatus, string> = {
+  Unused: 'blue',
+  Bound: 'green',
+  Expired: 'default',
+  Revoked: 'red',
+};
 
 export default function PlatformDevicesPage() {
   const [filterOrgId, setFilterOrgId] = useState<string | undefined>(undefined);
-  const [filterStatus, setFilterStatus] = useState<DeviceStatus | undefined>(undefined);
-  const [filterNew, setFilterNew] = useState<boolean | undefined>(undefined);
+  const [filterStatus, setFilterStatus] = useState<ActivationCodeStatus | undefined>(undefined);
 
-  const orgOptions = useMemo(() => buildOrgOptions(), []);
+  const orgOptions = useMemo(() =>
+    organizations
+      .filter((o) => o.org_type === 'CUSTOMER')
+      .map((o) => ({ label: o.name, value: o.org_id })),
+    []
+  );
 
-  // 为每台设备附加最近一次 session 信息
-  const dataSource = useMemo(() => {
-    return devices
-      .filter((d) => {
-        if (filterOrgId && d.current_org_id !== filterOrgId) return false;
-        if (filterStatus && d.status !== filterStatus) return false;
-        if (filterNew === true && !d.is_new) return false;
-        if (filterNew === false && d.is_new) return false;
-        return true;
-      })
-      .map((d) => {
-        return { ...d };
-      });
-  }, [filterOrgId, filterStatus, filterNew]);
+  const orgNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    organizations.forEach((o) => { map[o.org_id] = o.name; });
+    return map;
+  }, []);
 
-  const newDeviceCount = useMemo(() => devices.filter((d) => d.is_new).length, []);
+  const dataSource = useMemo(() =>
+    activationCodes.filter((ac) => {
+      if (filterOrgId && ac.org_id !== filterOrgId) return false;
+      if (filterStatus && ac.status !== filterStatus) return false;
+      return true;
+    }),
+    [filterOrgId, filterStatus]
+  );
 
-  const columns: ColumnsType<typeof dataSource[0]> = [
+  const columns: ColumnsType<ActivationCode> = [
     {
-      title: 'Device ID',
-      dataIndex: 'device_id',
-      key: 'device_id',
-      render: (id: string, record) => (
-        <Space size={6}>
-          <Text code>{id}</Text>
-          {record.is_new && (
-            <Tag color="blue" style={{ fontSize: 11 }}>New</Tag>
-          )}
-        </Space>
-      ),
+      title: 'Activation Code',
+      dataIndex: 'code',
+      key: 'code',
+      render: (code: string) => <Text code style={{ fontSize: 12 }}>{code}</Text>,
+    },
+    {
+      title: 'Org',
+      dataIndex: 'org_id',
+      key: 'org',
+      render: (orgId: string) => orgNameMap[orgId] ?? orgId,
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status: DeviceStatus) => (
-        <Badge
-          status={status === 'Online' ? 'success' : 'default'}
-          text={status}
-        />
+      render: (status: ActivationCodeStatus) => (
+        <Tag color={STATUS_COLOR[status]}>{status}</Tag>
       ),
     },
     {
-      title: 'Org',
-      key: 'org',
-      render: (_, record) => (
-        <Text>{record.current_org_name ?? '—'}</Text>
-      ),
+      title: 'Bound Device ID',
+      dataIndex: 'bound_device_id',
+      key: 'bound_device_id',
+      render: (id: string | null) =>
+        id ? <Text code style={{ fontSize: 12 }}>{id}</Text> : <Text type="secondary">—</Text>,
     },
     {
-      title: 'Current User',
-      dataIndex: 'current_user_email',
-      key: 'current_user_email',
+      title: 'Nickname',
+      dataIndex: 'nickname',
+      key: 'nickname',
       render: (val: string | null) =>
         val ? <Text>{val}</Text> : <Text type="secondary">—</Text>,
+    },
+    {
+      title: 'Created By',
+      dataIndex: 'created_by_portal',
+      key: 'created_by_portal',
+      render: (portal: 'platform' | 'channel') => (
+        <Tag color={portal === 'platform' ? 'purple' : 'cyan'}>
+          {portal === 'platform' ? 'Platform' : 'Channel'}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Created At',
+      dataIndex: 'created_at',
+      key: 'created_at',
     },
   ];
 
   return (
     <div>
-      {/* Header */}
       <div style={{ marginBottom: 16 }}>
-        <Space align="center">
-          <Title level={4} style={{ margin: 0 }}>
-            <DesktopOutlined style={{ marginRight: 8 }} />
-            Device Activity
-          </Title>
-          {newDeviceCount > 0 && (
-            <Tag color="blue">{newDeviceCount} new</Tag>
-          )}
-        </Space>
+        <Title level={4} style={{ margin: 0 }}>
+          Activation Codes (Global View)
+        </Title>
       </div>
 
-      {/* Filters */}
-      <Space style={{ marginBottom: 12 }} wrap>
+      <Space style={{ marginBottom: 16 }} wrap>
         <Select
           placeholder="Filter by Org"
           allowClear
+          showSearch
+          optionFilterProp="label"
           style={{ width: 200 }}
           value={filterOrgId}
           onChange={setFilterOrgId}
@@ -119,31 +117,21 @@ export default function PlatformDevicesPage() {
           allowClear
           style={{ width: 160 }}
           value={filterStatus}
-          onChange={setFilterStatus}
+          onChange={(val) => setFilterStatus(val as ActivationCodeStatus | undefined)}
           options={[
-            { label: 'Online', value: 'Online' },
-            { label: 'Offline', value: 'Offline' },
-          ]}
-        />
-        <Select
-          placeholder="Filter: New devices"
-          allowClear
-          style={{ width: 180 }}
-          value={filterNew}
-          onChange={setFilterNew}
-          options={[
-            { label: 'New (first login)', value: true },
-            { label: 'Established', value: false },
+            { label: 'Unused', value: 'Unused' },
+            { label: 'Bound', value: 'Bound' },
+            { label: 'Expired', value: 'Expired' },
+            { label: 'Revoked', value: 'Revoked' },
           ]}
         />
       </Space>
 
-      <Table
+      <Table<ActivationCode>
         columns={columns}
         dataSource={dataSource}
-        rowKey="device_id"
+        rowKey="code_id"
         pagination={{ pageSize: 20 }}
-        rowClassName={(record) => (record.is_new ? 'ant-table-row-highlight' : '')}
       />
     </div>
   );

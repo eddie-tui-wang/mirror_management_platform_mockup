@@ -109,6 +109,21 @@ export interface DeviceGarmentAssignment {
   assigned_at: string;
 }
 
+export type ActivationCodeStatus = 'Unused' | 'Bound' | 'Expired' | 'Revoked';
+
+export interface ActivationCode {
+  code_id: string;
+  code: string;                      // e.g., "SMRT-A1B2-C3D4"
+  org_id: string;
+  created_by_portal: 'platform' | 'channel';
+  created_at: string;
+  expires_at: string;                // Unused codes expire 7 days after creation
+  status: ActivationCodeStatus;
+  bound_device_id: string | null;
+  bound_at: string | null;
+  nickname: string | null;
+}
+
 export interface Session {
   session_id: string;
   device_id: string;

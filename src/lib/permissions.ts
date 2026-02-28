@@ -11,6 +11,7 @@ export const PERMISSIONS = {
   'platform:customers:view': 'View customer list',
   'platform:customers:create': 'Create direct customer',
   'platform:customers:transfer': 'Transfer customer ownership',
+  'platform:customers:create_code': 'Create activation code for customer',
   'platform:users:view': 'View all users',
   'platform:users:disable': 'Disable/Enable user',
   'platform:users:reset_password': 'Reset user password',
@@ -29,6 +30,7 @@ export const PERMISSIONS = {
   // ---- 渠道端 ----
   'channel:customers:view': 'View customers',
   'channel:customers:create': 'Create channel customer',
+  'channel:customers:create_code': 'Create activation code for channel customer',
   'channel:users:view': 'View customer accounts',
   'channel:users:reinvite': 'Resend invitation',
 
@@ -59,6 +61,7 @@ export const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
   ChannelOwner: [
     'channel:customers:view',
     'channel:customers:create',
+    'channel:customers:create_code',
     'channel:users:view',
     'channel:users:reinvite',
   ],
