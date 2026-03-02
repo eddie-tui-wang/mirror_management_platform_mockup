@@ -80,17 +80,6 @@ export default function CustomerDevicesPage() {
       dataIndex: 'created_at',
       key: 'created_at',
     },
-    {
-      title: 'Expires At',
-      dataIndex: 'expires_at',
-      key: 'expires_at',
-      render: (val: string, record) =>
-        record.status === 'Unused' ? (
-          <Text type="warning">{val}</Text>
-        ) : (
-          <Text type="secondary">—</Text>
-        ),
-    },
   ];
 
   return (

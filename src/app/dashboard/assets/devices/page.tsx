@@ -4,7 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { Table, Tag, Typography, Select, Space } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { activationCodes, organizations } from '@/lib/mock-data';
-import type { ActivationCode, ActivationCodeStatus } from '@/lib/types';
+import type { ActivationCode, ActivationCodeStatus, CodeType } from '@/lib/types';
 
 const { Title, Text } = Typography;
 
@@ -53,6 +53,14 @@ export default function PlatformDevicesPage() {
       dataIndex: 'org_id',
       key: 'org',
       render: (orgId: string) => orgNameMap[orgId] ?? orgId,
+    },
+    {
+      title: 'Type',
+      dataIndex: 'code_type',
+      key: 'code_type',
+      render: (type: CodeType) => (
+        <Tag color={type === 'Trial' ? 'orange' : 'blue'}>{type}</Tag>
+      ),
     },
     {
       title: 'Status',
