@@ -3,13 +3,13 @@
 import React, { useMemo, useState } from 'react';
 import {
   Table, Button, Tag, Space, Typography, message, Select, Modal, Form,
-  Input, Switch, InputNumber, Tooltip, Radio,
+  Input, InputNumber, Radio,
 } from 'antd';
-import { PlusOutlined, WarningOutlined, KeyOutlined } from '@ant-design/icons';
+import { PlusOutlined, KeyOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { organizations, getCustomerSummary, getOrgActivationCodes } from '@/lib/mock-data';
-import type { Organization, CustomerType, Status, TrialStatus, ActivationCode, ActivationCodeStatus } from '@/lib/types';
+import type { CustomerType, Status, ActivationCode, ActivationCodeStatus } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
 
 const { Title, Text } = Typography;
@@ -31,13 +31,6 @@ interface CustomerRow {
   channelName: string;
   adminEmail: string;
   onlineDeviceCount: number;
-  isTrial: boolean;
-  trialStatus: TrialStatus;
-  remainingDays: number;
-  trialEndDate: string;
-  trialMaxSales: number;
-  trialUsedSales: number;
-  trialRemainingSales: number;
   parent_org_id: string | null;
 }
 
@@ -48,9 +41,7 @@ export default function CustomersPage() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [channelFilter, setChannelFilter] = useState<string>(searchParams.get('channel') ?? 'all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [accountKindFilter, setAccountKindFilter] = useState<string>(searchParams.get('accountKind') ?? 'all');
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [isTrial, setIsTrial] = useState(false);
   const [form] = Form.useForm();
 
   const [codesModalOpen, setCodesModalOpen] = useState(false);
@@ -67,7 +58,6 @@ export default function CustomersPage() {
     [orgCodes]
   );
 
-  // Local mutable state for customer statuses
   const [statusOverrides, setStatusOverrides] = useState<Record<string, Status>>({});
 
   const channels = useMemo(
@@ -90,13 +80,6 @@ export default function CustomersPage() {
           channelName: summary.channelName,
           adminEmail: summary.adminEmail,
           onlineDeviceCount: summary.onlineDeviceCount,
-          isTrial: summary.isTrial,
-          trialStatus: summary.trialStatus,
-          remainingDays: summary.remainingDays,
-          trialEndDate: summary.trialEndDate,
-          trialMaxSales: summary.trialMaxSales,
-          trialUsedSales: summary.trialUsedSales,
-          trialRemainingSales: summary.trialRemainingSales,
         };
       });
   }, []);
@@ -113,12 +96,8 @@ export default function CustomersPage() {
     if (typeFilter !== 'all') filtered = filtered.filter((c) => c.customerType === typeFilter);
     if (channelFilter !== 'all') filtered = filtered.filter((c) => c.parent_org_id === channelFilter);
     if (statusFilter !== 'all') filtered = filtered.filter((c) => c.status === statusFilter);
-    if (accountKindFilter !== 'all') {
-      if (accountKindFilter === 'Trial') filtered = filtered.filter((c) => c.isTrial);
-      else filtered = filtered.filter((c) => !c.isTrial);
-    }
     return filtered;
-  }, [allCustomers, typeFilter, channelFilter, statusFilter, accountKindFilter]);
+  }, [allCustomers, typeFilter, channelFilter, statusFilter]);
 
   const toggleStatus = (record: CustomerRow) => {
     const current = statusOverrides[record.org_id] ?? record.status;
@@ -152,43 +131,10 @@ export default function CustomersPage() {
 
   const handleCreate = () => {
     form.validateFields().then((values) => {
-      const trialLabel = isTrial
-        ? ` (Trial: ${values.trialDays ?? 14} days, ${values.trialMaxSales ?? 50} sales)`
-        : '';
-      message.success(`Customer "${values.name}" created successfully${trialLabel} (simulated)`);
+      message.success(`Customer "${values.name}" created successfully (simulated)`);
       setCreateModalOpen(false);
-      setIsTrial(false);
       form.resetFields();
     });
-  };
-
-  const renderAccountKind = (record: CustomerRow) => {
-    if (!record.isTrial) return <Tag color="blue">Regular</Tag>;
-    const salesInfo = `Used ${record.trialUsedSales}/${record.trialMaxSales}, ${record.trialRemainingSales} remaining`;
-    const daysInfo = `Trial ends: ${record.trialEndDate}, ${record.remainingDays} days remaining`;
-    const tip = `${daysInfo}\n${salesInfo}`;
-    if (record.trialStatus === 'expired') {
-      return (
-        <Tooltip title={tip}>
-          <Space size={4} direction="vertical">
-            <Tag color="red" icon={<WarningOutlined />}>Trial - Expired</Tag>
-            <Typography.Text type="danger" style={{ fontSize: 12 }}>
-              {record.trialRemainingSales <= 0 ? 'Quota exhausted' : `${record.trialRemainingSales} remaining`}
-            </Typography.Text>
-          </Space>
-        </Tooltip>
-      );
-    }
-    return (
-      <Tooltip title={tip}>
-        <Space size={4} direction="vertical">
-          <Tag color="orange">Trial</Tag>
-          <Typography.Text type="warning" style={{ fontSize: 12 }}>
-            {record.trialRemainingSales}/{record.trialMaxSales} remaining · {record.remainingDays} days
-          </Typography.Text>
-        </Space>
-      </Tooltip>
-    );
   };
 
   const columns: ColumnsType<CustomerRow> = [
@@ -208,11 +154,6 @@ export default function CustomersPage() {
           {type === 'Direct' ? 'Direct' : 'Reseller'}
         </Tag>
       ),
-    },
-    {
-      title: 'Account',
-      key: 'accountKind',
-      render: (_, record) => renderAccountKind(record),
     },
     {
       title: 'Channel',
@@ -295,17 +236,6 @@ export default function CustomersPage() {
             { value: 'all', label: 'All' },
             { value: 'Direct', label: 'Direct' },
             { value: 'Reseller', label: 'Reseller' },
-          ]}
-        />
-        <span>Account Type:</span>
-        <Select
-          value={accountKindFilter}
-          onChange={setAccountKindFilter}
-          style={{ width: 120 }}
-          options={[
-            { value: 'all', label: 'All' },
-            { value: 'Regular', label: 'Regular' },
-            { value: 'Trial', label: 'Trial' },
           ]}
         />
         <span>Channel:</span>
@@ -490,11 +420,7 @@ export default function CustomersPage() {
         title="Create Customer (Direct)"
         open={createModalOpen}
         onOk={handleCreate}
-        onCancel={() => {
-          setCreateModalOpen(false);
-          setIsTrial(false);
-          form.resetFields();
-        }}
+        onCancel={() => { setCreateModalOpen(false); form.resetFields(); }}
         okText="Create"
         cancelText="Cancel"
       >
@@ -508,40 +434,14 @@ export default function CustomersPage() {
           </Form.Item>
           <Form.Item
             name="adminEmail"
-            label="HQ Admin Email"
+            label="Admin Email"
             rules={[
-              { required: true, message: 'Please enter HQ Admin email' },
+              { required: true, message: 'Please enter admin email' },
               { type: 'email', message: 'Please enter a valid email' },
             ]}
           >
-            <Input placeholder="Please enter HQ Admin email" />
+            <Input placeholder="Please enter admin email" />
           </Form.Item>
-          <Form.Item label="Trial Account">
-            <Space>
-              <Switch checked={isTrial} onChange={setIsTrial} />
-              <span>{isTrial ? 'Trial Enabled' : 'Regular Account'}</span>
-            </Space>
-          </Form.Item>
-          {isTrial && (
-            <>
-              <Form.Item
-                name="trialDays"
-                label="Trial Days"
-                initialValue={14}
-                rules={[{ required: true, message: 'Please enter trial days' }]}
-              >
-                <InputNumber min={1} max={90} style={{ width: '100%' }} placeholder="Trial period (days)" />
-              </Form.Item>
-              <Form.Item
-                name="trialMaxSales"
-                label="Trial Limit (Max Sales)"
-                initialValue={50}
-                rules={[{ required: true, message: 'Please enter trial limit' }]}
-              >
-                <InputNumber min={1} max={9999} style={{ width: '100%' }} placeholder="Max sales count for trial" />
-              </Form.Item>
-            </>
-          )}
         </Form>
       </Modal>
     </div>

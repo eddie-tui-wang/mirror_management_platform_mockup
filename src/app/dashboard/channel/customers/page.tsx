@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, Switch, InputNumber, Typography, Select, Tooltip, message, Radio } from 'antd';
-import { PlusOutlined, WarningOutlined, KeyOutlined } from '@ant-design/icons';
+import { Table, Button, Tag, Space, Modal, Form, Input, InputNumber, Typography, Select, message, Radio } from 'antd';
+import { PlusOutlined, KeyOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuthStore } from '@/lib/store';
 import { getChannelCustomers, getCustomerSummary, getOrgActivationCodes } from '@/lib/mock-data';
-import type { Organization, Status, TrialStatus, ActivationCode, ActivationCodeStatus } from '@/lib/types';
+import type { Organization, Status, ActivationCode, ActivationCodeStatus } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
 
 const { Title, Text } = Typography;
@@ -25,20 +25,11 @@ interface CustomerRow extends Organization {
   adminLastLogin: string | null;
   memberCount: number;
   onlineDeviceCount: number;
-  isTrial: boolean;
-  trialStatus: TrialStatus;
-  remainingDays: number;
-  trialEndDate: string;
-  trialMaxSales: number;
-  trialUsedSales: number;
-  trialRemainingSales: number;
 }
 
 export default function ChannelCustomersPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [isTrial, setIsTrial] = useState(false);
-  const [accountKindFilter, setAccountKindFilter] = useState<string>('all');
   const [accountStatusFilter, setAccountStatusFilter] = useState<string>('all');
   const [statusOverrides, setStatusOverrides] = useState<Record<string, Status>>({});
   const [form] = Form.useForm();
@@ -69,13 +60,6 @@ export default function ChannelCustomersPage() {
         adminLastLogin: summary.adminLastLogin,
         memberCount: summary.memberCount,
         onlineDeviceCount: summary.onlineDeviceCount,
-        isTrial: summary.isTrial,
-        trialStatus: summary.trialStatus,
-        remainingDays: summary.remainingDays,
-        trialEndDate: summary.trialEndDate,
-        trialMaxSales: summary.trialMaxSales,
-        trialUsedSales: summary.trialUsedSales,
-        trialRemainingSales: summary.trialRemainingSales,
       };
     });
   }, [currentUser]);
@@ -88,12 +72,9 @@ export default function ChannelCustomersPage() {
   }, [baseCustomers, statusOverrides]);
 
   const filteredData = useMemo(() => {
-    let result = allCustomers;
-    if (accountKindFilter === 'Trial') result = result.filter((c) => c.isTrial);
-    else if (accountKindFilter === 'Regular') result = result.filter((c) => !c.isTrial);
-    if (accountStatusFilter !== 'all') result = result.filter((c) => c.status === accountStatusFilter);
-    return result;
-  }, [allCustomers, accountKindFilter, accountStatusFilter]);
+    if (accountStatusFilter === 'all') return allCustomers;
+    return allCustomers.filter((c) => c.status === accountStatusFilter);
+  }, [allCustomers, accountStatusFilter]);
 
   const handleCreateCode = () => {
     createCodeForm.validateFields().then((values) => {
@@ -109,43 +90,10 @@ export default function ChannelCustomersPage() {
 
   const handleCreate = () => {
     form.validateFields().then((values) => {
-      const trialLabel = isTrial ? ` (Trial: ${values.trialDays ?? 14} days, ${values.trialMaxSales ?? 50} sales)` : '';
-      message.success(`Customer "${values.name}" created successfully${trialLabel} (simulated)`);
+      message.success(`Customer "${values.name}" created successfully (simulated)`);
       setCreateModalOpen(false);
-      setIsTrial(false);
       form.resetFields();
     });
-  };
-
-  const renderAccountKind = (record: CustomerRow) => {
-    if (!record.isTrial) {
-      return <Tag color="blue">Regular</Tag>;
-    }
-    const salesInfo = `Used ${record.trialUsedSales}/${record.trialMaxSales}, ${record.trialRemainingSales} remaining`;
-    const daysInfo = `Trial ends: ${record.trialEndDate}, ${record.remainingDays} days remaining`;
-    const tip = `${daysInfo}\n${salesInfo}`;
-    if (record.trialStatus === 'expired') {
-      return (
-        <Tooltip title={tip}>
-          <Space size={4} direction="vertical">
-            <Tag color="red" icon={<WarningOutlined />}>Trial - Expired</Tag>
-            <Typography.Text type="danger" style={{ fontSize: 12 }}>
-              {record.trialRemainingSales <= 0 ? 'Quota exhausted' : `${record.remainingDays} days left`}
-            </Typography.Text>
-          </Space>
-        </Tooltip>
-      );
-    }
-    return (
-      <Tooltip title={tip}>
-        <Space size={4} direction="vertical">
-          <Tag color="orange">Trial</Tag>
-          <Typography.Text type="warning" style={{ fontSize: 12 }}>
-            {record.trialRemainingSales}/{record.trialMaxSales} remaining · {record.remainingDays} days
-          </Typography.Text>
-        </Space>
-      </Tooltip>
-    );
   };
 
   const toggleStatus = (record: CustomerRow) => {
@@ -172,12 +120,7 @@ export default function ChannelCustomersPage() {
       key: 'name',
     },
     {
-      title: 'Account',
-      key: 'accountKind',
-      render: (_, record) => renderAccountKind(record),
-    },
-    {
-      title: 'Admin',
+      title: 'Email',
       dataIndex: 'adminEmail',
       key: 'adminEmail',
     },
@@ -252,18 +195,7 @@ export default function ChannelCustomersPage() {
       </div>
 
       <Space style={{ marginBottom: 16 }} wrap>
-        <span>Account Type:</span>
-        <Select
-          value={accountKindFilter}
-          onChange={setAccountKindFilter}
-          style={{ width: 120 }}
-          options={[
-            { value: 'all', label: 'All' },
-            { value: 'Regular', label: 'Regular' },
-            { value: 'Trial', label: 'Trial' },
-          ]}
-        />
-        <span>Account Status:</span>
+        <span>Status:</span>
         <Select
           value={accountStatusFilter}
           onChange={setAccountStatusFilter}
@@ -437,7 +369,6 @@ export default function ChannelCustomersPage() {
         onOk={handleCreate}
         onCancel={() => {
           setCreateModalOpen(false);
-          setIsTrial(false);
           form.resetFields();
         }}
         okText="Create"
@@ -453,42 +384,14 @@ export default function ChannelCustomersPage() {
           </Form.Item>
           <Form.Item
             name="adminEmail"
-            label="HQ Admin Email"
+            label="Admin Email"
             rules={[
-              { required: true, message: 'Please enter HQ Admin email' },
+              { required: true, message: 'Please enter admin email' },
               { type: 'email', message: 'Please enter a valid email' },
             ]}
           >
-            <Input placeholder="Will become this customer's HQ Owner account" />
+            <Input placeholder="Please enter admin email" />
           </Form.Item>
-
-          <Form.Item label="Trial Account">
-            <Space>
-              <Switch checked={isTrial} onChange={setIsTrial} />
-              <span>{isTrial ? 'Trial Enabled' : 'Regular Account'}</span>
-            </Space>
-          </Form.Item>
-
-          {isTrial && (
-            <>
-              <Form.Item
-                name="trialDays"
-                label="Trial Days"
-                initialValue={14}
-                rules={[{ required: true, message: 'Please enter trial days' }]}
-              >
-                <InputNumber min={1} max={90} style={{ width: '100%' }} placeholder="Trial period (days)" />
-              </Form.Item>
-              <Form.Item
-                name="trialMaxSales"
-                label="Trial Limit (Max Sales)"
-                initialValue={50}
-                rules={[{ required: true, message: 'Please enter trial limit' }]}
-              >
-                <InputNumber min={1} max={9999} style={{ width: '100%' }} placeholder="Max sales count for trial" />
-              </Form.Item>
-            </>
-          )}
         </Form>
       </Modal>
     </div>

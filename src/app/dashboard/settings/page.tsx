@@ -1,18 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
   Typography, Card, Avatar, Tag, Divider, Button,
   Form, Input, Steps, Result, Space, Row, Col,
 } from 'antd';
 import {
-  UserOutlined, MailOutlined, LockOutlined,
+  UserOutlined, LockOutlined,
   SafetyCertificateOutlined, EyeInvisibleOutlined, EyeTwoTone,
   CheckCircleOutlined, ArrowLeftOutlined, KeyOutlined,
-  ClockCircleOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '@/lib/store';
-import { getCustomerSummary } from '@/lib/mock-data';
 
 const { Title, Text } = Typography;
 
@@ -38,14 +36,6 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [verifyForm] = Form.useForm();
   const [newPwdForm] = Form.useForm();
-
-  // ── Trial info (customer portal only) ────────────────────
-  const trialInfo = useMemo(() => {
-    if (!currentUser || currentUser.portal !== 'customer') return null;
-    const summary = getCustomerSummary(currentUser.org_id);
-    if (!summary.isTrial) return null;
-    return summary;
-  }, [currentUser]);
 
   if (!currentUser) return null;
 
@@ -143,51 +133,6 @@ export default function SettingsPage() {
             <Text>{PORTAL_LABEL[currentUser.portal]}</Text>
           </Col>
 
-          {/* Trial info row */}
-          {trialInfo && (
-            <Col span={24}>
-              <Divider style={{ margin: '4px 0 12px' }} />
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                background: trialInfo.trialStatus === 'expired' ? '#fff2f0' : '#fffbe6',
-                border: `1px solid ${trialInfo.trialStatus === 'expired' ? '#ffccc7' : '#ffe58f'}`,
-                borderRadius: 8,
-                padding: '10px 14px',
-              }}>
-                <ClockCircleOutlined style={{
-                  fontSize: 18,
-                  color: trialInfo.trialStatus === 'expired' ? '#ff4d4f' : '#faad14',
-                }} />
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                    <Text strong style={{ fontSize: 13 }}>Trial Account</Text>
-                    {trialInfo.trialStatus === 'expired' ? (
-                      <Tag color="red">Expired</Tag>
-                    ) : (
-                      <Tag color="orange">Active</Tag>
-                    )}
-                  </div>
-                  {trialInfo.trialStatus === 'expired' ? (
-                    <Text type="danger" style={{ fontSize: 12 }}>
-                      Trial has expired. Please contact your account manager to upgrade.
-                    </Text>
-                  ) : (
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                      <Text strong style={{ fontSize: 12, color: '#d46b08' }}>
-                        {trialInfo.remainingDays} day{trialInfo.remainingDays !== 1 ? 's' : ''} remaining
-                      </Text>
-                      {' · '}
-                      Expires {trialInfo.trialEndDate}
-                      {' · '}
-                      {trialInfo.trialRemainingSales}/{trialInfo.trialMaxSales} sales remaining
-                    </Text>
-                  )}
-                </div>
-              </div>
-            </Col>
-          )}
         </Row>
       </Card>
 

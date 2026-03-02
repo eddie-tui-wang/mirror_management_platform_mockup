@@ -100,7 +100,7 @@ export default function ChannelsPage() {
       ),
     },
     {
-      title: 'Admin',
+      title: 'Email',
       dataIndex: 'adminEmail',
       key: 'adminEmail',
     },
