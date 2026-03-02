@@ -5,7 +5,7 @@ import { Table, Tag, Typography, Space } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuthStore } from '@/lib/store';
 import { getOrgActivationCodes } from '@/lib/mock-data';
-import type { ActivationCode, ActivationCodeStatus } from '@/lib/types';
+import type { ActivationCode, ActivationCodeStatus, CodeType } from '@/lib/types';
 
 const { Title, Text } = Typography;
 
@@ -33,6 +33,14 @@ export default function CustomerDevicesPage() {
         <Text code copyable style={{ fontSize: 13 }}>
           {code}
         </Text>
+      ),
+    },
+    {
+      title: 'Type',
+      dataIndex: 'code_type',
+      key: 'code_type',
+      render: (type: CodeType) => (
+        <Tag color={type === 'Trial' ? 'orange' : 'blue'}>{type}</Tag>
       ),
     },
     {

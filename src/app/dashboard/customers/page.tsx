@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   Table, Button, Tag, Space, Typography, message, Select, Modal, Form,
-  Input, Switch, InputNumber, Tooltip,
+  Input, Switch, InputNumber, Tooltip, Radio,
 } from 'antd';
 import { PlusOutlined, WarningOutlined, KeyOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -55,6 +55,9 @@ export default function CustomersPage() {
 
   const [codesModalOpen, setCodesModalOpen] = useState(false);
   const [codesOrg, setCodesOrg] = useState<CustomerRow | null>(null);
+  const [createCodeModalOpen, setCreateCodeModalOpen] = useState(false);
+  const [createCodeType, setCreateCodeType] = useState<'Regular' | 'Trial'>('Regular');
+  const [createCodeForm] = Form.useForm();
   const orgCodes = useMemo(
     () => (codesOrg ? getOrgActivationCodes(codesOrg.org_id) : []),
     [codesOrg]
@@ -135,6 +138,18 @@ export default function CustomersPage() {
     });
   };
 
+  const handleCreateCode = () => {
+    createCodeForm.validateFields().then((values) => {
+      const suffix = values.codeType === 'Trial'
+        ? ` — Trial · ${values.trialDays} days · ${values.trialMaxSessions} sessions`
+        : ' — Regular';
+      message.success(`Activation code created for ${codesOrg?.name}${suffix} (simulated)`);
+      setCreateCodeModalOpen(false);
+      setCreateCodeType('Regular');
+      createCodeForm.resetFields();
+    });
+  };
+
   const handleCreate = () => {
     form.validateFields().then((values) => {
       const trialLabel = isTrial
@@ -205,7 +220,7 @@ export default function CustomersPage() {
       key: 'channelName',
       render: (name: string) => (name === '-' ? '-' : name),
     },
-    { title: 'HQ Admin', dataIndex: 'adminEmail', key: 'adminEmail' },
+    { title: 'Email', dataIndex: 'adminEmail', key: 'adminEmail' },
     { title: 'Created At', dataIndex: 'created_at', key: 'created_at' },
     {
       title: 'Status',
@@ -349,9 +364,7 @@ export default function CustomersPage() {
               size="small"
               icon={<PlusOutlined />}
               disabled={unusedCount >= CODE_LIMIT || codesOrg?.status === 'Disabled'}
-              onClick={() =>
-                message.success(`New activation code created for ${codesOrg?.name} (simulated)`)
-              }
+              onClick={() => setCreateCodeModalOpen(true)}
             >
               Create Code
             </Button>
@@ -429,6 +442,48 @@ export default function CustomersPage() {
             },
           ]}
         />
+      </Modal>
+
+      <Modal
+        title={`Create Activation Code — ${codesOrg?.name ?? ''}`}
+        open={createCodeModalOpen}
+        onOk={handleCreateCode}
+        onCancel={() => {
+          setCreateCodeModalOpen(false);
+          setCreateCodeType('Regular');
+          createCodeForm.resetFields();
+        }}
+        okText="Create"
+        cancelText="Cancel"
+      >
+        <Form form={createCodeForm} layout="vertical" initialValues={{ codeType: 'Regular' }}>
+          <Form.Item name="codeType" label="Code Type">
+            <Radio.Group onChange={(e) => setCreateCodeType(e.target.value as 'Regular' | 'Trial')}>
+              <Radio value="Regular">Regular</Radio>
+              <Radio value="Trial">Trial</Radio>
+            </Radio.Group>
+          </Form.Item>
+          {createCodeType === 'Trial' && (
+            <>
+              <Form.Item
+                name="trialDays"
+                label="Trial Duration (days)"
+                initialValue={30}
+                rules={[{ required: true, message: 'Please enter trial duration' }]}
+              >
+                <InputNumber min={1} max={365} style={{ width: '100%' }} placeholder="e.g. 30" />
+              </Form.Item>
+              <Form.Item
+                name="trialMaxSessions"
+                label="Max Try-on Sessions"
+                initialValue={100}
+                rules={[{ required: true, message: 'Please enter max sessions' }]}
+              >
+                <InputNumber min={1} max={9999} style={{ width: '100%' }} placeholder="e.g. 100" />
+              </Form.Item>
+            </>
+          )}
+        </Form>
       </Modal>
 
       <Modal
