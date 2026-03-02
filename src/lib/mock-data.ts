@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import {
   Organization, User, OrgMembership, GarmentCatalog, GarmentCategory,
   MasterTemplate, TemplateAssignment, Device, DeviceGarmentAssignment, Session, DemoAccount,
-  ActivationCode,
+  ActivationCode, TrialStatus,
 } from './types';
 
 // ==================== 组织数据 ====================

@@ -8,6 +8,7 @@ export type DeviceStatus = 'Online' | 'Offline';
 export type SessionStatus = 'ACTIVE' | 'TERMINATED' | 'EXPIRED';
 export type CustomerType = 'Direct' | 'Reseller';
 export type CodeType = 'Regular' | 'Trial';
+export type TrialStatus = 'not_trial' | 'active' | 'expired';
 
 export interface Platform {
   platform_id: string;
@@ -22,6 +23,12 @@ export interface Organization {
   parent_org_id: string | null;
   status: Status;
   created_at: string;
+  // Trial fields (optional, present only for trial accounts)
+  is_trial?: boolean;
+  trial_start_date?: string;
+  trial_days?: number;
+  trial_max_sales?: number;
+  trial_used_sales?: number;
 }
 
 export interface User {
