@@ -54,7 +54,7 @@ export default function ChannelCustomersPage() {
     [orgCodes]
   );
 
-  const dataSource: CustomerRow[] = useMemo(() => {
+  const baseCustomers: CustomerRow[] = useMemo(() => {
     if (!currentUser) return [];
     const customers = getChannelCustomers(currentUser.org_id);
     return customers.map((org) => {
@@ -77,13 +77,20 @@ export default function ChannelCustomersPage() {
     });
   }, [currentUser]);
 
+  const allCustomers: CustomerRow[] = useMemo(() => {
+    return baseCustomers.map((row) => ({
+      ...row,
+      status: statusOverrides[row.org_id] ?? row.status,
+    }));
+  }, [baseCustomers, statusOverrides]);
+
   const filteredData = useMemo(() => {
-    let result = dataSource;
+    let result = allCustomers;
     if (accountKindFilter === 'Trial') result = result.filter((c) => c.isTrial);
     else if (accountKindFilter === 'Regular') result = result.filter((c) => !c.isTrial);
-    if (accountStatusFilter !== 'all') result = result.filter((c) => c.adminStatus === accountStatusFilter);
+    if (accountStatusFilter !== 'all') result = result.filter((c) => c.status === accountStatusFilter);
     return result;
-  }, [dataSource, accountKindFilter, accountStatusFilter]);
+  }, [allCustomers, accountKindFilter, accountStatusFilter]);
 
   const handleCreate = () => {
     form.validateFields().then((values) => {
@@ -127,8 +134,7 @@ export default function ChannelCustomersPage() {
   };
 
   const toggleStatus = (record: CustomerRow) => {
-    const current = statusOverrides[record.org_id] ?? record.status;
-    const next: Status = current === 'Active' ? 'Disabled' : 'Active';
+    const next: Status = record.status === 'Active' ? 'Disabled' : 'Active';
     const action = next === 'Disabled' ? 'disabled' : 'enabled';
     Modal.confirm({
       title: `${next === 'Disabled' ? 'Disable' : 'Enable'} customer "${record.name}"?`,
@@ -162,11 +168,10 @@ export default function ChannelCustomersPage() {
     },
     {
       title: 'Status',
-      key: 'adminStatus',
-      render: (_, record) => {
-        const current = statusOverrides[record.org_id] ?? record.adminStatus;
-        return <Tag color={current === 'Active' ? 'green' : 'red'}>{current}</Tag>;
-      },
+      key: 'status',
+      render: (_, record) => (
+        <Tag color={record.status === 'Active' ? 'green' : 'red'}>{record.status}</Tag>
+      ),
     },
     {
       title: 'Created At',
@@ -176,42 +181,39 @@ export default function ChannelCustomersPage() {
     {
       title: 'Actions',
       key: 'actions',
-      render: (_, record) => {
-        const current = statusOverrides[record.org_id] ?? record.status;
-        return (
-          <Space size="small">
-            <PermGuard permission="channel:customers:create_code">
-              <Button
-                type="link"
-                size="small"
-                icon={<KeyOutlined />}
-                onClick={() => { setCodesOrg(record); setCodesModalOpen(true); }}
-              >
-                Manage Codes
-              </Button>
-            </PermGuard>
-            {record.adminLastLogin === null && (
-              <PermGuard permission="channel:users:reinvite" fallback="disable">
-                <Button
-                  type="link"
-                  size="small"
-                  onClick={() => message.success(`Invitation resent to ${record.adminEmail} (simulated)`)}
-                >
-                  Resend Invitation
-                </Button>
-              </PermGuard>
-            )}
+      render: (_, record) => (
+        <Space size="small">
+          <PermGuard permission="channel:customers:create_code">
             <Button
               type="link"
               size="small"
-              danger={current === 'Active'}
-              onClick={() => toggleStatus(record)}
+              icon={<KeyOutlined />}
+              onClick={() => { setCodesOrg(record); setCodesModalOpen(true); }}
             >
-              {current === 'Active' ? 'Disable' : 'Enable'}
+              Manage Codes
             </Button>
-          </Space>
-        );
-      },
+          </PermGuard>
+          {record.adminLastLogin === null && (
+            <PermGuard permission="channel:users:reinvite" fallback="disable">
+              <Button
+                type="link"
+                size="small"
+                onClick={() => message.success(`Invitation resent to ${record.adminEmail} (simulated)`)}
+              >
+                Resend Invitation
+              </Button>
+            </PermGuard>
+          )}
+          <Button
+            type="link"
+            size="small"
+            danger={record.status === 'Active'}
+            onClick={() => toggleStatus(record)}
+          >
+            {record.status === 'Active' ? 'Disable' : 'Enable'}
+          </Button>
+        </Space>
+      ),
     },
   ];
 
@@ -282,7 +284,7 @@ export default function ChannelCustomersPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <Text type="secondary">
             {unusedCount} / {CODE_LIMIT} Unused slots used
-            {(statusOverrides[codesOrg?.org_id ?? ''] ?? codesOrg?.status) === 'Disabled' && (
+            {codesOrg?.status === 'Disabled' && (
               <Text type="danger" style={{ marginLeft: 8 }}>— Account is disabled</Text>
             )}
           </Text>
@@ -291,10 +293,7 @@ export default function ChannelCustomersPage() {
               type="primary"
               size="small"
               icon={<PlusOutlined />}
-              disabled={
-                unusedCount >= CODE_LIMIT ||
-                (statusOverrides[codesOrg?.org_id ?? ''] ?? codesOrg?.status) === 'Disabled'
-              }
+              disabled={unusedCount >= CODE_LIMIT || codesOrg?.status === 'Disabled'}
               onClick={() =>
                 message.success(`New activation code created for ${codesOrg?.name} (simulated)`)
               }
