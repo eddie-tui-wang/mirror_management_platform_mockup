@@ -27,7 +27,7 @@ export default function CustomerGarmentsPage() {
   const orgId = currentUser?.org_id ?? '';
   const orgName = currentUser?.org_name ?? '';
   const canManageCategories = currentUser
-    ? hasPermission(currentUser.role, 'customer:garments:manage_categories')
+    ? hasPermission(currentUser.portal, 'customer:garments:manage_categories')
     : false;
 
   // ── 分类管理弹窗 ──────────────────────────────────────────

@@ -2,21 +2,16 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  Table, Button, Tag, Space, Typography, message, Select, Input, Tabs,
+  Table, Button, Tag, Space, Typography, message, Select, Input,
 } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useSearchParams } from 'next/navigation';
 import { users, memberships, organizations } from '@/lib/mock-data';
-import {
-  ROLE_PERMISSIONS, PERMISSIONS, type PermissionKey,
-} from '@/lib/permissions';
-import type { Organization, OrgMembership, User, RoleKey, Status } from '@/lib/types';
+import type { Organization, OrgMembership, User, Status } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
 
 const { Title } = Typography;
-
-// ---------- 用户行类型（用户 + 成员关系 + 组织信息的联合视图） ----------
 
 interface UserRow {
   key: string;
@@ -29,28 +24,15 @@ interface UserRow {
   org_id: string;
   org_name: string;
   org_type: string;
-  role_key: RoleKey;
 }
 
-// ---------- 角色行类型 ----------
-
-interface RoleRow {
-  role_key: RoleKey;
-  permissionCount: number;
-  permissions: PermissionKey[];
-}
-
-// ===================== Users Tab =====================
-
-function UsersTab() {
+export default function UsersPage() {
   const searchParams = useSearchParams();
 
   const [searchText, setSearchText] = useState('');
   const [orgFilter, setOrgFilter] = useState<string>(searchParams.get('org') ?? 'all');
-  const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  // 构建用户联合列表：每条成员关系生成一行
   const allUserRows: UserRow[] = useMemo(() => {
     return memberships.map((m: OrgMembership) => {
       const user = users.find((u: User) => u.user_id === m.user_id);
@@ -66,36 +48,20 @@ function UsersTab() {
         org_id: m.org_id,
         org_name: org?.name ?? '-',
         org_type: org?.org_type ?? '-',
-        role_key: m.role_key,
       };
     });
   }, []);
 
-  // 唯一组织选项
   const orgOptions = useMemo(() => {
     const orgsMap = new Map<string, string>();
     allUserRows.forEach((r) => {
-      if (!orgsMap.has(r.org_id)) {
-        orgsMap.set(r.org_id, r.org_name);
-      }
+      if (!orgsMap.has(r.org_id)) orgsMap.set(r.org_id, r.org_name);
     });
-    return Array.from(orgsMap.entries()).map(([value, label]) => ({
-      value,
-      label,
-    }));
+    return Array.from(orgsMap.entries()).map(([value, label]) => ({ value, label }));
   }, [allUserRows]);
 
-  // 唯一角色选项
-  const roleOptions = useMemo(() => {
-    const rolesSet = new Set<string>();
-    allUserRows.forEach((r) => rolesSet.add(r.role_key));
-    return Array.from(rolesSet).map((r) => ({ value: r, label: r }));
-  }, [allUserRows]);
-
-  // 过滤后的数据
   const dataSource = useMemo(() => {
     let filtered = allUserRows;
-
     if (searchText.trim()) {
       const lower = searchText.trim().toLowerCase();
       filtered = filtered.filter(
@@ -105,28 +71,13 @@ function UsersTab() {
           r.user_id.toLowerCase().includes(lower)
       );
     }
-
-    if (orgFilter !== 'all') {
-      filtered = filtered.filter((r) => r.org_id === orgFilter);
-    }
-
-    if (roleFilter !== 'all') {
-      filtered = filtered.filter((r) => r.role_key === roleFilter);
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter((r) => r.status === statusFilter);
-    }
-
+    if (orgFilter !== 'all') filtered = filtered.filter((r) => r.org_id === orgFilter);
+    if (statusFilter !== 'all') filtered = filtered.filter((r) => r.status === statusFilter);
     return filtered;
-  }, [allUserRows, searchText, orgFilter, roleFilter, statusFilter]);
+  }, [allUserRows, searchText, orgFilter, statusFilter]);
 
   const columns: ColumnsType<UserRow> = [
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-    },
+    { title: 'Email', dataIndex: 'email', key: 'email' },
     {
       title: 'user_id',
       dataIndex: 'user_id',
@@ -149,22 +100,12 @@ function UsersTab() {
         <Tag color={type === 'CHANNEL' ? 'geekblue' : 'volcano'}>{type}</Tag>
       ),
     },
-    {
-      title: 'Org Name',
-      dataIndex: 'org_name',
-      key: 'org_name',
-    },
+    { title: 'Org Name', dataIndex: 'org_name', key: 'org_name' },
     {
       title: 'org_id',
       dataIndex: 'org_id',
       key: 'org_id',
       render: (id: string) => <Typography.Text code>{id}</Typography.Text>,
-    },
-    {
-      title: 'Role',
-      dataIndex: 'role_key',
-      key: 'role_key',
-      render: (role: RoleKey) => <Tag>{role}</Tag>,
     },
     {
       title: 'Last Login',
@@ -195,22 +136,9 @@ function UsersTab() {
             <Button
               type="link"
               size="small"
-              onClick={() =>
-                message.info(`Reset password for ${record.email} (simulated)`)
-              }
+              onClick={() => message.info(`Reset password for ${record.email} (simulated)`)}
             >
               Reset Password
-            </Button>
-          </PermGuard>
-          <PermGuard permission="platform:users:change_role">
-            <Button
-              type="link"
-              size="small"
-              onClick={() =>
-                message.info(`Change role for ${record.email} (simulated)`)
-              }
-            >
-              Change Role
             </Button>
           </PermGuard>
         </Space>
@@ -220,14 +148,18 @@ function UsersTab() {
 
   return (
     <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <Title level={4} style={{ margin: 0 }}>User Management</Title>
+      </div>
+
       <Space style={{ marginBottom: 16 }} wrap>
         <Input
-          placeholder="Search by email/name/user_id"
+          placeholder="Search by email / name / user_id"
           prefix={<SearchOutlined />}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           allowClear
-          style={{ width: 240 }}
+          style={{ width: 260 }}
         />
         <span>Organization:</span>
         <Select
@@ -235,13 +167,6 @@ function UsersTab() {
           onChange={setOrgFilter}
           style={{ width: 200 }}
           options={[{ value: 'all', label: 'All' }, ...orgOptions]}
-        />
-        <span>Role:</span>
-        <Select
-          value={roleFilter}
-          onChange={setRoleFilter}
-          style={{ width: 160 }}
-          options={[{ value: 'all', label: 'All' }, ...roleOptions]}
         />
         <span>Status:</span>
         <Select
@@ -262,83 +187,6 @@ function UsersTab() {
         rowKey="key"
         pagination={{ pageSize: 10 }}
       />
-    </div>
-  );
-}
-
-// ===================== Roles Tab =====================
-
-function RolesTab() {
-  const roleData: RoleRow[] = useMemo(() => {
-    return (Object.keys(ROLE_PERMISSIONS) as RoleKey[]).map((role_key) => ({
-      role_key,
-      permissionCount: ROLE_PERMISSIONS[role_key].length,
-      permissions: ROLE_PERMISSIONS[role_key],
-    }));
-  }, []);
-
-  const columns: ColumnsType<RoleRow> = [
-    {
-      title: 'Role Name',
-      dataIndex: 'role_key',
-      key: 'role_key',
-      render: (role: RoleKey) => <Tag color="blue">{role}</Tag>,
-    },
-    {
-      title: 'Permission Count',
-      dataIndex: 'permissionCount',
-      key: 'permissionCount',
-    },
-  ];
-
-  return (
-    <Table<RoleRow>
-      columns={columns}
-      dataSource={roleData}
-      rowKey="role_key"
-      pagination={false}
-      expandable={{
-        expandedRowRender: (record) => (
-          <div style={{ padding: '8px 0' }}>
-            <Space wrap size={[4, 8]}>
-              {record.permissions.map((perm) => (
-                <Tag key={perm} style={{ marginBottom: 4 }}>
-                  {perm}
-                  <Typography.Text type="secondary" style={{ marginLeft: 4, fontSize: 12 }}>
-                    ({PERMISSIONS[perm]})
-                  </Typography.Text>
-                </Tag>
-              ))}
-            </Space>
-          </div>
-        ),
-      }}
-    />
-  );
-}
-
-// ===================== Main Page =====================
-
-export default function UsersPage() {
-  const tabItems = [
-    {
-      key: 'users',
-      label: 'User Management',
-      children: <UsersTab />,
-    },
-    {
-      key: 'roles',
-      label: 'Role Permissions',
-      children: <RolesTab />,
-    },
-  ];
-
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Title level={4} style={{ margin: 0 }}>Users & Roles</Title>
-      </div>
-      <Tabs items={tabItems} defaultActiveKey="users" />
     </div>
   );
 }

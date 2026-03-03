@@ -25,7 +25,7 @@ export default function PermGuard({
 
   if (!currentUser) return null;
 
-  const allowed = hasPermission(currentUser.role, permission);
+  const allowed = hasPermission(currentUser.portal, permission);
 
   if (allowed) return <>{children}</>;
 

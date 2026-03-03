@@ -39,15 +39,15 @@ const PORTAL_LABEL: Record<string, string> = {
   customer: 'Customer',
 };
 
-function buildMenuItems(items: MenuItemConfig[], role: string): MenuProps['items'] {
+function buildMenuItems(items: MenuItemConfig[], portal: string): MenuProps['items'] {
   return items
     .filter(item => {
       if (item.children) {
         return item.children.some(child =>
-          !child.permission || hasPermission(role as any, child.permission)
+          !child.permission || hasPermission(portal as any, child.permission)
         );
       }
-      return !item.permission || hasPermission(role as any, item.permission);
+      return !item.permission || hasPermission(portal as any, item.permission);
     })
     .map(item => {
       if (item.children) {
@@ -56,7 +56,7 @@ function buildMenuItems(items: MenuItemConfig[], role: string): MenuProps['items
           icon: ICON_MAP[item.icon],
           label: item.label,
           children: item.children
-            .filter(child => !child.permission || hasPermission(role as any, child.permission))
+            .filter(child => !child.permission || hasPermission(portal as any, child.permission))
             .map(child => ({
               key: child.path || child.key,
               icon: ICON_MAP[child.icon],
@@ -81,7 +81,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const menuItems = useMemo(() => {
     if (!currentUser) return [];
-    return buildMenuItems(PORTAL_MENUS[currentUser.portal], currentUser.role);
+    return buildMenuItems(PORTAL_MENUS[currentUser.portal], currentUser.portal);
   }, [currentUser]);
 
   if (!currentUser) {
@@ -157,7 +157,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
         <div style={{ padding: '8px 12px' }}>
           <Tag color={portalColor} style={{ width: '100%', textAlign: 'center', padding: '4px 0', fontSize: 13 }}>
-            {PORTAL_LABEL[currentUser.portal]} - {currentUser.role}
+            {PORTAL_LABEL[currentUser.portal]}
           </Tag>
         </div>
         <Menu

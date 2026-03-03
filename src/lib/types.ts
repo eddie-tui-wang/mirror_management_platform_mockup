@@ -1,7 +1,6 @@
 // ==================== 数据模型类型 ====================
 
 export type OrgType = 'CHANNEL' | 'CUSTOMER';
-export type RoleKey = 'PlatformSuperAdmin' | 'ChannelOwner' | 'HQOwner';
 export type PortalType = 'platform' | 'channel' | 'customer';
 export type Status = 'Active' | 'Disabled';
 export type DeviceStatus = 'Online' | 'Offline';
@@ -43,7 +42,6 @@ export interface User {
 export interface OrgMembership {
   user_id: string;
   org_id: string;
-  role_key: RoleKey;
   invited_by: string | null;
   created_at: string;
 }
@@ -146,7 +144,6 @@ export interface DemoAccount {
   user_id: string;
   email: string;
   name: string;
-  role: RoleKey;
   portal: PortalType;
   org_id: string;
   org_name: string;

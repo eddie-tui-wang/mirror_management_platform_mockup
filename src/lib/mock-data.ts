@@ -54,27 +54,27 @@ export const users: User[] = [
 
 export const memberships: OrgMembership[] = [
   // 渠道A
-  { user_id: 'u_001', org_id: 'org_ch_001', role_key: 'ChannelOwner', invited_by: null, created_at: '2026-02-01' },
-  { user_id: 'u_004', org_id: 'org_ch_001', role_key: 'ChannelOwner', invited_by: 'u_001', created_at: '2026-02-02' },
+  { user_id: 'u_001', org_id: 'org_ch_001', invited_by: null, created_at: '2026-02-01' },
+  { user_id: 'u_004', org_id: 'org_ch_001', invited_by: 'u_001', created_at: '2026-02-02' },
   // 渠道B
-  { user_id: 'u_005', org_id: 'org_ch_002', role_key: 'ChannelOwner', invited_by: null, created_at: '2026-01-15' },
+  { user_id: 'u_005', org_id: 'org_ch_002', invited_by: null, created_at: '2026-01-15' },
   // 渠道C
-  { user_id: 'u_015', org_id: 'org_ch_003', role_key: 'ChannelOwner', invited_by: null, created_at: '2026-01-20' },
+  { user_id: 'u_015', org_id: 'org_ch_003', invited_by: null, created_at: '2026-01-20' },
   // 客户X
-  { user_id: 'u_002', org_id: 'org_cu_1001', role_key: 'HQOwner', invited_by: null, created_at: '2026-02-03' },
-  { user_id: 'u_006', org_id: 'org_cu_1001', role_key: 'HQOwner', invited_by: 'u_002', created_at: '2026-02-03' },
-  { user_id: 'u_007', org_id: 'org_cu_1001', role_key: 'HQOwner', invited_by: 'u_002', created_at: '2026-02-04' },
-  { user_id: 'u_016', org_id: 'org_cu_1001', role_key: 'HQOwner', invited_by: 'u_002', created_at: '2026-02-05' },
+  { user_id: 'u_002', org_id: 'org_cu_1001', invited_by: null, created_at: '2026-02-03' },
+  { user_id: 'u_006', org_id: 'org_cu_1001', invited_by: 'u_002', created_at: '2026-02-03' },
+  { user_id: 'u_007', org_id: 'org_cu_1001', invited_by: 'u_002', created_at: '2026-02-04' },
+  { user_id: 'u_016', org_id: 'org_cu_1001', invited_by: 'u_002', created_at: '2026-02-05' },
   // 客户Y
-  { user_id: 'u_010', org_id: 'org_cu_1002', role_key: 'HQOwner', invited_by: null, created_at: '2026-02-05' },
-  { user_id: 'u_011', org_id: 'org_cu_1002', role_key: 'HQOwner', invited_by: 'u_010', created_at: '2026-02-05' },
+  { user_id: 'u_010', org_id: 'org_cu_1002', invited_by: null, created_at: '2026-02-05' },
+  { user_id: 'u_011', org_id: 'org_cu_1002', invited_by: 'u_010', created_at: '2026-02-05' },
   // 客户Z
-  { user_id: 'u_012', org_id: 'org_cu_1003', role_key: 'HQOwner', invited_by: null, created_at: '2026-02-06' },
-  { user_id: 'u_013', org_id: 'org_cu_1003', role_key: 'HQOwner', invited_by: 'u_012', created_at: '2026-02-06' },
+  { user_id: 'u_012', org_id: 'org_cu_1003', invited_by: null, created_at: '2026-02-06' },
+  { user_id: 'u_013', org_id: 'org_cu_1003', invited_by: 'u_012', created_at: '2026-02-06' },
   // 客户W
-  { user_id: 'u_014', org_id: 'org_cu_1004', role_key: 'HQOwner', invited_by: null, created_at: '2026-02-07' },
+  { user_id: 'u_014', org_id: 'org_cu_1004', invited_by: null, created_at: '2026-02-07' },
   // 客户V
-  { user_id: 'u_017', org_id: 'org_cu_1005', role_key: 'HQOwner', invited_by: null, created_at: '2026-02-08' },
+  { user_id: 'u_017', org_id: 'org_cu_1005', invited_by: null, created_at: '2026-02-08' },
 ];
 
 // ==================== 服装库 ====================
@@ -199,31 +199,33 @@ export const sessions: Session[] = [
 // ==================== 激活码 ====================
 
 export const activationCodes: ActivationCode[] = [
-  // Customer X: 1 Regular Bound, 1 Trial Bound (7 days / 33 sessions left), 1 Regular Unused, 1 Regular Revoked
-  { code_id: 'ac_001', code: 'SMRT-A1B2-C3D4', org_id: 'org_cu_1001', created_by_portal: 'platform', created_at: '2026-02-01 10:00', expires_at: '2026-02-08 10:00', status: 'Bound',   bound_device_id: 'dev_09', bound_at: '2026-02-03 09:00', nickname: 'Front Door Mirror', code_type: 'Regular', trial_duration_days: null, trial_max_sessions: null,  trial_used_sessions: null },
-  { code_id: 'ac_002', code: 'SMRT-E5F6-G7H8', org_id: 'org_cu_1001', created_by_portal: 'platform', created_at: '2026-02-02 11:00', expires_at: '2026-02-09 11:00', status: 'Bound',   bound_device_id: 'dev_20', bound_at: '2026-02-05 14:00', nickname: 'Fitting Room #2',   code_type: 'Trial',   trial_duration_days: 30,   trial_max_sessions: 100, trial_used_sessions: 67 },
-  { code_id: 'ac_003', code: 'SMRT-I9J0-K1L2', org_id: 'org_cu_1001', created_by_portal: 'channel',  created_at: '2026-02-09 09:00', expires_at: '2026-02-16 09:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Regular', trial_duration_days: null, trial_max_sessions: null,  trial_used_sessions: null },
-  { code_id: 'ac_004', code: 'SMRT-M3N4-O5P6', org_id: 'org_cu_1001', created_by_portal: 'channel',  created_at: '2026-02-01 08:00', expires_at: '2026-02-08 08:00', status: 'Revoked', bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Regular', trial_duration_days: null, trial_max_sessions: null,  trial_used_sessions: null },
-  // Customer Y: 1 Regular Bound, 1 Trial Unused, 1 Trial Expired (quota exhausted)
-  { code_id: 'ac_005', code: 'SMRT-Q7R8-S9T0', org_id: 'org_cu_1002', created_by_portal: 'channel',  created_at: '2026-02-05 10:00', expires_at: '2026-02-12 10:00', status: 'Bound',   bound_device_id: 'dev_12', bound_at: '2026-02-07 11:00', nickname: 'VIP Lounge',        code_type: 'Regular', trial_duration_days: null, trial_max_sessions: null,  trial_used_sessions: null },
-  { code_id: 'ac_006', code: 'SMRT-U1V2-W3X4', org_id: 'org_cu_1002', created_by_portal: 'channel',  created_at: '2026-02-09 14:00', expires_at: '2026-02-16 14:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Trial',   trial_duration_days: 14,   trial_max_sessions: 50,  trial_used_sessions: null },
-  { code_id: 'ac_007', code: 'SMRT-Y5Z6-A7B8', org_id: 'org_cu_1002', created_by_portal: 'channel',  created_at: '2026-02-01 09:00', expires_at: '2026-02-08 09:00', status: 'Expired', bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Trial',   trial_duration_days: 14,   trial_max_sessions: 50,  trial_used_sessions: 50 },
-  // Customer Z: 1 Regular Bound, 1 Regular Unused
-  { code_id: 'ac_008', code: 'SMRT-C9D0-E1F2', org_id: 'org_cu_1003', created_by_portal: 'channel',  created_at: '2026-02-06 10:00', expires_at: '2026-02-13 10:00', status: 'Bound',   bound_device_id: 'dev_15', bound_at: '2026-02-08 16:00', nickname: null,                code_type: 'Regular', trial_duration_days: null, trial_max_sessions: null,  trial_used_sessions: null },
-  { code_id: 'ac_009', code: 'SMRT-G3H4-I5J6', org_id: 'org_cu_1003', created_by_portal: 'channel',  created_at: '2026-02-09 15:00', expires_at: '2026-02-16 15:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Regular', trial_duration_days: null, trial_max_sessions: null,  trial_used_sessions: null },
-  // Customer W: 1 Trial Bound (9 days / 38 sessions left), 1 Regular Unused
-  { code_id: 'ac_010', code: 'SMRT-K7L8-M9N0', org_id: 'org_cu_1004', created_by_portal: 'platform', created_at: '2026-02-07 09:00', expires_at: '2026-02-14 09:00', status: 'Bound',   bound_device_id: 'dev_22', bound_at: '2026-02-08 10:00', nickname: null,                code_type: 'Trial',   trial_duration_days: 30,   trial_max_sessions: 50,  trial_used_sessions: 12 },
-  { code_id: 'ac_011', code: 'SMRT-O1P2-Q3R4', org_id: 'org_cu_1004', created_by_portal: 'platform', created_at: '2026-02-09 10:00', expires_at: '2026-02-16 10:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Regular', trial_duration_days: null, trial_max_sessions: null,  trial_used_sessions: null },
-  // Customer V: 1 Trial Unused
-  { code_id: 'ac_012', code: 'SMRT-S5T6-U7V8', org_id: 'org_cu_1005', created_by_portal: 'channel',  created_at: '2026-02-09 11:00', expires_at: '2026-02-16 11:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Trial',   trial_duration_days: 14,   trial_max_sessions: 30,  trial_used_sessions: null },
+  // Customer X: 1 Regular Bound, 1 Trial Bound (50 sessions / 17 used), 1 Trial Unused (25 sessions), 1 Regular Unused, 1 Regular Revoked
+  { code_id: 'ac_001', code: 'SMRT-A1B2-C3D4', org_id: 'org_cu_1001', created_by_portal: 'platform', created_at: '2026-02-01 10:00', expires_at: '2026-02-08 10:00', status: 'Bound',   bound_device_id: 'dev_09', bound_at: '2026-02-03 09:00', nickname: 'Front Door Mirror', code_type: 'Regular', trial_duration_days: null, trial_max_sessions: null, trial_used_sessions: null },
+  { code_id: 'ac_002', code: 'SMRT-E5F6-G7H8', org_id: 'org_cu_1001', created_by_portal: 'platform', created_at: '2026-02-02 11:00', expires_at: '2026-02-09 11:00', status: 'Bound',   bound_device_id: 'dev_20', bound_at: '2026-02-05 14:00', nickname: 'Fitting Room #2',   code_type: 'Trial',   trial_duration_days: null, trial_max_sessions: 50,  trial_used_sessions: 17 },
+  { code_id: 'ac_013', code: 'SMRT-T1U2-V3W4', org_id: 'org_cu_1001', created_by_portal: 'channel',  created_at: '2026-02-09 13:00', expires_at: '2026-02-16 13:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Trial',   trial_duration_days: null, trial_max_sessions: 25,  trial_used_sessions: null },
+  { code_id: 'ac_003', code: 'SMRT-I9J0-K1L2', org_id: 'org_cu_1001', created_by_portal: 'channel',  created_at: '2026-02-09 09:00', expires_at: '2026-02-16 09:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Regular', trial_duration_days: null, trial_max_sessions: null, trial_used_sessions: null },
+  { code_id: 'ac_004', code: 'SMRT-M3N4-O5P6', org_id: 'org_cu_1001', created_by_portal: 'channel',  created_at: '2026-02-01 08:00', expires_at: '2026-02-08 08:00', status: 'Revoked', bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Regular', trial_duration_days: null, trial_max_sessions: null, trial_used_sessions: null },
+  // Customer Y: 1 Regular Bound, 1 Trial Unused (50 sessions), 1 Trial Expired (quota exhausted, 50/50)
+  { code_id: 'ac_005', code: 'SMRT-Q7R8-S9T0', org_id: 'org_cu_1002', created_by_portal: 'channel',  created_at: '2026-02-05 10:00', expires_at: '2026-02-12 10:00', status: 'Bound',   bound_device_id: 'dev_12', bound_at: '2026-02-07 11:00', nickname: 'VIP Lounge',        code_type: 'Regular', trial_duration_days: null, trial_max_sessions: null, trial_used_sessions: null },
+  { code_id: 'ac_006', code: 'SMRT-U1V2-W3X4', org_id: 'org_cu_1002', created_by_portal: 'channel',  created_at: '2026-02-09 14:00', expires_at: '2026-02-16 14:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Trial',   trial_duration_days: null, trial_max_sessions: 50,  trial_used_sessions: null },
+  { code_id: 'ac_007', code: 'SMRT-Y5Z6-A7B8', org_id: 'org_cu_1002', created_by_portal: 'channel',  created_at: '2026-02-01 09:00', expires_at: '2026-02-08 09:00', status: 'Expired', bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Trial',   trial_duration_days: null, trial_max_sessions: 50,  trial_used_sessions: 50 },
+  // Customer Z: 1 Regular Bound, 1 Trial Unused (25 sessions), 1 Regular Unused
+  { code_id: 'ac_008', code: 'SMRT-C9D0-E1F2', org_id: 'org_cu_1003', created_by_portal: 'channel',  created_at: '2026-02-06 10:00', expires_at: '2026-02-13 10:00', status: 'Bound',   bound_device_id: 'dev_15', bound_at: '2026-02-08 16:00', nickname: null,                code_type: 'Regular', trial_duration_days: null, trial_max_sessions: null, trial_used_sessions: null },
+  { code_id: 'ac_014', code: 'SMRT-X5Y6-Z7A8', org_id: 'org_cu_1003', created_by_portal: 'platform', created_at: '2026-02-10 09:00', expires_at: '2026-02-17 09:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Trial',   trial_duration_days: null, trial_max_sessions: 25,  trial_used_sessions: null },
+  { code_id: 'ac_009', code: 'SMRT-G3H4-I5J6', org_id: 'org_cu_1003', created_by_portal: 'channel',  created_at: '2026-02-09 15:00', expires_at: '2026-02-16 15:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Regular', trial_duration_days: null, trial_max_sessions: null, trial_used_sessions: null },
+  // Customer W: 1 Trial Bound (50 sessions / 12 used), 1 Regular Unused
+  { code_id: 'ac_010', code: 'SMRT-K7L8-M9N0', org_id: 'org_cu_1004', created_by_portal: 'platform', created_at: '2026-02-07 09:00', expires_at: '2026-02-14 09:00', status: 'Bound',   bound_device_id: 'dev_22', bound_at: '2026-02-08 10:00', nickname: null,                code_type: 'Trial',   trial_duration_days: null, trial_max_sessions: 50,  trial_used_sessions: 12 },
+  { code_id: 'ac_011', code: 'SMRT-O1P2-Q3R4', org_id: 'org_cu_1004', created_by_portal: 'platform', created_at: '2026-02-09 10:00', expires_at: '2026-02-16 10:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Regular', trial_duration_days: null, trial_max_sessions: null, trial_used_sessions: null },
+  // Customer V: 1 Trial Unused (25 sessions)
+  { code_id: 'ac_012', code: 'SMRT-S5T6-U7V8', org_id: 'org_cu_1005', created_by_portal: 'channel',  created_at: '2026-02-09 11:00', expires_at: '2026-02-16 11:00', status: 'Unused',  bound_device_id: null,     bound_at: null,              nickname: null,                code_type: 'Trial',   trial_duration_days: null, trial_max_sessions: 25,  trial_used_sessions: null },
 ];
 
 // ==================== Demo 账号 ====================
 
 export const demoAccounts: DemoAccount[] = [
-  { user_id: 'u_super', email: 'super@platform.com', name: 'Platform Admin', role: 'PlatformSuperAdmin', portal: 'platform', org_id: 'platform', org_name: 'Smart Mirror Platform', password: 'demo' },
-  { user_id: 'u_001', email: 'admin@channel-a.com', name: 'Alice Chen', role: 'ChannelOwner', portal: 'channel', org_id: 'org_ch_001', org_name: 'Channel A', password: 'demo' },
-  { user_id: 'u_002', email: 'hq.admin@x.com', name: 'David Zhang', role: 'HQOwner', portal: 'customer', org_id: 'org_cu_1001', org_name: 'Customer X', password: 'demo' },
+  { user_id: 'u_super', email: 'super@platform.com', name: 'Platform Admin', portal: 'platform', org_id: 'platform', org_name: 'Smart Mirror Platform', password: 'demo' },
+  { user_id: 'u_001', email: 'admin@channel-a.com', name: 'Alice Chen', portal: 'channel', org_id: 'org_ch_001', org_name: 'Channel A', password: 'demo' },
+  { user_id: 'u_002', email: 'hq.admin@x.com', name: 'David Zhang', portal: 'customer', org_id: 'org_cu_1001', org_name: 'Customer X', password: 'demo' },
 ];
 
 // ==================== 试用辅助函数 ====================
@@ -377,8 +379,7 @@ export function getOrgActivationCodes(orgId: string): ActivationCode[] {
 export function getChannelSummary(channelOrgId: string) {
   const members = memberships.filter(m => m.org_id === channelOrgId);
   const customerCount = organizations.filter(o => o.parent_org_id === channelOrgId).length;
-  const admin = members.find(m => m.role_key === 'ChannelOwner');
-  const adminUser = admin ? users.find(u => u.user_id === admin.user_id) : null;
+  const adminUser = members.length > 0 ? users.find(u => u.user_id === members[0].user_id) : null;
   return {
     memberCount: members.length,
     customerCount,
@@ -391,8 +392,7 @@ export function getChannelSummary(channelOrgId: string) {
 export function getCustomerSummary(customerOrgId: string) {
   const members = memberships.filter(m => m.org_id === customerOrgId);
   const onlineDevices = devices.filter(d => d.current_org_id === customerOrgId && d.status === 'Online').length;
-  const admin = members.find(m => m.role_key === 'HQOwner');
-  const adminUser = admin ? users.find(u => u.user_id === admin.user_id) : null;
+  const adminUser = members.length > 0 ? users.find(u => u.user_id === members[0].user_id) : null;
   const parentOrg = organizations.find(o => o.org_id === customerOrgId);
   const channelOrg = parentOrg?.parent_org_id ? organizations.find(o => o.org_id === parentOrg.parent_org_id) : null;
   const trialInfo = parentOrg ? getTrialInfo(parentOrg) : { trialStatus: 'not_trial' as const, remainingDays: 0, trialEndDate: '', trialMaxSales: 0, trialUsedSales: 0, trialRemainingSales: 0 };

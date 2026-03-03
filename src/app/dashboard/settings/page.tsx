@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import {
   Typography, Card, Avatar, Tag, Divider, Button,
-  Form, Input, Steps, Result, Space, Row, Col,
+  Form, Input, Steps, Result, Space, Row, Col, message,
 } from 'antd';
 import {
   UserOutlined, LockOutlined,
   SafetyCertificateOutlined, EyeInvisibleOutlined, EyeTwoTone,
-  CheckCircleOutlined, ArrowLeftOutlined, KeyOutlined,
+  CheckCircleOutlined, ArrowLeftOutlined, KeyOutlined, EditOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '@/lib/store';
 
@@ -30,6 +30,7 @@ type PasswordStep = 'idle' | 'verify' | 'newPwd' | 'success';
 
 export default function SettingsPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
+  const updateName = useAuthStore((s) => s.updateName);
 
   // ── Change Password wizard state ─────────────────────────
   const [pwdStep, setPwdStep] = useState<PasswordStep>('idle');
@@ -37,14 +38,36 @@ export default function SettingsPage() {
   const [verifyForm] = Form.useForm();
   const [newPwdForm] = Form.useForm();
 
+  // ── Display name edit state ───────────────────────────────
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState('');
+
   if (!currentUser) return null;
 
   const portalColor = PORTAL_COLOR[currentUser.portal] ?? '#1677ff';
+  const isPlatform = currentUser.portal === 'platform';
+
+  const handleEditName = () => {
+    setNameInput(currentUser.name);
+    setEditingName(true);
+  };
+
+  const handleSaveName = () => {
+    const trimmed = nameInput.trim();
+    if (trimmed) {
+      updateName(trimmed);
+      message.success('Display name updated');
+    }
+    setEditingName(false);
+  };
+
+  const handleCancelName = () => {
+    setEditingName(false);
+  };
 
   // ── Step handlers ─────────────────────────────────────────
   const handleStartChangePassword = () => {
     setPwdStep('verify');
-    // In a real app: trigger sending the code to currentUser.email here
   };
 
   const handleVerifySubmit = () => {
@@ -99,7 +122,6 @@ export default function SettingsPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <Text strong style={{ fontSize: 18 }}>{currentUser.name}</Text>
               <Tag color={portalColor}>{PORTAL_LABEL[currentUser.portal]}</Tag>
-              <Tag>{currentUser.role}</Tag>
             </div>
             <Text type="secondary">{currentUser.email}</Text>
           </div>
@@ -107,7 +129,41 @@ export default function SettingsPage() {
 
         <Divider style={{ margin: '0 0 16px' }} />
 
-        <Row gutter={[24, 12]}>
+        <Row gutter={[24, 14]}>
+          {/* Display Name — editable for all portals */}
+          <Col span={24}>
+            <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
+              Display Name
+            </Text>
+            {editingName ? (
+              <Space>
+                <Input
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
+                  onPressEnter={handleSaveName}
+                  size="small"
+                  style={{ width: 220 }}
+                  autoFocus
+                />
+                <Button size="small" type="primary" onClick={handleSaveName}>Save</Button>
+                <Button size="small" onClick={handleCancelName}>Cancel</Button>
+              </Space>
+            ) : (
+              <Space>
+                <Text>{currentUser.name}</Text>
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<EditOutlined />}
+                  onClick={handleEditName}
+                  style={{ padding: 0 }}
+                >
+                  Edit
+                </Button>
+              </Space>
+            )}
+          </Col>
+
           <Col span={12}>
             <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 2 }}>
               Email
@@ -120,19 +176,13 @@ export default function SettingsPage() {
             </Text>
             <Text>{currentUser.org_name}</Text>
           </Col>
+
           <Col span={12}>
             <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 2 }}>
-              Role
-            </Text>
-            <Text>{currentUser.role}</Text>
-          </Col>
-          <Col span={12}>
-            <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 2 }}>
-              Portal
+              Organization Type
             </Text>
             <Text>{PORTAL_LABEL[currentUser.portal]}</Text>
           </Col>
-
         </Row>
       </Card>
 

@@ -9,6 +9,7 @@ interface AuthStore {
   isAuthenticated: boolean;
   login: (account: DemoAccount) => void;
   logout: () => void;
+  updateName: (name: string) => void;
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -18,6 +19,9 @@ export const useAuthStore = create<AuthStore>()(
       isAuthenticated: false,
       login: (account: DemoAccount) => set({ currentUser: account, isAuthenticated: true }),
       logout: () => set({ currentUser: null, isAuthenticated: false }),
+      updateName: (name: string) => set((state) => ({
+        currentUser: state.currentUser ? { ...state.currentUser, name } : null,
+      })),
     }),
     { name: 'smart-mirror-auth' }
   )

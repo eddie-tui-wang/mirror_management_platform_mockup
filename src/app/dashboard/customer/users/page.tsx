@@ -1,19 +1,15 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Table, Button, Tag, Space, Typography, Modal, Form, Input, Select, message } from 'antd';
+import { Table, Button, Tag, Space, Typography, Modal, Form, Input, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuthStore } from '@/lib/store';
-import { users, memberships, getMembershipInfo } from '@/lib/mock-data';
-import type { User, RoleKey, Status } from '@/lib/types';
+import { users, memberships } from '@/lib/mock-data';
+import type { User, Status } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
 
 const { Title } = Typography;
-
-interface MemberRow extends User {
-  role_key: RoleKey;
-}
 
 export default function CustomerUsersPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
@@ -23,47 +19,24 @@ export default function CustomerUsersPage() {
   const orgId = currentUser?.org_id ?? '';
   const orgName = currentUser?.org_name ?? '';
 
-  const dataSource: MemberRow[] = useMemo(() => {
+  const dataSource: User[] = useMemo(() => {
     const orgMemberships = memberships.filter((m) => m.org_id === orgId);
     return orgMemberships
-      .map((m) => {
-        const user = users.find((u) => u.user_id === m.user_id);
-        if (!user) return null;
-        return {
-          ...user,
-          role_key: m.role_key,
-        };
-      })
-      .filter(Boolean) as MemberRow[];
+      .map((m) => users.find((u) => u.user_id === m.user_id))
+      .filter(Boolean) as User[];
   }, [orgId]);
 
   const handleInvite = () => {
     form.validateFields().then((values) => {
-      message.success(`Invited ${values.email} as ${values.role} (simulated)`);
+      message.success(`Invited ${values.email} (simulated)`);
       setInviteOpen(false);
       form.resetFields();
     });
   };
 
-  const columns: ColumnsType<MemberRow> = [
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-    },
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Role',
-      dataIndex: 'role_key',
-      key: 'role_key',
-      render: (role: RoleKey) => (
-        <Tag color="blue">{role}</Tag>
-      ),
-    },
+  const columns: ColumnsType<User> = [
+    { title: 'Email', dataIndex: 'email', key: 'email' },
+    { title: 'Name', dataIndex: 'name', key: 'name' },
     {
       title: 'Status',
       dataIndex: 'status',
@@ -106,9 +79,7 @@ export default function CustomerUsersPage() {
             <Button
               type="link"
               size="small"
-              onClick={() =>
-                message.info(`Reset password for ${record.name} (simulated)`)
-              }
+              onClick={() => message.info(`Reset password for ${record.name} (simulated)`)}
             >
               Reset Password
             </Button>
@@ -120,14 +91,7 @@ export default function CustomerUsersPage() {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 16,
-        }}
-      >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Title level={4} style={{ margin: 0 }}>
           {orgName} - Members
         </Title>
@@ -142,7 +106,7 @@ export default function CustomerUsersPage() {
         </PermGuard>
       </div>
 
-      <Table<MemberRow>
+      <Table<User>
         columns={columns}
         dataSource={dataSource}
         rowKey="user_id"
@@ -153,10 +117,7 @@ export default function CustomerUsersPage() {
         title="Invite Member"
         open={inviteOpen}
         onOk={handleInvite}
-        onCancel={() => {
-          setInviteOpen(false);
-          form.resetFields();
-        }}
+        onCancel={() => { setInviteOpen(false); form.resetFields(); }}
         okText="Invite"
         cancelText="Cancel"
       >
@@ -170,18 +131,6 @@ export default function CustomerUsersPage() {
             ]}
           >
             <Input placeholder="Please enter invitee's email" />
-          </Form.Item>
-          <Form.Item
-            name="role"
-            label="Role"
-            rules={[{ required: true, message: 'Please select a role' }]}
-          >
-            <Select
-              placeholder="Please select a role"
-              options={[
-                { label: 'HQOwner', value: 'HQOwner' },
-              ]}
-            />
           </Form.Item>
         </Form>
       </Modal>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, InputNumber, Typography, Select, message, Radio } from 'antd';
+import { Table, Button, Tag, Space, Modal, Form, Input, Typography, Select, message, Radio } from 'antd';
 import { PlusOutlined, KeyOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuthStore } from '@/lib/store';
@@ -79,7 +79,7 @@ export default function ChannelCustomersPage() {
   const handleCreateCode = () => {
     createCodeForm.validateFields().then((values) => {
       const suffix = values.codeType === 'Trial'
-        ? ` — Trial · ${values.trialDays} days · ${values.trialMaxSessions} sessions`
+        ? ` — Trial · ${values.trialMaxSessions} sessions`
         : ' — Regular';
       message.success(`Activation code created for ${codesOrg?.name}${suffix} (simulated)`);
       setCreateCodeModalOpen(false);
@@ -341,24 +341,17 @@ export default function ChannelCustomersPage() {
             </Radio.Group>
           </Form.Item>
           {createCodeType === 'Trial' && (
-            <>
-              <Form.Item
-                name="trialDays"
-                label="Trial Duration (days)"
-                initialValue={30}
-                rules={[{ required: true, message: 'Please enter trial duration' }]}
-              >
-                <InputNumber min={1} max={365} style={{ width: '100%' }} placeholder="e.g. 30" />
-              </Form.Item>
-              <Form.Item
-                name="trialMaxSessions"
-                label="Max Try-on Sessions"
-                initialValue={100}
-                rules={[{ required: true, message: 'Please enter max sessions' }]}
-              >
-                <InputNumber min={1} max={9999} style={{ width: '100%' }} placeholder="e.g. 100" />
-              </Form.Item>
-            </>
+            <Form.Item
+              name="trialMaxSessions"
+              label="Max Try-on Sessions"
+              initialValue={25}
+              rules={[{ required: true, message: 'Please select max sessions' }]}
+            >
+              <Radio.Group>
+                <Radio value={25}>25 sessions</Radio>
+                <Radio value={50}>50 sessions</Radio>
+              </Radio.Group>
+            </Form.Item>
           )}
         </Form>
       </Modal>

@@ -34,7 +34,7 @@ export default function RouteGuard({ children }: { children: React.ReactNode }) 
   }
 
   // 检查路由权限
-  if (!hasRouteAccess(currentUser.role, pathname)) {
+  if (!hasRouteAccess(currentUser.portal, pathname)) {
     return <ForbiddenPage />;
   }
 

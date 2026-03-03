@@ -12,13 +12,7 @@ export default function ForbiddenPage() {
     <Result
       status="403"
       title="403 - Access Denied"
-      subTitle={
-        <>
-          Role <strong>{currentUser?.role ?? 'Unknown'}</strong> does not have permission to access this page.
-          <br />
-          Please contact an administrator or switch accounts.
-        </>
-      }
+      subTitle="Your account does not have permission to access this page. Please contact an administrator or switch accounts."
       extra={[
         <Button type="primary" key="back" onClick={() => router.back()}>
           Go Back

@@ -1,4 +1,4 @@
-import { RoleKey, PortalType } from './types';
+import { PortalType } from './types';
 
 // ==================== 权限 Key 定义 ====================
 // 命名规则: portal:resource:action
@@ -15,8 +15,6 @@ export const PERMISSIONS = {
   'platform:users:view': 'View all users',
   'platform:users:disable': 'Disable/Enable user',
   'platform:users:reset_password': 'Reset user password',
-  'platform:users:change_role': 'Change user role',
-  'platform:roles:view': 'View role permissions',
   'platform:garments:view': 'View garments (aggregated)',
   'platform:garments:edit': 'Edit garment (fallback)',
   'platform:garments:delete': 'Delete garment',
@@ -53,12 +51,12 @@ export const PERMISSIONS = {
 
 export type PermissionKey = keyof typeof PERMISSIONS;
 
-// ==================== 角色 → 权限映射 ====================
+// ==================== Portal → 权限映射 ====================
 
-export const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
-  PlatformSuperAdmin: Object.keys(PERMISSIONS) as PermissionKey[], // 全权限
+export const PORTAL_PERMISSIONS: Record<PortalType, PermissionKey[]> = {
+  platform: Object.keys(PERMISSIONS) as PermissionKey[],
 
-  ChannelOwner: [
+  channel: [
     'channel:customers:view',
     'channel:customers:create',
     'channel:customers:create_code',
@@ -66,7 +64,7 @@ export const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'channel:users:reinvite',
   ],
 
-  HQOwner: [
+  customer: [
     'customer:users:view',
     'customer:users:invite',
     'customer:users:disable',
@@ -82,15 +80,6 @@ export const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'customer:devices:manage',
     'customer:garments:assign_device',
   ],
-
-};
-
-// ==================== 角色 → Portal 映射 ====================
-
-export const ROLE_PORTAL: Record<RoleKey, PortalType> = {
-  PlatformSuperAdmin: 'platform',
-  ChannelOwner: 'channel',
-  HQOwner: 'customer',
 };
 
 // ==================== 路由权限映射 ====================
@@ -112,16 +101,12 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
 
 // ==================== 权限检查工具函数 ====================
 
-export function hasPermission(role: RoleKey, permission: PermissionKey): boolean {
-  return ROLE_PERMISSIONS[role]?.includes(permission) ?? false;
+export function hasPermission(portal: PortalType, permission: PermissionKey): boolean {
+  return PORTAL_PERMISSIONS[portal]?.includes(permission) ?? false;
 }
 
-export function hasAnyPermission(role: RoleKey, permissions: PermissionKey[]): boolean {
-  return permissions.some(p => hasPermission(role, p));
-}
-
-export function hasRouteAccess(role: RoleKey, path: string): boolean {
+export function hasRouteAccess(portal: PortalType, path: string): boolean {
   const requiredPerm = ROUTE_PERMISSIONS[path];
-  if (!requiredPerm) return true; // 无权限要求的路由默认放行
-  return hasPermission(role, requiredPerm);
+  if (!requiredPerm) return true;
+  return hasPermission(portal, requiredPerm);
 }
