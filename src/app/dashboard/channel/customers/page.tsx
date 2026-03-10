@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, Typography, Select, message, Radio } from 'antd';
+import { Table, Button, Tag, Space, Modal, Form, Input, Typography, Select, message, Radio, Alert } from 'antd';
 import { PlusOutlined, KeyOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuthStore } from '@/lib/store';
@@ -11,7 +11,8 @@ import PermGuard from '@/components/PermGuard';
 
 const { Title, Text } = Typography;
 
-const CODE_LIMIT = 5;
+const TRIAL_LIMIT = 10; // max Unused Trial codes per customer
+
 const CODE_STATUS_COLOR: Record<ActivationCodeStatus, string> = {
   Unused: 'blue',
   Bound: 'green',
@@ -37,14 +38,20 @@ export default function ChannelCustomersPage() {
   const [codesModalOpen, setCodesModalOpen] = useState(false);
   const [codesOrg, setCodesOrg] = useState<CustomerRow | null>(null);
   const [createCodeModalOpen, setCreateCodeModalOpen] = useState(false);
-  const [createCodeType, setCreateCodeType] = useState<'Regular' | 'Trial'>('Regular');
   const [createCodeForm] = Form.useForm();
+
   const orgCodes = useMemo(
     () => (codesOrg ? getOrgActivationCodes(codesOrg.org_id) : []),
     [codesOrg]
   );
-  const unusedCount = useMemo(
-    () => orgCodes.filter((c) => c.status === 'Unused').length,
+
+  const unusedTrialCount = useMemo(
+    () => orgCodes.filter((c) => c.status === 'Unused' && c.code_type === 'Trial').length,
+    [orgCodes]
+  );
+
+  const regularCount = useMemo(
+    () => orgCodes.filter((c) => c.code_type === 'Regular').length,
     [orgCodes]
   );
 
@@ -78,12 +85,8 @@ export default function ChannelCustomersPage() {
 
   const handleCreateCode = () => {
     createCodeForm.validateFields().then((values) => {
-      const suffix = values.codeType === 'Trial'
-        ? ` — Trial · ${values.trialMaxSessions} sessions`
-        : ' — Regular';
-      message.success(`Activation code created for ${codesOrg?.name}${suffix} (simulated)`);
+      message.success(`Trial code created for ${codesOrg?.name} · ${values.trialMaxSessions} sessions (simulated)`);
       setCreateCodeModalOpen(false);
-      setCreateCodeType('Regular');
       createCodeForm.resetFields();
     });
   };
@@ -114,16 +117,8 @@ export default function ChannelCustomersPage() {
   };
 
   const columns: ColumnsType<CustomerRow> = [
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Email',
-      dataIndex: 'adminEmail',
-      key: 'adminEmail',
-    },
+    { title: 'Name', dataIndex: 'name', key: 'name' },
+    { title: 'Email', dataIndex: 'adminEmail', key: 'adminEmail' },
     {
       title: 'Status',
       key: 'status',
@@ -131,11 +126,7 @@ export default function ChannelCustomersPage() {
         <Tag color={record.status === 'Active' ? 'green' : 'red'}>{record.status}</Tag>
       ),
     },
-    {
-      title: 'Created At',
-      dataIndex: 'created_at',
-      key: 'created_at',
-    },
+    { title: 'Created At', dataIndex: 'created_at', key: 'created_at' },
     {
       title: 'Actions',
       key: 'actions',
@@ -177,6 +168,8 @@ export default function ChannelCustomersPage() {
 
   if (!currentUser) return null;
 
+  const trialLimitReached = unusedTrialCount >= TRIAL_LIMIT;
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -184,11 +177,7 @@ export default function ChannelCustomersPage() {
           {currentUser.org_name} - Customer Management
         </Title>
         <PermGuard permission="channel:customers:create">
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setCreateModalOpen(true)}
-          >
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateModalOpen(true)}>
             Create Customer (Reseller)
           </Button>
         </PermGuard>
@@ -229,24 +218,42 @@ export default function ChannelCustomersPage() {
         width={760}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <Text type="secondary">
-            {unusedCount} / {CODE_LIMIT} Unused slots used
+          <Space direction="vertical" size={2}>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              Trial codes (Unused):{' '}
+              <Text strong style={{ color: trialLimitReached ? '#ff4d4f' : undefined }}>
+                {unusedTrialCount} / {TRIAL_LIMIT}
+              </Text>
+            </Text>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              Regular codes (assigned by platform): <Text strong>{regularCount}</Text>
+            </Text>
             {codesOrg?.status === 'Disabled' && (
-              <Text type="danger" style={{ marginLeft: 8 }}>— Account is disabled</Text>
+              <Text type="danger" style={{ fontSize: 12 }}>Account is disabled</Text>
             )}
-          </Text>
+          </Space>
           <PermGuard permission="channel:customers:create_code">
             <Button
               type="primary"
               size="small"
               icon={<PlusOutlined />}
-              disabled={unusedCount >= CODE_LIMIT || codesOrg?.status === 'Disabled'}
+              disabled={trialLimitReached || codesOrg?.status === 'Disabled'}
               onClick={() => setCreateCodeModalOpen(true)}
             >
-              Create Code
+              Create Trial Code
             </Button>
           </PermGuard>
         </div>
+
+        {trialLimitReached && (
+          <Alert
+            type="warning"
+            showIcon
+            message={`This customer has reached the limit of ${TRIAL_LIMIT} unused Trial codes.`}
+            style={{ marginBottom: 12, fontSize: 12 }}
+          />
+        )}
+
         <Table<ActivationCode>
           size="small"
           dataSource={orgCodes}
@@ -258,6 +265,14 @@ export default function ChannelCustomersPage() {
               dataIndex: 'code',
               key: 'code',
               render: (c: string) => <Text code style={{ fontSize: 12 }}>{c}</Text>,
+            },
+            {
+              title: 'Type',
+              dataIndex: 'code_type',
+              key: 'code_type',
+              render: (t: string) => (
+                <Tag color={t === 'Regular' ? 'blue' : 'orange'}>{t}</Tag>
+              ),
             },
             {
               title: 'Status',
@@ -321,49 +336,36 @@ export default function ChannelCustomersPage() {
         />
       </Modal>
 
+      {/* Create Trial Code Modal */}
       <Modal
-        title={`Create Activation Code — ${codesOrg?.name ?? ''}`}
+        title={`Create Trial Activation Code — ${codesOrg?.name ?? ''}`}
         open={createCodeModalOpen}
         onOk={handleCreateCode}
-        onCancel={() => {
-          setCreateCodeModalOpen(false);
-          setCreateCodeType('Regular');
-          createCodeForm.resetFields();
-        }}
+        onCancel={() => { setCreateCodeModalOpen(false); createCodeForm.resetFields(); }}
         okText="Create"
         cancelText="Cancel"
       >
-        <Form form={createCodeForm} layout="vertical" initialValues={{ codeType: 'Regular' }}>
-          <Form.Item name="codeType" label="Code Type">
-            <Radio.Group onChange={(e) => setCreateCodeType(e.target.value as 'Regular' | 'Trial')}>
-              <Radio value="Regular">Regular</Radio>
-              <Radio value="Trial">Trial</Radio>
+        <Form form={createCodeForm} layout="vertical">
+          <Form.Item
+            name="trialMaxSessions"
+            label="Max Try-on Sessions"
+            initialValue={25}
+            rules={[{ required: true, message: 'Please select max sessions' }]}
+          >
+            <Radio.Group>
+              <Radio value={25}>25 sessions</Radio>
+              <Radio value={50}>50 sessions</Radio>
             </Radio.Group>
           </Form.Item>
-          {createCodeType === 'Trial' && (
-            <Form.Item
-              name="trialMaxSessions"
-              label="Max Try-on Sessions"
-              initialValue={25}
-              rules={[{ required: true, message: 'Please select max sessions' }]}
-            >
-              <Radio.Group>
-                <Radio value={25}>25 sessions</Radio>
-                <Radio value={50}>50 sessions</Radio>
-              </Radio.Group>
-            </Form.Item>
-          )}
         </Form>
       </Modal>
 
+      {/* Create Customer Modal */}
       <Modal
         title="Create Customer (Reseller)"
         open={createModalOpen}
         onOk={handleCreate}
-        onCancel={() => {
-          setCreateModalOpen(false);
-          form.resetFields();
-        }}
+        onCancel={() => { setCreateModalOpen(false); form.resetFields(); }}
         okText="Create"
         cancelText="Cancel"
       >
