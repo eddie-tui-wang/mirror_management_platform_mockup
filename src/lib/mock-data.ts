@@ -222,7 +222,7 @@ export const activationCodes: ActivationCode[] = [
 // ==================== Demo 账号 ====================
 
 export const demoAccounts: DemoAccount[] = [
-  { user_id: 'u_super', email: 'super@platform.com', name: 'Platform Admin', portal: 'platform', org_id: 'platform', org_name: 'Smart Mirror Platform', password: 'demo' },
+  { user_id: 'u_super', email: 'super@platform.com', name: 'Platform Admin', portal: 'platform', org_id: 'platform', org_name: 'AI Fitting Mirror Platform', password: 'demo' },
   { user_id: 'u_001', email: 'admin@channel-a.com', name: 'Alice Chen', portal: 'channel', org_id: 'org_ch_001', org_name: 'Channel A', password: 'demo' },
   { user_id: 'u_002', email: 'hq.admin@x.com', name: 'David Zhang', portal: 'customer', org_id: 'org_cu_1001', org_name: 'Customer X', password: 'demo' },
 ];

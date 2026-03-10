@@ -274,7 +274,7 @@ export default function ForgotPasswordPage() {
                   type="primary"
                   block
                   style={primaryBtnStyle}
-                  onClick={() => router.push('/')}
+                  onClick={() => router.push('/login')}
                 >
                   Back to Sign in
                 </Button>,
@@ -288,7 +288,7 @@ export default function ForgotPasswordPage() {
           <div style={{ textAlign: 'center', marginTop: 16 }}>
             <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13 }}>
               Remember your password?{' '}
-              <Link style={{ color: 'rgba(255,255,255,0.85)' }} onClick={() => router.push('/')}>
+              <Link style={{ color: 'rgba(255,255,255,0.85)' }} onClick={() => router.push('/login')}>
                 Sign in
               </Link>
             </Text>
@@ -297,7 +297,7 @@ export default function ForgotPasswordPage() {
 
         <div style={{ textAlign: 'center', marginTop: 12 }}>
           <Text style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11 }}>
-            &copy; 2026 Smart Mirror Technologies · Privacy · Terms
+            &copy; 2026 AI Fitting Mirror Technologies · Privacy · Terms
           </Text>
         </div>
       </div>

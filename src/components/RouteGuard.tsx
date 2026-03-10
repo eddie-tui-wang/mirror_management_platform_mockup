@@ -29,7 +29,7 @@ export default function RouteGuard({ children }: { children: React.ReactNode }) 
 
   // 未登录 → 跳转登录页
   if (!isAuthenticated || !currentUser) {
-    router.push('/');
+    router.push('/login');
     return null;
   }
 

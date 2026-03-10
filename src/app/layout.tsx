@@ -9,8 +9,8 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Mirror Management - Demo",
-  description: "Smart Mirror Multi-Account RBAC Management System Demo",
+  title: "AI Fitting Mirror Management - Demo",
+  description: "AI Fitting Mirror Multi-Account RBAC Management System Demo",
 };
 
 export default function RootLayout({

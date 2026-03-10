@@ -88,7 +88,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [currentUser]);
 
   if (!currentUser) {
-    router.push('/');
+    router.push('/login');
     return null;
   }
 
@@ -125,7 +125,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       danger: true,
       onClick: () => {
         logout();
-        router.push('/');
+        router.push('/login');
       },
     },
   ];
@@ -183,11 +183,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             selectedKeys={selectedKeys}
             onClick={handleMenuClick}
             style={{ borderRight: 0 }}
-            items={[{
-              key: '/dashboard/settings',
-              icon: <SettingOutlined />,
-              label: 'Settings',
-            }]}
+            items={[
+              {
+                key: '/dashboard/settings',
+                icon: <SettingOutlined />,
+                label: 'Settings',
+              },
+            ]}
           />
         </div>
       </Sider>
