@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import {
   Organization, User, OrgMembership, GarmentCatalog, GarmentCategory,
   MasterTemplate, TemplateAssignment, Device, DeviceGarmentAssignment, Session, DemoAccount,
-  ActivationCode, TrialStatus,
+  ActivationCode, TrialStatus, EmailRecord, WebsiteInquiry,
 } from './types';
 
 // ==================== 组织数据 ====================
@@ -415,3 +415,39 @@ export function getCustomerSummary(customerOrgId: string) {
     trialRemainingSales: trialInfo.trialRemainingSales,
   };
 }
+
+// ==================== 邮件发送记录 ====================
+
+const PLACEHOLDER_IMG = 'https://placehold.co/80x80/e8f4ff/667eea?text=Result';
+
+export const emailRecords: EmailRecord[] = [
+  { record_id: 'er_001', customer_email: 'alice@example.com',   sent_time: '2026-03-01 10:23', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_002', customer_email: 'bob@fashion.co',      sent_time: '2026-03-01 11:05', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_003', customer_email: 'carol@style.io',      sent_time: '2026-03-02 09:14', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_004', customer_email: 'dave@retail.com',     sent_time: '2026-03-02 14:32', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_005', customer_email: 'eve@boutique.cn',     sent_time: '2026-03-03 08:50', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_006', customer_email: 'frank@mall.com',      sent_time: '2026-03-03 13:17', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_007', customer_email: 'grace@luxury.hk',     sent_time: '2026-03-04 10:44', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_008', customer_email: 'henry@shopping.sg',   sent_time: '2026-03-05 15:28', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_009', customer_email: 'iris@outlet.jp',      sent_time: '2026-03-06 09:03', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_010', customer_email: 'jack@tryon.ai',       sent_time: '2026-03-07 11:55', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_011', customer_email: 'kate@wear.com',       sent_time: '2026-03-08 16:10', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_012', customer_email: 'leo@apparel.cn',      sent_time: '2026-03-09 10:30', generation_result_url: PLACEHOLDER_IMG },
+];
+
+// ==================== 官网表单提交记录 ====================
+
+export const websiteInquiries: WebsiteInquiry[] = [
+  { inquiry_id: 'wi_001', time: '2026-02-10 09:00', name: 'Sarah Kim',     company: 'Luxe Retail Group',   email: 'sarah@luxeretail.com',  role: 'Operations Manager', venue: 'Shanghai Flagship Store' },
+  { inquiry_id: 'wi_002', time: '2026-02-11 14:30', name: 'James Liu',     company: 'FashionHub Co.',      email: 'james@fashionhub.cn',   role: 'IT Director',         venue: 'Guangzhou Mall Branch' },
+  { inquiry_id: 'wi_003', time: '2026-02-12 11:15', name: 'Mia Zhang',     company: 'TrendWear Ltd.',      email: 'mia@trendwear.hk',      role: 'Store Manager',       venue: 'Hong Kong Pop-up' },
+  { inquiry_id: 'wi_004', time: '2026-02-14 16:45', name: 'Tom Wang',      company: 'StylePoint Inc.',     email: 'tom@stylepoint.sg',     role: 'CEO',                 venue: 'Singapore Orchard Rd' },
+  { inquiry_id: 'wi_005', time: '2026-02-15 10:00', name: 'Linda Chen',    company: 'Urban Threads',       email: 'linda@urbanthreads.com', role: 'Buyer',              venue: 'Beijing CBD Showroom' },
+  { inquiry_id: 'wi_006', time: '2026-02-18 13:20', name: 'Kevin Park',    company: 'K-Mode Fashion',      email: 'kevin@kmode.kr',        role: 'Brand Manager',       venue: 'Seoul Gangnam Store' },
+  { inquiry_id: 'wi_007', time: '2026-02-20 09:50', name: 'Amy Tanaka',    company: 'Haru Clothing',       email: 'amy@haruclothing.jp',   role: 'Marketing Lead',      venue: 'Tokyo Shibuya' },
+  { inquiry_id: 'wi_008', time: '2026-02-22 15:05', name: 'David Lau',     company: 'Metro Fashion',       email: 'david@metrofashion.hk', role: 'CTO',                 venue: 'Causeway Bay Outlet' },
+  { inquiry_id: 'wi_009', time: '2026-02-25 11:40', name: 'Nina Wu',       company: 'Silk Road Apparel',   email: 'nina@silkroad.cn',      role: 'Retail Director',     venue: 'Chengdu IFS' },
+  { inquiry_id: 'wi_010', time: '2026-03-01 10:10', name: 'Oscar Zheng',   company: 'NextGen Retail',      email: 'oscar@nextgenretail.ai', role: 'Product Manager',    venue: 'Shenzhen Tech Park' },
+  { inquiry_id: 'wi_011', time: '2026-03-03 14:00', name: 'Pam Ho',        company: 'Chic Avenue',         email: 'pam@chicavenue.sg',     role: 'Visual Merchandiser', venue: 'Marina Bay Sands' },
+  { inquiry_id: 'wi_012', time: '2026-03-05 09:25', name: 'Ryan Foo',      company: 'StyleMatrix',         email: 'ryan@stylematrix.com',  role: 'Business Dev',        venue: 'KL Pavilion Mall' },
+];

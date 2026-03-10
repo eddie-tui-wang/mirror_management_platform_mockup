@@ -24,6 +24,8 @@ export const PERMISSIONS = {
   'platform:templates:delete': 'Delete template',
   'platform:templates:assign': 'Assign template to customer',
   'platform:devices:view': 'View all devices (aggregated)',
+  'platform:email_records:view': 'View email send records',
+  'platform:website_inquiries:view': 'View website form submissions',
 
   // ---- 渠道端 ----
   'channel:customers:view': 'View customers',
@@ -31,6 +33,8 @@ export const PERMISSIONS = {
   'channel:customers:create_code': 'Create activation code for channel customer',
   'channel:users:view': 'View customer accounts',
   'channel:users:reinvite': 'Resend invitation',
+  'channel:templates:view': 'View templates',
+  'channel:templates:assign': 'Assign template to customer',
 
   // ---- 客户端 ----
   'customer:users:view': 'View members',
@@ -62,6 +66,8 @@ export const PORTAL_PERMISSIONS: Record<PortalType, PermissionKey[]> = {
     'channel:customers:create_code',
     'channel:users:view',
     'channel:users:reinvite',
+    'channel:templates:view',
+    'channel:templates:assign',
   ],
 
   customer: [
@@ -90,8 +96,11 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   '/dashboard/assets/garments': 'platform:garments:view',
   '/dashboard/assets/templates': 'platform:templates:view',
   '/dashboard/assets/devices': 'platform:devices:view',
+  '/dashboard/email-records': 'platform:email_records:view',
+  '/dashboard/website-inquiries': 'platform:website_inquiries:view',
   // 渠道端
   '/dashboard/channel/customers': 'channel:customers:view',
+  '/dashboard/channel/templates': 'channel:templates:view',
   // 客户端
   '/dashboard/customer/users': 'customer:users:view',
   '/dashboard/customer/garments': 'customer:garments:view',

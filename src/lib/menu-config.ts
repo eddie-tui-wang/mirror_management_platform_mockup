@@ -14,6 +14,8 @@ export interface MenuItemConfig {
 const platformMenu: MenuItemConfig[] = [
   { key: 'channels', label: 'Channel Management', icon: 'BankOutlined', path: '/dashboard/channels', permission: 'platform:channels:view' },
   { key: 'customers', label: 'Customer Management', icon: 'TeamOutlined', path: '/dashboard/customers', permission: 'platform:customers:view' },
+  { key: 'email-records', label: 'Email Records', icon: 'MailOutlined', path: '/dashboard/email-records', permission: 'platform:email_records:view' },
+  { key: 'website-inquiries', label: 'Website Inquiries', icon: 'FormOutlined', path: '/dashboard/website-inquiries', permission: 'platform:website_inquiries:view' },
   {
     key: 'assets', label: 'Assets', icon: 'AppstoreOutlined',
     children: [
@@ -27,6 +29,7 @@ const platformMenu: MenuItemConfig[] = [
 // 渠道端菜单
 const channelMenu: MenuItemConfig[] = [
   { key: 'ch-customers', label: 'Customer Management', icon: 'TeamOutlined', path: '/dashboard/channel/customers', permission: 'channel:customers:view' },
+  { key: 'ch-templates', label: 'Template Management', icon: 'LayoutOutlined', path: '/dashboard/channel/templates', permission: 'channel:templates:view' },
 ];
 
 // 客户端菜单

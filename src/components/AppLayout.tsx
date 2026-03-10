@@ -5,7 +5,7 @@ import { Layout, Menu, Avatar, Dropdown, Tag, Typography, Space, theme } from 'a
 import {
   BankOutlined, TeamOutlined, UserOutlined, AppstoreOutlined,
   SkinOutlined, LayoutOutlined, DesktopOutlined, ClockCircleOutlined,
-  LogoutOutlined, SettingOutlined,
+  LogoutOutlined, SettingOutlined, MailOutlined, FormOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
@@ -25,6 +25,8 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   LayoutOutlined: <LayoutOutlined />,
   DesktopOutlined: <DesktopOutlined />,
   ClockCircleOutlined: <ClockCircleOutlined />,
+  MailOutlined: <MailOutlined />,
+  FormOutlined: <FormOutlined />,
 };
 
 const PORTAL_COLOR: Record<string, string> = {
@@ -136,16 +138,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const selectedKeys = [pathname];
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ height: '100vh', overflow: 'hidden' }}>
       <Sider
         width={220}
         style={{
           background: token.colorBgContainer,
           borderRight: `1px solid ${token.colorBorderSecondary}`,
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100vh',
+          overflow: 'hidden',
         }}
       >
         <div style={{
           height: 64,
+          flexShrink: 0,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -155,21 +162,37 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="AI Mirror Fitting" style={{ height: 22, width: 'auto' }} />
         </div>
-        <div style={{ padding: '8px 12px' }}>
+        <div style={{ padding: '8px 12px', flexShrink: 0 }}>
           <Tag color={portalColor} style={{ width: '100%', textAlign: 'center', padding: '4px 0', fontSize: 13 }}>
             {PORTAL_LABEL[currentUser.portal]}
           </Tag>
         </div>
-        <Menu
-          mode="inline"
-          selectedKeys={selectedKeys}
-          items={menuItems}
-          onClick={handleMenuClick}
-          style={{ borderRight: 0 }}
-        />
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          <Menu
+            mode="inline"
+            selectedKeys={selectedKeys}
+            items={menuItems}
+            onClick={handleMenuClick}
+            style={{ borderRight: 0 }}
+          />
+        </div>
+        <div style={{ flexShrink: 0, borderTop: `1px solid ${token.colorBorderSecondary}` }}>
+          <Menu
+            mode="inline"
+            selectedKeys={selectedKeys}
+            onClick={handleMenuClick}
+            style={{ borderRight: 0 }}
+            items={[{
+              key: '/dashboard/settings',
+              icon: <SettingOutlined />,
+              label: 'Settings',
+            }]}
+          />
+        </div>
       </Sider>
-      <Layout>
+      <Layout style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
         <Header style={{
+          flexShrink: 0,
           background: token.colorBgContainer,
           borderBottom: `1px solid ${token.colorBorderSecondary}`,
           padding: '0 24px',
@@ -191,7 +214,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </Dropdown>
           </Space>
         </Header>
-        <Content style={{ margin: 24, padding: 24, background: token.colorBgContainer, borderRadius: token.borderRadiusLG, minHeight: 360 }}>
+        <Content style={{
+          flex: 1,
+          overflow: 'auto',
+          margin: 24,
+          padding: 24,
+          background: token.colorBgContainer,
+          borderRadius: token.borderRadiusLG,
+        }}>
           {children}
         </Content>
       </Layout>

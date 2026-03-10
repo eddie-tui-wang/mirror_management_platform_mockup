@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Table, Button, Tag, Space, Modal, Form, Input, Typography, message } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useRouter } from 'next/navigation';
-import { organizations, getChannelSummary } from '@/lib/mock-data';
+import { organizations, users, getChannelSummary } from '@/lib/mock-data';
 import type { Organization, Status } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
 
@@ -25,9 +25,15 @@ export default function ChannelsPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [form] = Form.useForm();
 
+  // Debounced search
+  const [searchInput, setSearchInput] = useState('');
   const [searchText, setSearchText] = useState('');
 
-  // Local mutable state for channel statuses
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchText(searchInput), 500);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
   const [statusOverrides, setStatusOverrides] = useState<Record<string, Status>>({});
 
   const baseData: ChannelRow[] = useMemo(() => {
@@ -60,19 +66,38 @@ export default function ChannelsPage() {
     Modal.confirm({
       title: `${next === 'Disabled' ? 'Disable' : 'Enable'} channel "${record.name}"?`,
       content: next === 'Disabled'
-        ? 'Channel users will lose access until re-enabled.'
+        ? 'All users under this channel will be immediately logged out and lose access until re-enabled.'
         : 'The channel will be restored to active status.',
       okText: next === 'Disabled' ? 'Disable' : 'Enable',
       okType: next === 'Disabled' ? 'danger' : 'primary',
       onOk: () => {
         setStatusOverrides((prev) => ({ ...prev, [record.org_id]: next }));
         message.success(`Channel "${record.name}" has been ${action}.`);
+        if (next === 'Disabled') {
+          message.warning(`All active sessions for "${record.name}" have been terminated (simulated).`);
+        }
       },
     });
   };
 
   const handleCreate = () => {
     form.validateFields().then((values) => {
+      // Uniqueness: Name
+      const nameTaken = organizations.some(
+        (o) => o.org_type === 'CHANNEL' && o.name.toLowerCase() === values.name.trim().toLowerCase()
+      );
+      if (nameTaken) {
+        form.setFields([{ name: 'name', errors: ['Channel name already exists'] }]);
+        return;
+      }
+      // Uniqueness: Email
+      const emailTaken = users.some(
+        (u) => u.email.toLowerCase() === values.adminEmail.trim().toLowerCase()
+      );
+      if (emailTaken) {
+        form.setFields([{ name: 'adminEmail', errors: ['Email is already registered'] }]);
+        return;
+      }
       message.success(`Channel "${values.name}" created successfully (simulated)`);
       setCreateModalOpen(false);
       form.resetFields();
@@ -80,11 +105,7 @@ export default function ChannelsPage() {
   };
 
   const columns: ColumnsType<ChannelRow> = [
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-    },
+    { title: 'Name', dataIndex: 'name', key: 'name' },
     {
       title: 'channel_id',
       dataIndex: 'org_id',
@@ -99,21 +120,9 @@ export default function ChannelsPage() {
         <Tag color={status === 'Active' ? 'green' : 'red'}>{status}</Tag>
       ),
     },
-    {
-      title: 'Email',
-      dataIndex: 'adminEmail',
-      key: 'adminEmail',
-    },
-    {
-      title: 'Customers',
-      dataIndex: 'customerCount',
-      key: 'customerCount',
-    },
-    {
-      title: 'Created At',
-      dataIndex: 'created_at',
-      key: 'created_at',
-    },
+    { title: 'Email', dataIndex: 'adminEmail', key: 'adminEmail' },
+    { title: 'Customers', dataIndex: 'customerCount', key: 'customerCount' },
+    { title: 'Created At', dataIndex: 'created_at', key: 'created_at' },
     {
       title: 'Actions',
       key: 'actions',
@@ -150,11 +159,7 @@ export default function ChannelsPage() {
         <Title level={4} style={{ margin: 0 }}>Channel Management</Title>
         <Space>
           <PermGuard permission="platform:channels:create">
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => setCreateModalOpen(true)}
-            >
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateModalOpen(true)}>
               Create Channel
             </Button>
           </PermGuard>
@@ -167,8 +172,12 @@ export default function ChannelsPage() {
           placeholder="Search by channel name"
           allowClear
           style={{ width: 260 }}
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
+          value={searchInput}
+          onChange={(e) => {
+            setSearchInput(e.target.value);
+            if (!e.target.value) setSearchText('');
+          }}
+          onPressEnter={() => setSearchText(searchInput)}
         />
       </div>
 
@@ -183,10 +192,7 @@ export default function ChannelsPage() {
         title="Create Channel"
         open={createModalOpen}
         onOk={handleCreate}
-        onCancel={() => {
-          setCreateModalOpen(false);
-          form.resetFields();
-        }}
+        onCancel={() => { setCreateModalOpen(false); form.resetFields(); }}
         okText="Create"
         cancelText="Cancel"
       >
@@ -207,9 +213,6 @@ export default function ChannelsPage() {
             ]}
           >
             <Input placeholder="Please enter channel admin email" />
-          </Form.Item>
-          <Form.Item name="remark" label="Remarks">
-            <Input.TextArea placeholder="Optional remarks" rows={3} />
           </Form.Item>
         </Form>
       </Modal>

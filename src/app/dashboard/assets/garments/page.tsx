@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
-import { Table, Tag, Typography, Select, Image, Space } from 'antd';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Table, Tag, Typography, Select, Image, Space, Input } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useSearchParams } from 'next/navigation';
 import { organizations, garments, getOrgById } from '@/lib/mock-data';
+import { SearchOutlined } from '@ant-design/icons';
 import type { GarmentCatalog, OrgType, Status } from '@/lib/types';
 
 const { Title } = Typography;
@@ -20,6 +21,13 @@ export default function GarmentsPage() {
 
   const [filterOrgId, setFilterOrgId] = useState<string | undefined>(initialOrgId);
   const [filterStatus, setFilterStatus] = useState<Status | undefined>(undefined);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchText, setSearchText] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchText(searchInput), 500);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const orgOptions = useMemo(() => {
     return organizations.map((o) => ({ label: `${o.name} (${o.org_id})`, value: o.org_id }));
@@ -38,9 +46,10 @@ export default function GarmentsPage() {
       .filter((g) => {
         if (filterOrgId && g.org_id !== filterOrgId) return false;
         if (filterStatus && g.status !== filterStatus) return false;
+        if (searchText && !g.name.toLowerCase().includes(searchText.toLowerCase())) return false;
         return true;
       });
-  }, [filterOrgId, filterStatus]);
+  }, [filterOrgId, filterStatus, searchText]);
 
   const columns: ColumnsType<GarmentRow> = [
     {
@@ -91,6 +100,18 @@ export default function GarmentsPage() {
       </div>
 
       <Space style={{ marginBottom: 16 }} wrap>
+        <Input
+          prefix={<SearchOutlined style={{ color: '#bbb' }} />}
+          placeholder="Search by garment name"
+          allowClear
+          style={{ width: 220 }}
+          value={searchInput}
+          onChange={(e) => {
+            setSearchInput(e.target.value);
+            if (!e.target.value) setSearchText('');
+          }}
+          onPressEnter={() => setSearchText(searchInput)}
+        />
         <Select
           placeholder="Organization"
           allowClear

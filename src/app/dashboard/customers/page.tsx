@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   Table, Button, Tag, Space, Typography, message, Select, Modal, Form,
   Input,
 } from 'antd';
-import { PlusOutlined, KeyOutlined } from '@ant-design/icons';
+import { PlusOutlined, KeyOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { organizations, getCustomerSummary, getOrgActivationCodes } from '@/lib/mock-data';
+import { organizations, users, getCustomerSummary, getOrgActivationCodes } from '@/lib/mock-data';
 import type { CustomerType, Status, ActivationCode, ActivationCodeStatus } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
 
@@ -40,7 +40,14 @@ export default function CustomersPage() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [channelFilter, setChannelFilter] = useState<string>(searchParams.get('channel') ?? 'all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchInput, setSearchInput] = useState('');
+  const [searchText, setSearchText] = useState('');
   const [createModalOpen, setCreateModalOpen] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchText(searchInput), 500);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
   const [form] = Form.useForm();
 
   const [codesModalOpen, setCodesModalOpen] = useState(false);
@@ -95,8 +102,12 @@ export default function CustomersPage() {
     if (typeFilter !== 'all') filtered = filtered.filter((c) => c.customerType === typeFilter);
     if (channelFilter !== 'all') filtered = filtered.filter((c) => c.parent_org_id === channelFilter);
     if (statusFilter !== 'all') filtered = filtered.filter((c) => c.status === statusFilter);
+    if (searchText) {
+      const lower = searchText.toLowerCase();
+      filtered = filtered.filter((c) => c.name.toLowerCase().includes(lower));
+    }
     return filtered;
-  }, [allCustomers, typeFilter, channelFilter, statusFilter]);
+  }, [allCustomers, typeFilter, channelFilter, statusFilter, searchText]);
 
   const toggleStatus = (record: CustomerRow) => {
     const current = statusOverrides[record.org_id] ?? record.status;
@@ -112,6 +123,9 @@ export default function CustomersPage() {
       onOk: () => {
         setStatusOverrides((prev) => ({ ...prev, [record.org_id]: next }));
         message.success(`Customer "${record.name}" has been ${action}.`);
+        if (next === 'Disabled') {
+          message.warning(`All active sessions for "${record.name}" have been terminated (simulated).`);
+        }
       },
     });
   };
@@ -126,6 +140,20 @@ export default function CustomersPage() {
 
   const handleCreate = () => {
     form.validateFields().then((values) => {
+      const nameTaken = organizations.some(
+        (o) => o.org_type === 'CUSTOMER' && o.name.toLowerCase() === values.name.trim().toLowerCase()
+      );
+      if (nameTaken) {
+        form.setFields([{ name: 'name', errors: ['Customer name already exists'] }]);
+        return;
+      }
+      const emailTaken = users.some(
+        (u) => u.email.toLowerCase() === values.adminEmail.trim().toLowerCase()
+      );
+      if (emailTaken) {
+        form.setFields([{ name: 'adminEmail', errors: ['Email is already registered'] }]);
+        return;
+      }
       message.success(`Customer "${values.name}" created successfully (simulated)`);
       setCreateModalOpen(false);
       form.resetFields();
@@ -219,6 +247,21 @@ export default function CustomersPage() {
             </Button>
           </PermGuard>
         </Space>
+      </div>
+
+      <div style={{ marginBottom: 16 }}>
+        <Input
+          prefix={<SearchOutlined style={{ color: '#bbb' }} />}
+          placeholder="Search by customer name"
+          allowClear
+          style={{ width: 260 }}
+          value={searchInput}
+          onChange={(e) => {
+            setSearchInput(e.target.value);
+            if (!e.target.value) setSearchText('');
+          }}
+          onPressEnter={() => setSearchText(searchInput)}
+        />
       </div>
 
       <Space style={{ marginBottom: 16 }} wrap>

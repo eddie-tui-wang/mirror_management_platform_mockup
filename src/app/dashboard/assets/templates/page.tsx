@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   Table, Button, Tag, Space, Typography, Select, Input, Modal,
   Form, List, message,
 } from 'antd';
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import {
   masterTemplates, getTemplateAssignedOrgs, getTemplateUnassignedOrgs,
@@ -17,7 +17,13 @@ const { Title } = Typography;
 
 export default function TemplatesPage() {
   // 筛选状态
+  const [searchInput, setSearchInput] = useState('');
   const [searchText, setSearchText] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchText(searchInput), 500);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   // 弹窗状态
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -269,17 +275,20 @@ export default function TemplatesPage() {
       </div>
 
       {/* 筛选栏 */}
-      <Space style={{ marginBottom: 16 }} wrap>
-        <Input.Search
+      <div style={{ marginBottom: 16 }}>
+        <Input
+          prefix={<SearchOutlined style={{ color: '#bbb' }} />}
           placeholder="Search name or prompt"
           allowClear
           style={{ width: 240 }}
-          onSearch={setSearchText}
+          value={searchInput}
           onChange={(e) => {
+            setSearchInput(e.target.value);
             if (!e.target.value) setSearchText('');
           }}
+          onPressEnter={() => setSearchText(searchInput)}
         />
-      </Space>
+      </div>
 
       <Table<MasterTemplate>
         columns={columns}

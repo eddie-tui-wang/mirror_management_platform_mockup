@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Input, Form, Typography, message, Checkbox, Divider, Dropdown } from 'antd';
+import { Button, Input, Form, Typography, message, Divider, Dropdown } from 'antd';
 import {
   LockOutlined, MailOutlined, EyeInvisibleOutlined, EyeTwoTone, DownOutlined,
   SafetyCertificateOutlined, ArrowLeftOutlined,
 } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
-import { demoAccounts } from '@/lib/mock-data';
+import { demoAccounts, getOrgById } from '@/lib/mock-data';
 import { DemoAccount, PortalType } from '@/lib/types';
 
 const { Title, Text, Link } = Typography;
@@ -42,8 +42,13 @@ export default function LoginPage() {
         a => a.email === values.email && a.password === values.password
       );
       if (account) {
-        setPendingAccount(account);
-        setLoginStep('verify');
+        const org = getOrgById(account.org_id);
+        if (org && org.status === 'Disabled') {
+          message.error('This account has been disabled. Please contact your administrator.');
+        } else {
+          setPendingAccount(account);
+          setLoginStep('verify');
+        }
       } else {
         message.error('Invalid email or password');
       }
@@ -171,12 +176,6 @@ export default function LoginPage() {
                     Forgot password?
                   </Link>
                 </div>
-
-                <Form.Item name="remember" valuePropName="checked" style={{ marginBottom: 20 }}>
-                  <Checkbox>
-                    <Text style={{ fontSize: 13 }}>Remember me for 30 days</Text>
-                  </Checkbox>
-                </Form.Item>
 
                 <Form.Item style={{ marginBottom: 16 }}>
                   <Button

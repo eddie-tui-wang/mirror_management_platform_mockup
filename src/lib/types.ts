@@ -157,6 +157,27 @@ export interface AuthState {
   logout: () => void;
 }
 
+// ==================== 邮件记录 ====================
+
+export interface EmailRecord {
+  record_id: string;
+  customer_email: string;
+  sent_time: string;
+  generation_result_url: string;
+}
+
+// ==================== 官网表单 ====================
+
+export interface WebsiteInquiry {
+  inquiry_id: string;
+  time: string;
+  name: string;
+  company: string;
+  email: string;
+  role: string;
+  venue: string;
+}
+
 // ==================== 菜单与路由 ====================
 
 export interface MenuItem {
