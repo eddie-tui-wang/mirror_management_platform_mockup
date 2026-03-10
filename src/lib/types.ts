@@ -46,6 +46,8 @@ export interface OrgMembership {
   created_at: string;
 }
 
+export type GarmentSex = 'male' | 'female' | 'unisex';
+
 export interface GarmentCatalog {
   catalog_id: string;
   garment_id: string;
@@ -55,6 +57,7 @@ export interface GarmentCatalog {
   category_id: string | null;
   template_ids: string[];
   status: Status;
+  sex?: GarmentSex;
   updated_at: string;
 }
 

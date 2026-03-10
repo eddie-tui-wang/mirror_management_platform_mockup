@@ -5,7 +5,7 @@ import { Layout, Menu, Avatar, Dropdown, Tag, Typography, Space, theme } from 'a
 import {
   BankOutlined, TeamOutlined, UserOutlined, AppstoreOutlined,
   SkinOutlined, LayoutOutlined, DesktopOutlined, ClockCircleOutlined,
-  LogoutOutlined, SettingOutlined, MailOutlined, FormOutlined,
+  LogoutOutlined, SettingOutlined, MailOutlined, FormOutlined, PictureOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
@@ -27,6 +27,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ClockCircleOutlined: <ClockCircleOutlined />,
   MailOutlined: <MailOutlined />,
   FormOutlined: <FormOutlined />,
+  PictureOutlined: <PictureOutlined />,
 };
 
 const PORTAL_COLOR: Record<string, string> = {

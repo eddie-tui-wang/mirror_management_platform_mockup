@@ -20,6 +20,7 @@ const platformMenu: MenuItemConfig[] = [
     key: 'assets', label: 'Assets', icon: 'AppstoreOutlined',
     children: [
       { key: 'garments',  label: 'Garments',             icon: 'SkinOutlined',         path: '/dashboard/assets/garments',  permission: 'platform:garments:view' },
+      { key: 'images',    label: 'Image Assets',         icon: 'PictureOutlined',       path: '/dashboard/assets/images',    permission: 'platform:images:view' },
       { key: 'templates', label: 'Template Management',  icon: 'LayoutOutlined',        path: '/dashboard/assets/templates', permission: 'platform:templates:view' },
       { key: 'devices',   label: 'Device Activity',      icon: 'DesktopOutlined',       path: '/dashboard/assets/devices',   permission: 'platform:devices:view' },
     ],
@@ -35,6 +36,7 @@ const channelMenu: MenuItemConfig[] = [
 // 客户端菜单
 const customerMenu: MenuItemConfig[] = [
   { key: 'cu-garments', label: 'Garments', icon: 'SkinOutlined', path: '/dashboard/customer/garments', permission: 'customer:garments:view' },
+  { key: 'cu-images', label: 'Image Library', icon: 'PictureOutlined', path: '/dashboard/customer/images', permission: 'customer:images:view' },
   { key: 'cu-templates', label: 'Templates', icon: 'LayoutOutlined', path: '/dashboard/customer/templates', permission: 'customer:templates:view' },
   { key: 'cu-devices', label: 'Devices', icon: 'DesktopOutlined', path: '/dashboard/customer/devices', permission: 'customer:devices:view' },
 ];

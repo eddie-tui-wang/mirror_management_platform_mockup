@@ -81,35 +81,34 @@ export const memberships: OrgMembership[] = [
 
 export const garments: GarmentCatalog[] = [
   // Customer X (org_cu_1001): assigned templates tpl_001, tpl_003, tpl_006
-  { catalog_id: 'cat_01', garment_id: 'g_9001', org_id: 'org_cu_1001', name: 'Black Suit Set',  image_url: 'https://picsum.photos/seed/g9001/80/80', category_id: 'gc_01', template_ids: ['tpl_001', 'tpl_006'], status: 'Active',   updated_at: '2026-02-09 18:32' },
-  { catalog_id: 'cat_03', garment_id: 'g_9003', org_id: 'org_cu_1001', name: 'Casual Jacket',   image_url: 'https://picsum.photos/seed/g9003/80/80', category_id: 'gc_03', template_ids: ['tpl_003'],         status: 'Active',   updated_at: '2026-02-07 14:22' },
-  { catalog_id: 'cat_07', garment_id: 'g_9007', org_id: 'org_cu_1001', name: 'Evening Gown',    image_url: 'https://picsum.photos/seed/g9007/80/80', category_id: 'gc_02', template_ids: ['tpl_001', 'tpl_003', 'tpl_006'], status: 'Active', updated_at: '2026-02-03 20:15' },
+  { catalog_id: 'cat_01', garment_id: 'g_9001', org_id: 'org_cu_1001', name: 'Black Suit Set',  image_url: 'https://picsum.photos/seed/g9001/80/80', category_id: 'gc_02', template_ids: ['tpl_001', 'tpl_006'], status: 'Active',   sex: 'male',    updated_at: '2026-02-09 18:32' },
+  { catalog_id: 'cat_03', garment_id: 'g_9003', org_id: 'org_cu_1001', name: 'Casual Jacket',   image_url: 'https://picsum.photos/seed/g9003/80/80', category_id: 'gc_01', template_ids: ['tpl_003'],         status: 'Active',   sex: 'unisex',  updated_at: '2026-02-07 14:22' },
+  { catalog_id: 'cat_07', garment_id: 'g_9007', org_id: 'org_cu_1001', name: 'Evening Gown',    image_url: 'https://picsum.photos/seed/g9007/80/80', category_id: 'gc_02', template_ids: ['tpl_001', 'tpl_003', 'tpl_006'], status: 'Active', sex: 'female', updated_at: '2026-02-03 20:15' },
   // Customer Y (org_cu_1002): assigned templates tpl_002, tpl_003
-  { catalog_id: 'cat_04', garment_id: 'g_9004', org_id: 'org_cu_1002', name: 'Winter Coat',     image_url: 'https://picsum.photos/seed/g9004/80/80', category_id: 'gc_07', template_ids: ['tpl_002'],         status: 'Active',   updated_at: '2026-02-06 09:10' },
+  { catalog_id: 'cat_04', garment_id: 'g_9004', org_id: 'org_cu_1002', name: 'Winter Coat',     image_url: 'https://picsum.photos/seed/g9004/80/80', category_id: 'gc_07', template_ids: ['tpl_002'],         status: 'Active',   sex: 'unisex',  updated_at: '2026-02-06 09:10' },
   // Customer Z (org_cu_1003): assigned templates tpl_005, tpl_006, tpl_010
-  { catalog_id: 'cat_05', garment_id: 'g_9005', org_id: 'org_cu_1003', name: 'Silk Blouse',     image_url: 'https://picsum.photos/seed/g9005/80/80', category_id: null,    template_ids: [],                 status: 'Disabled', updated_at: '2026-02-05 16:45' },
+  { catalog_id: 'cat_05', garment_id: 'g_9005', org_id: 'org_cu_1003', name: 'Silk Blouse',     image_url: 'https://picsum.photos/seed/g9005/80/80', category_id: null,    template_ids: [],                 status: 'Disabled', sex: 'female',  updated_at: '2026-02-05 16:45' },
   // Customer W (org_cu_1004): assigned templates tpl_001, tpl_007
-  { catalog_id: 'cat_08', garment_id: 'g_9008', org_id: 'org_cu_1004', name: 'Sport Wear',      image_url: 'https://picsum.photos/seed/g9008/80/80', category_id: null,    template_ids: ['tpl_007'],        status: 'Active',   updated_at: '2026-02-02 10:30' },
+  { catalog_id: 'cat_08', garment_id: 'g_9008', org_id: 'org_cu_1004', name: 'Sport Wear',      image_url: 'https://picsum.photos/seed/g9008/80/80', category_id: null,    template_ids: ['tpl_007'],        status: 'Active',   sex: 'unisex',  updated_at: '2026-02-02 10:30' },
   // Channel-owned (no customer template assignments)
-  { catalog_id: 'cat_02', garment_id: 'g_9002', org_id: 'org_ch_001',  name: 'Summer Dress',    image_url: 'https://picsum.photos/seed/g9002/80/80', category_id: null,    template_ids: [],                 status: 'Active',   updated_at: '2026-02-08 11:05' },
-  { catalog_id: 'cat_06', garment_id: 'g_9006', org_id: 'org_ch_003',  name: 'Denim Series',    image_url: 'https://picsum.photos/seed/g9006/80/80', category_id: null,    template_ids: [],                 status: 'Active',   updated_at: '2026-02-04 12:00' },
+  { catalog_id: 'cat_02', garment_id: 'g_9002', org_id: 'org_ch_001',  name: 'Summer Dress',    image_url: 'https://picsum.photos/seed/g9002/80/80', category_id: null,    template_ids: [],                 status: 'Active',   sex: 'female',  updated_at: '2026-02-08 11:05' },
+  { catalog_id: 'cat_06', garment_id: 'g_9006', org_id: 'org_ch_003',  name: 'Denim Series',    image_url: 'https://picsum.photos/seed/g9006/80/80', category_id: null,    template_ids: [],                 status: 'Active',   sex: 'unisex',  updated_at: '2026-02-04 12:00' },
 ];
 
 // ==================== 服装分类（客户端管理） ====================
 
 export const garmentCategories: GarmentCategory[] = [
   // 客户X (org_cu_1001)
-  { category_id: 'gc_01', org_id: 'org_cu_1001', name: 'Tops', created_at: '2026-02-01' },
-  { category_id: 'gc_02', org_id: 'org_cu_1001', name: 'Dresses', created_at: '2026-02-01' },
-  { category_id: 'gc_03', org_id: 'org_cu_1001', name: 'Outerwear', created_at: '2026-02-02' },
-  { category_id: 'gc_04', org_id: 'org_cu_1001', name: 'Accessories', created_at: '2026-02-03' },
+  { category_id: 'gc_01', org_id: 'org_cu_1001', name: 'Top',        created_at: '2026-02-01' },
+  { category_id: 'gc_02', org_id: 'org_cu_1001', name: 'Whole look', created_at: '2026-02-01' },
+  { category_id: 'gc_03', org_id: 'org_cu_1001', name: 'Bottom',     created_at: '2026-02-02' },
   // 客户Y (org_cu_1002)
-  { category_id: 'gc_05', org_id: 'org_cu_1002', name: 'Tops', created_at: '2026-02-05' },
-  { category_id: 'gc_06', org_id: 'org_cu_1002', name: 'Bottoms', created_at: '2026-02-05' },
-  { category_id: 'gc_07', org_id: 'org_cu_1002', name: 'Outerwear', created_at: '2026-02-05' },
+  { category_id: 'gc_05', org_id: 'org_cu_1002', name: 'Top',        created_at: '2026-02-05' },
+  { category_id: 'gc_06', org_id: 'org_cu_1002', name: 'Bottom',     created_at: '2026-02-05' },
+  { category_id: 'gc_07', org_id: 'org_cu_1002', name: 'Whole look', created_at: '2026-02-05' },
   // 客户Z (org_cu_1003)
-  { category_id: 'gc_08', org_id: 'org_cu_1003', name: 'Formal', created_at: '2026-02-06' },
-  { category_id: 'gc_09', org_id: 'org_cu_1003', name: 'Casual', created_at: '2026-02-06' },
+  { category_id: 'gc_08', org_id: 'org_cu_1003', name: 'Whole look', created_at: '2026-02-06' },
+  { category_id: 'gc_09', org_id: 'org_cu_1003', name: 'Top',        created_at: '2026-02-06' },
 ];
 
 // ==================== 主模板库（平台统一管理的模块化场景） ====================
