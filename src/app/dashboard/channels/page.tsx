@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  Table, Button, Tag, Space, Modal, Form, Input, Typography, message, Radio,
+  Table, Button, Tag, Space, Modal, Form, Input, Typography, message, InputNumber,
 } from 'antd';
 import { PlusOutlined, SearchOutlined, KeyOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -38,8 +38,7 @@ export default function ChannelsPage() {
   const [codesChannel, setCodesChannel] = useState<ChannelRow | null>(null);
   const [codesModalOpen, setCodesModalOpen] = useState(false);
   const [createCodeModalOpen, setCreateCodeModalOpen] = useState(false);
-  const [codeTypeChoice, setCodeTypeChoice] = useState<CodeType>('Regular');
-  const [trialSessions, setTrialSessions] = useState<25 | 50>(25);
+  const [createQty, setCreateQty] = useState(1);
 
   const { codes, revokeCode, createCodeForChannel } = useCodeStore();
 
@@ -104,13 +103,13 @@ export default function ChannelsPage() {
 
   const handleCreateCode = () => {
     if (!codesChannel) return;
-    createCodeForChannel(
-      codesChannel.org_id,
-      codeTypeChoice,
-      codeTypeChoice === 'Trial' ? trialSessions : null,
-    );
-    message.success(`${codeTypeChoice} code created for ${codesChannel.name}`);
+    const qty = Math.max(1, createQty);
+    for (let i = 0; i < qty; i++) {
+      createCodeForChannel(codesChannel.org_id, 'Regular', null);
+    }
+    message.success(`${qty} Regular code${qty > 1 ? 's' : ''} created for ${codesChannel.name}`);
     setCreateCodeModalOpen(false);
+    setCreateQty(1);
   };
 
   const poolColumns: ColumnsType<ActivationCode> = [
@@ -214,7 +213,7 @@ export default function ChannelsPage() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Title level={4} style={{ margin: 0 }}>Channel Management</Title>
+        <Title level={4} style={{ margin: 0 }}>Channels</Title>
         <PermGuard permission="platform:channels:create">
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateModalOpen(true)}>
             Create Channel
@@ -248,13 +247,8 @@ export default function ChannelsPage() {
         footer={null}
         width={720}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <Text type="secondary">
-            Codes in pool: <Text strong>{channelPool.filter(c => c.status === 'Unused').length} Unused</Text>
-            {' · '}
-            <Text>{channelPool.length} Total</Text>
-          </Text>
-          <Button type="primary" size="small" icon={<PlusOutlined />} onClick={() => { setCodeTypeChoice('Regular'); setTrialSessions(25); setCreateCodeModalOpen(true); }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+          <Button type="primary" size="small" icon={<PlusOutlined />} onClick={() => { setCreateQty(1); setCreateCodeModalOpen(true); }}>
             Create Code
           </Button>
         </div>
@@ -268,30 +262,28 @@ export default function ChannelsPage() {
         />
       </Modal>
 
-      {/* Create Code for Channel Modal */}
+      {/* Create Regular Codes for Channel Modal */}
       <Modal
-        title={`Create Code for ${codesChannel?.name}`}
+        title={`Assign Regular Codes to ${codesChannel?.name}`}
         open={createCodeModalOpen}
         onOk={handleCreateCode}
-        onCancel={() => setCreateCodeModalOpen(false)}
-        okText="Create"
+        onCancel={() => { setCreateCodeModalOpen(false); setCreateQty(1); }}
+        okText={`Create ${createQty} Code${createQty > 1 ? 's' : ''}`}
         cancelText="Cancel"
       >
         <Form layout="vertical" style={{ marginTop: 8 }}>
-          <Form.Item label="Code Type">
-            <Radio.Group value={codeTypeChoice} onChange={(e) => setCodeTypeChoice(e.target.value)}>
-              <Radio value="Regular">Regular — permanent access, no session limit</Radio>
-              <Radio value="Trial">Trial — limited sessions for demo use</Radio>
-            </Radio.Group>
+          <Form.Item label="Number of Regular Codes">
+            <InputNumber
+              min={1}
+              max={100}
+              value={createQty}
+              onChange={(v) => setCreateQty(v ?? 1)}
+              style={{ width: 140 }}
+            />
           </Form.Item>
-          {codeTypeChoice === 'Trial' && (
-            <Form.Item label="Max Try-on Sessions">
-              <Radio.Group value={trialSessions} onChange={(e) => setTrialSessions(e.target.value)}>
-                <Radio value={25}>25 sessions</Radio>
-                <Radio value={50}>50 sessions</Radio>
-              </Radio.Group>
-            </Form.Item>
-          )}
+          <Typography.Text type="secondary" style={{ fontSize: 13 }}>
+            Regular codes grant permanent device access with no session limit.
+          </Typography.Text>
         </Form>
       </Modal>
 

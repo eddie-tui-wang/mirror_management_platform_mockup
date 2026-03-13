@@ -21,6 +21,8 @@ export default function ChannelTemplatesPage() {
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<MasterTemplate | null>(null);
   const [newAssignments, setNewAssignments] = useState<string[]>([]);
+  const [promptsModalOpen, setPromptsModalOpen] = useState(false);
+  const [promptsTemplate, setPromptsTemplate] = useState<MasterTemplate | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setSearchText(searchInput), 500);
@@ -65,7 +67,10 @@ export default function ChannelTemplatesPage() {
     {
       title: 'Prompts',
       key: 'prompts',
-      render: (_, record) => <Tag>{record.prompts.length} prompt(s)</Tag>,
+      width: 100,
+      render: (_, record) => (
+        <Tag>{record.prompts.length} prompt{record.prompts.length !== 1 ? 's' : ''}</Tag>
+      ),
     },
     {
       title: 'Assignments',
@@ -80,6 +85,13 @@ export default function ChannelTemplatesPage() {
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
+          <Button
+            type="link"
+            size="small"
+            onClick={() => { setPromptsTemplate(record); setPromptsModalOpen(true); }}
+          >
+            View Prompts
+          </Button>
           <PermGuard permission="channel:templates:assign" fallback="disable">
             <Button type="link" size="small" onClick={() => openAssignModal(record)}>
               Assign
@@ -100,7 +112,7 @@ export default function ChannelTemplatesPage() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Title level={4} style={{ margin: 0 }}>Template Management</Title>
+        <Title level={4} style={{ margin: 0 }}>Templates</Title>
       </div>
 
       <div style={{ marginBottom: 16 }}>
@@ -124,6 +136,54 @@ export default function ChannelTemplatesPage() {
         rowKey="template_id"
         pagination={{ pageSize: 10 }}
       />
+
+      {/* View Prompts Modal */}
+      <Modal
+        title={
+          <Space>
+            <span>{promptsTemplate?.name}</span>
+            <Tag>{promptsTemplate?.prompts.length} prompt{(promptsTemplate?.prompts.length ?? 0) !== 1 ? 's' : ''}</Tag>
+          </Space>
+        }
+        open={promptsModalOpen}
+        onCancel={() => { setPromptsModalOpen(false); setPromptsTemplate(null); }}
+        footer={<Button onClick={() => { setPromptsModalOpen(false); setPromptsTemplate(null); }}>Close</Button>}
+        width={540}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 }}>
+          {(promptsTemplate?.prompts ?? []).map((prompt, i) => (
+            <div
+              key={i}
+              style={{
+                display: 'flex',
+                gap: 12,
+                alignItems: 'flex-start',
+                background: '#f9f9f9',
+                borderRadius: 8,
+                padding: '10px 14px',
+              }}
+            >
+              <div style={{
+                flexShrink: 0,
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: '#1677ff',
+                color: '#fff',
+                fontSize: 12,
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: 1,
+              }}>
+                {i + 1}
+              </div>
+              <Typography.Text style={{ lineHeight: 1.6 }}>{prompt}</Typography.Text>
+            </div>
+          ))}
+        </div>
+      </Modal>
 
       <Modal
         title={`Assign "${selectedTemplate?.name}" to Customers`}

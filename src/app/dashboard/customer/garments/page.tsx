@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   Table, Button, Tag, Space, Typography, Image, Select, Modal,
-  Input, Checkbox, message, Alert, Form, Switch, Upload,
+  Input, message, Alert, Form, Switch, Upload,
 } from 'antd';
 import {
   UploadOutlined, DeleteOutlined,
@@ -12,9 +12,10 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType, TableRowSelection } from 'antd/es/table/interface';
 import { useAuthStore } from '@/lib/store';
+import { useCodeStore } from '@/lib/code-store';
 import {
   getOrgGarments, getOrgGarmentCategories, getGarmentCategoryName,
-  getGarmentAssignedDevices, getOrgDevices, getCustomerAssignedTemplates,
+  getGarmentAssignedDevices, getCustomerAssignedTemplates,
 } from '@/lib/mock-data';
 import type { GarmentCatalog, Status } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
@@ -39,6 +40,7 @@ export default function CustomerGarmentsPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
   const orgId = currentUser?.org_id ?? '';
   const orgName = currentUser?.org_name ?? '';
+  const { codes } = useCodeStore();
 
   // ── 本地新增的 garments（Upload 后追加） ──────────────────
   const [localGarments, setLocalGarments] = useState<GarmentCatalog[]>([]);
@@ -80,7 +82,12 @@ export default function CustomerGarmentsPage() {
   const mockGarments = useMemo(() => getOrgGarments(orgId), [orgId]);
   const allGarments = useMemo(() => [...localGarments, ...mockGarments], [localGarments, mockGarments]);
   const assignedTemplates = useMemo(() => getCustomerAssignedTemplates(orgId), [orgId]);
-  const orgDevices = useMemo(() => getOrgDevices(orgId), [orgId]);
+
+  // Activated devices = Bound activation codes belonging to this customer
+  const boundDevices = useMemo(
+    () => codes.filter((c) => c.org_id === orgId && c.status === 'Bound'),
+    [codes, orgId]
+  );
 
   const dataSource = useMemo(() => {
     if (!filterCategoryId) return allGarments;
@@ -642,25 +649,50 @@ export default function CustomerGarmentsPage() {
         onCancel={() => { setAssignDevOpen(false); setAssignDevGarment(null); }}
         okText="Save"
         cancelText="Cancel"
+        width={600}
       >
-        {orgDevices.length > 0 ? (
-          <Checkbox.Group
-            value={assignDevSelected}
-            onChange={(vals) => setAssignDevSelected(vals as string[])}
-            style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
-          >
-            {orgDevices.map((d) => (
-              <Checkbox key={d.device_id} value={d.device_id}>
-                <Space>
-                  <Typography.Text code>{d.device_id}</Typography.Text>
-                  <span>{d.nickname ?? ''}</span>
-                  <Tag color={d.status === 'Online' ? 'green' : 'default'}>{d.status}</Tag>
-                </Space>
-              </Checkbox>
-            ))}
-          </Checkbox.Group>
+        {boundDevices.length > 0 ? (
+          <Table
+            size="small"
+            rowKey={(r) => r.bound_device_id ?? r.code_id}
+            dataSource={boundDevices}
+            pagination={false}
+            rowSelection={{
+              selectedRowKeys: assignDevSelected,
+              onChange: (keys) => setAssignDevSelected(keys as string[]),
+            }}
+            columns={[
+              {
+                title: 'Device ID',
+                dataIndex: 'bound_device_id',
+                key: 'bound_device_id',
+                render: (id: string) => <Typography.Text code style={{ fontSize: 12 }}>{id}</Typography.Text>,
+              },
+              {
+                title: 'Nickname',
+                dataIndex: 'nickname',
+                key: 'nickname',
+                render: (val: string | null) =>
+                  val ? <Typography.Text>{val}</Typography.Text> : <Typography.Text type="secondary">—</Typography.Text>,
+              },
+              {
+                title: 'Activation Code',
+                dataIndex: 'code',
+                key: 'code',
+                render: (c: string) => <Typography.Text type="secondary" style={{ fontSize: 11 }}>{c}</Typography.Text>,
+              },
+              {
+                title: 'Type',
+                dataIndex: 'code_type',
+                key: 'code_type',
+                render: (t: string) => <Tag color={t === 'Regular' ? 'blue' : 'orange'}>{t}</Tag>,
+              },
+            ]}
+          />
         ) : (
-          <Typography.Text type="secondary">No devices available for this organization.</Typography.Text>
+          <Typography.Text type="secondary">
+            No activated devices. Please bind a device first on the Devices page.
+          </Typography.Text>
         )}
       </Modal>
     </div>

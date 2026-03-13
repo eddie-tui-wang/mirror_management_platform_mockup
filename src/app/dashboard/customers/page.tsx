@@ -3,7 +3,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import {
   Table, Button, Tag, Space, Typography, message, Select, Modal, Form,
-  Input, Dropdown, Radio,
+  Input, Dropdown, Radio, InputNumber,
 } from 'antd';
 import { PlusOutlined, KeyOutlined, SearchOutlined, DownOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -57,17 +57,13 @@ export default function CustomersPage() {
   const [codesOrg, setCodesOrg] = useState<CustomerRow | null>(null);
   const [createCodeModalOpen, setCreateCodeModalOpen] = useState(false);
   const [createCodeType, setCreateCodeType] = useState<CodeType>('Regular');
+  const [createCodeQty, setCreateCodeQty] = useState(1);
 
   const { codes, revokeCode, createCodeForCustomer } = useCodeStore();
 
   const orgCodes = useMemo(
     () => codes.filter((c) => c.org_id === codesOrg?.org_id),
     [codes, codesOrg]
-  );
-
-  const unusedRegularCount = useMemo(
-    () => orgCodes.filter((c) => c.status === 'Unused' && c.code_type === 'Regular').length,
-    [orgCodes]
   );
 
   const [statusOverrides, setStatusOverrides] = useState<Record<string, Status>>({});
@@ -138,16 +134,21 @@ export default function CustomersPage() {
 
   const handleCreateCode = () => {
     createCodeForm.validateFields().then((values) => {
-      createCodeForCustomer(
-        codesOrg!.org_id,
-        createCodeType,
-        createCodeType === 'Trial' ? values.trialMaxSessions : null,
-        'platform',
-        null,
-      );
-      message.success(`${createCodeType} code created for ${codesOrg?.name}`);
+      if (createCodeType === 'Regular') {
+        const qty = Math.max(1, createCodeQty);
+        for (let i = 0; i < qty; i++) {
+          createCodeForCustomer(codesOrg!.org_id, 'Regular', null, 'platform', null);
+        }
+        message.success(`${qty} Regular code${qty > 1 ? 's' : ''} created for ${codesOrg?.name}`);
+      } else {
+        createCodeForCustomer(
+          codesOrg!.org_id, 'Trial', values.trialMaxSessions, 'platform', null,
+        );
+        message.success(`Trial code created for ${codesOrg?.name}`);
+      }
       setCreateCodeModalOpen(false);
       createCodeForm.resetFields();
+      setCreateCodeQty(1);
     });
   };
 
@@ -248,7 +249,7 @@ export default function CustomersPage() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Title level={4} style={{ margin: 0 }}>Customer Management</Title>
+        <Title level={4} style={{ margin: 0 }}>Customers</Title>
         <Space>
           <PermGuard permission="platform:customers:create">
             <Button
@@ -333,12 +334,11 @@ export default function CustomersPage() {
         width={760}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <Text type="secondary">
-            Regular codes (Unused): <Text strong>{unusedRegularCount}</Text>
+          <div>
             {codesOrg?.status === 'Disabled' && (
-              <Text type="danger" style={{ marginLeft: 8 }}>— Account is disabled</Text>
+              <Text type="danger" style={{ fontSize: 12 }}>Account is disabled</Text>
             )}
-          </Text>
+          </div>
           <PermGuard permission="platform:customers:create_code">
             <Dropdown
               menu={{
@@ -446,14 +446,25 @@ export default function CustomersPage() {
         title={`Create ${createCodeType} Activation Code — ${codesOrg?.name ?? ''}`}
         open={createCodeModalOpen}
         onOk={handleCreateCode}
-        onCancel={() => { setCreateCodeModalOpen(false); createCodeForm.resetFields(); }}
-        okText="Create"
+        onCancel={() => { setCreateCodeModalOpen(false); createCodeForm.resetFields(); setCreateCodeQty(1); }}
+        okText={createCodeType === 'Regular' ? `Create ${createCodeQty} Code${createCodeQty > 1 ? 's' : ''}` : 'Create'}
         cancelText="Cancel"
       >
         {createCodeType === 'Regular' ? (
-          <Text type="secondary" style={{ fontSize: 13 }}>
-            Regular codes grant permanent device access with no session limit. Only platform admins can create Regular codes.
-          </Text>
+          <Form layout="vertical" style={{ marginTop: 8 }}>
+            <Form.Item label="Number of Regular Codes">
+              <InputNumber
+                min={1}
+                max={100}
+                value={createCodeQty}
+                onChange={(v) => setCreateCodeQty(v ?? 1)}
+                style={{ width: 140 }}
+              />
+            </Form.Item>
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              Regular codes grant permanent device access with no session limit.
+            </Text>
+          </Form>
         ) : (
           <Form form={createCodeForm} layout="vertical">
             <Form.Item

@@ -18,6 +18,7 @@ export default function ChannelCodesPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
   const { codes } = useCodeStore();
   const [filterStatus, setFilterStatus] = useState<ActivationCodeStatus | undefined>(undefined);
+  const [filterType, setFilterType] = useState<CodeType | undefined>(undefined);
 
   const orgMap = useMemo(() => {
     const m: Record<string, string> = {};
@@ -29,9 +30,10 @@ export default function ChannelCodesPage() {
     codes.filter((c) => {
       if (c.channel_org_id !== currentUser?.org_id) return false;
       if (filterStatus && c.status !== filterStatus) return false;
+      if (filterType && c.code_type !== filterType) return false;
       return true;
     }),
-    [codes, currentUser, filterStatus]
+    [codes, currentUser, filterStatus, filterType]
   );
 
   const columns: ColumnsType<ActivationCode> = [
@@ -89,10 +91,21 @@ export default function ChannelCodesPage() {
         <Title level={4} style={{ margin: 0 }}>Code Pool</Title>
       </div>
       <Text type="secondary" style={{ display: 'block', marginBottom: 16, fontSize: 13 }}>
-        Codes assigned to your channel by the platform. Assign them to your customers via Customer Management.
+        Codes assigned to your channel by the platform. Assign them to your customers via the Customers page.
       </Text>
 
       <Space style={{ marginBottom: 12 }}>
+        <Select
+          placeholder="Filter by type"
+          allowClear
+          style={{ width: 150 }}
+          value={filterType}
+          onChange={setFilterType}
+          options={[
+            { label: 'Regular', value: 'Regular' },
+            { label: 'Trial', value: 'Trial' },
+          ]}
+        />
         <Select
           placeholder="Filter by status"
           allowClear

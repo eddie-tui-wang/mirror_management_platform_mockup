@@ -261,7 +261,7 @@ export default function TemplatesPage() {
         }}
       >
         <Title level={4} style={{ margin: 0 }}>
-          Template Management
+          Templates
         </Title>
         <PermGuard permission="platform:templates:create">
           <Button

@@ -12,25 +12,25 @@ export interface MenuItemConfig {
 
 // 平台端菜单
 const platformMenu: MenuItemConfig[] = [
-  { key: 'channels', label: 'Channel Management', icon: 'BankOutlined', path: '/dashboard/channels', permission: 'platform:channels:view' },
-  { key: 'customers', label: 'Customer Management', icon: 'TeamOutlined', path: '/dashboard/customers', permission: 'platform:customers:view' },
+  { key: 'channels', label: 'Channels', icon: 'BankOutlined', path: '/dashboard/channels', permission: 'platform:channels:view' },
+  { key: 'customers', label: 'Customers', icon: 'TeamOutlined', path: '/dashboard/customers', permission: 'platform:customers:view' },
   { key: 'email-records', label: 'Email Records', icon: 'MailOutlined', path: '/dashboard/email-records', permission: 'platform:email_records:view' },
   { key: 'website-inquiries', label: 'Website Inquiries', icon: 'FormOutlined', path: '/dashboard/website-inquiries', permission: 'platform:website_inquiries:view' },
   {
     key: 'assets', label: 'Assets', icon: 'AppstoreOutlined',
     children: [
-      { key: 'garments',  label: 'Garments',             icon: 'SkinOutlined',         path: '/dashboard/assets/garments',  permission: 'platform:garments:view' },
-      { key: 'templates', label: 'Template Management',  icon: 'LayoutOutlined',        path: '/dashboard/assets/templates', permission: 'platform:templates:view' },
-      { key: 'devices',   label: 'Device Activity',      icon: 'DesktopOutlined',       path: '/dashboard/assets/devices',   permission: 'platform:devices:view' },
+      { key: 'garments',  label: 'Garments',        icon: 'SkinOutlined',   path: '/dashboard/assets/garments',  permission: 'platform:garments:view' },
+      { key: 'templates', label: 'Templates',        icon: 'LayoutOutlined', path: '/dashboard/assets/templates', permission: 'platform:templates:view' },
+      { key: 'devices',   label: 'Device Activity',  icon: 'DesktopOutlined', path: '/dashboard/assets/devices',  permission: 'platform:devices:view' },
     ],
   },
 ];
 
 // 渠道端菜单
 const channelMenu: MenuItemConfig[] = [
-  { key: 'ch-customers', label: 'Customer Management', icon: 'TeamOutlined', path: '/dashboard/channel/customers', permission: 'channel:customers:view' },
+  { key: 'ch-customers', label: 'Customers', icon: 'TeamOutlined', path: '/dashboard/channel/customers', permission: 'channel:customers:view' },
   { key: 'ch-codes', label: 'Code Pool', icon: 'KeyOutlined', path: '/dashboard/channel/codes', permission: 'channel:codes:view' },
-  { key: 'ch-templates', label: 'Template Management', icon: 'LayoutOutlined', path: '/dashboard/channel/templates', permission: 'channel:templates:view' },
+  { key: 'ch-templates', label: 'Templates', icon: 'LayoutOutlined', path: '/dashboard/channel/templates', permission: 'channel:templates:view' },
 ];
 
 // 客户端菜单

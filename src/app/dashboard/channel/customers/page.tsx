@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, Typography, Select, message, Radio, Alert, Divider } from 'antd';
+import { Table, Button, Tag, Space, Modal, Form, Input, Typography, Select, message, Radio, Alert } from 'antd';
 import { PlusOutlined, KeyOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuthStore } from '@/lib/store';
@@ -40,6 +40,7 @@ export default function ChannelCustomersPage() {
   const [codesOrg, setCodesOrg] = useState<CustomerRow | null>(null);
   const [createCodeModalOpen, setCreateCodeModalOpen] = useState(false);
   const [createCodeForm] = Form.useForm();
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
 
   const { codes, revokeCode, assignToCustomer, createCodeForCustomer } = useCodeStore();
 
@@ -48,28 +49,23 @@ export default function ChannelCustomersPage() {
     [codes, codesOrg]
   );
 
-  // Channel pool: unassigned codes belonging to this channel
-  const channelPool = useMemo(
+  const unusedTrialCount = useMemo(
+    () => orgCodes.filter((c) => c.status === 'Unused' && c.code_type === 'Trial').length,
+    [orgCodes]
+  );
+
+  const channelRegularPool = useMemo(
     () =>
       currentUser
         ? codes.filter(
             (c) =>
               c.channel_org_id === currentUser.org_id &&
               c.org_id === null &&
-              c.status === 'Unused'
+              c.status === 'Unused' &&
+              c.code_type === 'Regular'
           )
         : [],
     [codes, currentUser]
-  );
-
-  const unusedTrialCount = useMemo(
-    () => orgCodes.filter((c) => c.status === 'Unused' && c.code_type === 'Trial').length,
-    [orgCodes]
-  );
-
-  const regularCount = useMemo(
-    () => orgCodes.filter((c) => c.code_type === 'Regular').length,
-    [orgCodes]
   );
 
   const baseCustomers: CustomerRow[] = useMemo(() => {
@@ -117,16 +113,9 @@ export default function ChannelCustomersPage() {
 
   const handleAssignFromPool = (code: ActivationCode) => {
     if (!codesOrg) return;
-    Modal.confirm({
-      title: `Assign code ${code.code} to ${codesOrg.name}?`,
-      content: `This ${code.code_type} code will be moved from the channel pool and assigned to ${codesOrg.name}.`,
-      okText: 'Assign',
-      okType: 'primary',
-      onOk: () => {
-        assignToCustomer(code.code_id, codesOrg.org_id);
-        message.success(`Code assigned to ${codesOrg.name}`);
-      },
-    });
+    assignToCustomer(code.code_id, codesOrg.org_id);
+    message.success(`Code ${code.code} assigned to ${codesOrg.name}`);
+    setAssignModalOpen(false);
   };
 
   const handleCreate = () => {
@@ -204,38 +193,6 @@ export default function ChannelCustomersPage() {
     },
   ];
 
-  const poolColumns: ColumnsType<ActivationCode> = [
-    {
-      title: 'Code',
-      dataIndex: 'code',
-      key: 'code',
-      render: (c: string) => <Text code style={{ fontSize: 12 }}>{c}</Text>,
-    },
-    {
-      title: 'Type',
-      dataIndex: 'code_type',
-      key: 'code_type',
-      render: (t: CodeType) => <Tag color={t === 'Trial' ? 'orange' : 'blue'}>{t}</Tag>,
-    },
-    {
-      title: 'Sessions',
-      key: 'sessions',
-      render: (_: unknown, r: ActivationCode) =>
-        r.code_type === 'Trial' ? <Text>{r.trial_max_sessions}</Text> : <Text type="secondary">—</Text>,
-    },
-    {
-      title: 'Action',
-      key: 'action',
-      render: (_: unknown, rec: ActivationCode) => (
-        <PermGuard permission="channel:codes:assign">
-          <Button type="link" size="small" onClick={() => handleAssignFromPool(rec)}>
-            Assign
-          </Button>
-        </PermGuard>
-      ),
-    },
-  ];
-
   if (!currentUser) return null;
 
   const trialLimitReached = unusedTrialCount >= TRIAL_LIMIT;
@@ -244,7 +201,7 @@ export default function ChannelCustomersPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Title level={4} style={{ margin: 0 }}>
-          {currentUser.org_name} - Customer Management
+          {currentUser.org_name} - Customers
         </Title>
         <PermGuard permission="channel:customers:create">
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateModalOpen(true)}>
@@ -295,23 +252,30 @@ export default function ChannelCustomersPage() {
                 {unusedTrialCount} / {TRIAL_LIMIT}
               </Text>
             </Text>
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              Regular codes (assigned by platform): <Text strong>{regularCount}</Text>
-            </Text>
             {codesOrg?.status === 'Disabled' && (
               <Text type="danger" style={{ fontSize: 12 }}>Account is disabled</Text>
             )}
           </Space>
           <PermGuard permission="channel:customers:create_code">
-            <Button
-              type="primary"
-              size="small"
-              icon={<PlusOutlined />}
-              disabled={trialLimitReached || codesOrg?.status === 'Disabled'}
-              onClick={() => setCreateCodeModalOpen(true)}
-            >
-              Create Trial Code
-            </Button>
+            <Space size="small">
+              <Button
+                size="small"
+                icon={<KeyOutlined />}
+                disabled={codesOrg?.status === 'Disabled' || channelRegularPool.length === 0}
+                onClick={() => setAssignModalOpen(true)}
+              >
+                Assign Regular Codes
+              </Button>
+              <Button
+                type="primary"
+                size="small"
+                icon={<PlusOutlined />}
+                disabled={trialLimitReached || codesOrg?.status === 'Disabled'}
+                onClick={() => setCreateCodeModalOpen(true)}
+              >
+                Create Trial Code
+              </Button>
+            </Space>
           </PermGuard>
         </div>
 
@@ -405,20 +369,54 @@ export default function ChannelCustomersPage() {
           ]}
         />
 
-        {/* Assign from Channel Pool */}
-        <Divider style={{ fontSize: 13 }}>Assign from Channel Pool</Divider>
-        {channelPool.length === 0 ? (
-          <Text type="secondary" style={{ fontSize: 12 }}>No available codes in channel pool.</Text>
-        ) : (
-          <Table<ActivationCode>
-            size="small"
-            dataSource={channelPool}
-            rowKey="code_id"
-            pagination={false}
-            columns={poolColumns}
-            locale={{ emptyText: 'No codes available in pool.' }}
-          />
-        )}
+      </Modal>
+
+      {/* Assign Regular Codes Modal */}
+      <Modal
+        title={
+          <Space>
+            <KeyOutlined />
+            <span>Assign Regular Code — {codesOrg?.name}</span>
+          </Space>
+        }
+        open={assignModalOpen}
+        onCancel={() => setAssignModalOpen(false)}
+        footer={null}
+        width={600}
+      >
+        <Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 13 }}>
+          Select a Regular code from your channel pool to assign to this customer.
+        </Text>
+        <Table<ActivationCode>
+          size="small"
+          dataSource={channelRegularPool}
+          rowKey="code_id"
+          pagination={false}
+          locale={{ emptyText: 'No Regular codes available in channel pool.' }}
+          columns={[
+            {
+              title: 'Code',
+              dataIndex: 'code',
+              key: 'code',
+              render: (c: string) => <Text code style={{ fontSize: 12 }}>{c}</Text>,
+            },
+            {
+              title: 'Created At',
+              dataIndex: 'created_at',
+              key: 'created_at',
+              render: (v: string) => <Text style={{ fontSize: 12 }}>{v}</Text>,
+            },
+            {
+              title: 'Action',
+              key: 'action',
+              render: (_: unknown, rec: ActivationCode) => (
+                <Button type="primary" size="small" onClick={() => handleAssignFromPool(rec)}>
+                  Assign
+                </Button>
+              ),
+            },
+          ]}
+        />
       </Modal>
 
       {/* Create Trial Code Modal */}
