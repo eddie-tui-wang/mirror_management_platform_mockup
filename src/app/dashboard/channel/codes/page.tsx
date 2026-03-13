@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Table, Tag, Typography, Select, Space, Progress } from 'antd';
+import { Table, Tag, Typography, Select, Space } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuthStore } from '@/lib/store';
 import { useCodeStore } from '@/lib/code-store';
@@ -62,21 +62,7 @@ export default function ChannelCodesPage() {
       render: (orgId: string | null) =>
         orgId ? <Text>{orgMap[orgId] ?? orgId}</Text> : <Tag color="gold">Unassigned (Pool)</Tag>,
     },
-    {
-      title: 'Sessions',
-      key: 'sessions',
-      render: (_: unknown, r: ActivationCode) => {
-        if (r.code_type !== 'Trial') return <Text type="secondary">—</Text>;
-        const max = r.trial_max_sessions ?? 0;
-        const used = r.trial_used_sessions ?? 0;
-        return (
-          <Space direction="vertical" size={2} style={{ width: 120 }}>
-            <Text style={{ fontSize: 12 }}>{used} / {max}</Text>
-            <Progress percent={Math.round((used / max) * 100)} size="small" showInfo={false} />
-          </Space>
-        );
-      },
-    },
+
     {
       title: 'Created At',
       dataIndex: 'created_at',

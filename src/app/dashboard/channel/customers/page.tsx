@@ -49,8 +49,8 @@ export default function ChannelCustomersPage() {
     [codes, codesOrg]
   );
 
-  const unusedTrialCount = useMemo(
-    () => orgCodes.filter((c) => c.status === 'Unused' && c.code_type === 'Trial').length,
+  const trialCount = useMemo(
+    () => orgCodes.filter((c) => c.code_type === 'Trial' && (c.status === 'Bound' || c.status === 'Unused')).length,
     [orgCodes]
   );
 
@@ -195,7 +195,7 @@ export default function ChannelCustomersPage() {
 
   if (!currentUser) return null;
 
-  const trialLimitReached = unusedTrialCount >= TRIAL_LIMIT;
+  const trialLimitReached = trialCount >= TRIAL_LIMIT;
 
   return (
     <div>
@@ -247,9 +247,9 @@ export default function ChannelCustomersPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <Space direction="vertical" size={2}>
             <Text type="secondary" style={{ fontSize: 12 }}>
-              Trial codes (Unused):{' '}
+              Trial codes:{' '}
               <Text strong style={{ color: trialLimitReached ? '#ff4d4f' : undefined }}>
-                {unusedTrialCount} / {TRIAL_LIMIT}
+                {trialCount} / {TRIAL_LIMIT}
               </Text>
             </Text>
             {codesOrg?.status === 'Disabled' && (
@@ -283,7 +283,7 @@ export default function ChannelCustomersPage() {
           <Alert
             type="warning"
             showIcon
-            message={`This customer has reached the limit of ${TRIAL_LIMIT} unused Trial codes.`}
+            message={`This customer has reached the limit of ${TRIAL_LIMIT} Trial codes.`}
             style={{ marginBottom: 12, fontSize: 12 }}
           />
         )}
