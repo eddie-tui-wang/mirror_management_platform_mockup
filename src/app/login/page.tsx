@@ -82,19 +82,12 @@ export default function LoginPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: '#f0f2f5',
+      background: '#ffffff',
     }}>
-      {/* Background decoration */}
-      <div style={{
-        position: 'fixed', top: 0, left: 0, right: 0, height: '50vh',
-        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-        zIndex: 0,
-      }} />
-
       {/* Back to Overview */}
       <Link href="/" style={{
         position: 'fixed', top: 20, left: 24, zIndex: 10,
-        color: 'rgba(255,255,255,0.7)', fontSize: 13, textDecoration: 'none',
+        color: 'rgba(0,0,0,0.45)', fontSize: 13, textDecoration: 'none',
         display: 'inline-flex', alignItems: 'center', gap: 6,
       }}>
         <ApartmentOutlined />
@@ -105,8 +98,8 @@ export default function LoginPage() {
         {/* Logo & Branding */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 32 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="AI Mirror Fitting" style={{ height: 36, width: 'auto', filter: 'invert(1) brightness(2)', marginBottom: 12 }} />
-          <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>
+          <img src="/logo.svg" alt="AI Mirror Fitting" style={{ height: 36, width: 'auto', marginBottom: 12 }} />
+          <Text style={{ color: 'rgba(0,0,0,0.45)', fontSize: 13 }}>
             Intelligent Fitting Room Management
           </Text>
         </div>
@@ -262,7 +255,7 @@ export default function LoginPage() {
         </div>
 
         <div style={{ textAlign: 'center', marginTop: 24 }}>
-          <Text style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11 }}>
+          <Text style={{ color: 'rgba(0,0,0,0.3)', fontSize: 11 }}>
             &copy; 2026 AI Fitting Mirror Technologies · Privacy · Terms
           </Text>
         </div>

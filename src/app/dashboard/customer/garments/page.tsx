@@ -3,12 +3,12 @@
 import React, { useMemo, useState } from 'react';
 import {
   Table, Button, Tag, Space, Typography, Image, Select, Modal,
-  Input, Checkbox, message, Alert, Form, Switch, Upload, Tooltip, Divider,
+  Input, Checkbox, message, Alert, Form, Switch, Upload,
 } from 'antd';
 import {
-  UploadOutlined, DeleteOutlined, PlusOutlined,
-  DesktopOutlined, AppstoreAddOutlined, EditOutlined, DownloadOutlined, InboxOutlined,
-  PictureOutlined, CheckCircleFilled,
+  UploadOutlined, DeleteOutlined,
+  DesktopOutlined, AppstoreAddOutlined, EditOutlined,
+  PictureOutlined, CheckCircleFilled, InboxOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType, TableRowSelection } from 'antd/es/table/interface';
 import { useAuthStore } from '@/lib/store';
@@ -16,30 +16,12 @@ import {
   getOrgGarments, getOrgGarmentCategories, getGarmentCategoryName,
   getGarmentAssignedDevices, getOrgDevices, getCustomerAssignedTemplates,
 } from '@/lib/mock-data';
-import { hasPermission } from '@/lib/permissions';
 import type { GarmentCatalog, Status } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
 
-// ── 批量导入类型 ────────────────────────────────────────────
-type ImportRow = {
-  key: number;
-  name: string;
-  category: string;
-  sex: string;
-  errors: string[];
-};
-
-const MOCK_IMPORT_ROWS: ImportRow[] = [
-  { key: 1, name: 'Black Slim Trousers',   category: 'Bottom',     sex: 'male',   errors: [] },
-  { key: 2, name: 'Floral Maxi Dress',     category: 'Whole look', sex: 'female', errors: [] },
-  { key: 3, name: 'Oversized Hoodie',      category: 'Top',        sex: 'unisex', errors: [] },
-  { key: 4, name: '',                      category: 'Top',        sex: 'male',   errors: ['Name is required'] },
-  { key: 5, name: 'Vintage Denim Jacket',  category: 'Outerwear',  sex: 'kids',   errors: ['category must be one of: Top, Bottom, Whole look', 'sex must be one of: male, female, unisex'] },
-];
-
 const { Title } = Typography;
 
-// ── 图片库 mock 数据（当前客户已上传的图片） ─────────────────
+// ── 图片库 mock 数据 ──────────────────────────────────────────
 const MOCK_IMAGE_LIBRARY = [
   { key: 'img_001', file_name: 'product-jacket.jpg',   image_url: 'https://picsum.photos/seed/jacket/400/400' },
   { key: 'img_002', file_name: 'summer-dress.png',     image_url: 'https://picsum.photos/seed/dress/400/400' },
@@ -49,13 +31,19 @@ const MOCK_IMAGE_LIBRARY = [
   { key: 'img_006', file_name: 'striped-tee.png',      image_url: 'https://picsum.photos/seed/tee/400/400' },
 ];
 
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+type UploadedFile = { uid: string; file: File; previewUrl: string; name: string };
+
 export default function CustomerGarmentsPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
-
   const orgId = currentUser?.org_id ?? '';
   const orgName = currentUser?.org_name ?? '';
 
-  // ── Edit 弹窗（含 Set Category + Set Templates） ──────────
+  // ── 本地新增的 garments（Upload 后追加） ──────────────────
+  const [localGarments, setLocalGarments] = useState<GarmentCatalog[]>([]);
+
+  // ── Edit 弹窗 ──────────────────────────────────────────────
   const [editOpen, setEditOpen] = useState(false);
   const [editGarment, setEditGarment] = useState<GarmentCatalog | null>(null);
   const [editName, setEditName] = useState('');
@@ -63,10 +51,15 @@ export default function CustomerGarmentsPage() {
   const [editCategoryId, setEditCategoryId] = useState<string | null>(null);
   const [editTemplateIds, setEditTemplateIds] = useState<string[]>([]);
   const [editImageUrl, setEditImageUrl] = useState('');
+  const [editSex, setEditSex] = useState<string | undefined>(undefined);
 
   // ── 图片库选择器弹窗 ──────────────────────────────────────
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
   const [imagePickerSelected, setImagePickerSelected] = useState<string>('');
+
+  // ── Upload 弹窗 ───────────────────────────────────────────
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
   // ── 分类筛选 ──────────────────────────────────────────────
   const [filterCategoryId, setFilterCategoryId] = useState<string | undefined>(undefined);
@@ -76,11 +69,6 @@ export default function CustomerGarmentsPage() {
   const [assignDevGarment, setAssignDevGarment] = useState<GarmentCatalog | null>(null);
   const [assignDevSelected, setAssignDevSelected] = useState<string[]>([]);
 
-  // ── 批量导入弹窗 ──────────────────────────────────────────
-  const [importOpen, setImportOpen] = useState(false);
-  const [importFileName, setImportFileName] = useState<string | null>(null);
-  const [importRows, setImportRows] = useState<ImportRow[]>([]);
-
   // ── 批量选择 ─────────────────────────────────────────────
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
@@ -89,10 +77,10 @@ export default function CustomerGarmentsPage() {
   const [bulkCategoryId, setBulkCategoryId] = useState<string | null>(null);
 
   const categories = useMemo(() => getOrgGarmentCategories(orgId), [orgId]);
-  const allGarments = useMemo(() => getOrgGarments(orgId), [orgId]);
-
-  // 当前客户已被分配的模板列表（用于 Edit 弹窗模板多选）
+  const mockGarments = useMemo(() => getOrgGarments(orgId), [orgId]);
+  const allGarments = useMemo(() => [...localGarments, ...mockGarments], [localGarments, mockGarments]);
   const assignedTemplates = useMemo(() => getCustomerAssignedTemplates(orgId), [orgId]);
+  const orgDevices = useMemo(() => getOrgDevices(orgId), [orgId]);
 
   const dataSource = useMemo(() => {
     if (!filterCategoryId) return allGarments;
@@ -106,9 +94,7 @@ export default function CustomerGarmentsPage() {
     return opts;
   }, [categories]);
 
-  const orgDevices = useMemo(() => getOrgDevices(orgId), [orgId]);
-
-  // ── 打开 Edit 弹窗 ────────────────────────────────────────
+  // ── Edit 弹窗操作 ─────────────────────────────────────────
   const openEdit = (record: GarmentCatalog) => {
     setEditGarment(record);
     setEditName(record.name);
@@ -116,11 +102,20 @@ export default function CustomerGarmentsPage() {
     setEditCategoryId(record.category_id);
     setEditTemplateIds(record.template_ids ?? []);
     setEditImageUrl(record.image_url ?? '');
+    setEditSex(record.sex);
     setEditOpen(true);
   };
 
   const handleEditSave = () => {
-    message.success(`Garment "${editName}" updated (simulated)`);
+    // 更新 localGarments 中的记录（mock garments 仅模拟提示）
+    setLocalGarments((prev) =>
+      prev.map((g) =>
+        g.catalog_id === editGarment?.catalog_id
+          ? { ...g, name: editName, status: editStatus, category_id: editCategoryId, template_ids: editTemplateIds, image_url: editImageUrl, sex: editSex as import('@/lib/types').GarmentSex | undefined }
+          : g
+      )
+    );
+    message.success(`Garment "${editName}" updated`);
     setEditOpen(false);
     setEditGarment(null);
   };
@@ -151,136 +146,76 @@ export default function CustomerGarmentsPage() {
       okText: 'Delete',
       okType: 'danger',
       onOk: () => {
-        message.success(`${selectedCount} garment(s) deleted (simulated)`);
+        setLocalGarments((prev) => prev.filter((g) => !selectedRowKeys.includes(g.catalog_id)));
+        message.success(`${selectedCount} garment(s) deleted`);
         setSelectedRowKeys([]);
       },
     });
-  };
-
-  const handleBulkSetCategory = () => {
-    setBulkCategoryId(null);
-    setBulkCatOpen(true);
   };
 
   const handleBulkCategoryConfirm = () => {
     const catName = bulkCategoryId
       ? categories.find((c) => c.category_id === bulkCategoryId)?.name ?? '-'
       : 'Uncategorized';
-    message.success(
-      `${selectedCount} garment(s) set to category "${catName}" (simulated)`
-    );
+    message.success(`${selectedCount} garment(s) set to category "${catName}" (simulated)`);
     setBulkCatOpen(false);
     setSelectedRowKeys([]);
   };
 
-  // ── 批量导入处理 ──────────────────────────────────────────
-  const importHasErrors = importRows.some((r) => r.errors.length > 0);
-
-  const handleDownloadTemplate = () => {
-    const csvContent = 'name,category,sex,image_url\n# category allowed values: Top | Bottom | Whole look\n# sex allowed values: male | female | unisex\nExample Garment,Top,male,https://example.com/image.jpg\n';
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'garment_import_template.csv';
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImportBeforeUpload = (file: File) => {
-    setImportFileName(file.name);
-    setImportRows(MOCK_IMPORT_ROWS);
+  // ── Upload 逻辑 ───────────────────────────────────────────
+  const handleUploadBeforeUpload = (file: File) => {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      message.error(`${file.name}: only JPG, PNG, WebP are supported`);
+      return Upload.LIST_IGNORE;
+    }
+    const previewUrl = URL.createObjectURL(file);
+    const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
+    setUploadedFiles((prev) => [
+      ...prev,
+      { uid: `${Date.now()}-${Math.random()}`, file, previewUrl, name: nameWithoutExt },
+    ]);
     return false;
   };
 
-  const handleImportConfirm = () => {
-    const validCount = importRows.filter((r) => r.errors.length === 0).length;
-    message.success(`Successfully imported ${validCount} garment(s) (simulated)`);
-    setImportOpen(false);
-    setImportFileName(null);
-    setImportRows([]);
+  const handleUploadConfirm = () => {
+    if (uploadedFiles.length === 0) return;
+    const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+    const newGarments: GarmentCatalog[] = uploadedFiles.map((uf) => ({
+      catalog_id: `local_${uf.uid}`,
+      org_id: orgId,
+      name: uf.name,
+      category_id: null,
+      sex: undefined,
+      image_url: uf.previewUrl,
+      status: 'Active' as Status,
+      template_ids: [],
+      updated_at: now,
+    }));
+    setLocalGarments((prev) => [...newGarments, ...prev]);
+    message.success(`${uploadedFiles.length} garment(s) added. Click Edit to fill in details.`);
+    setUploadedFiles([]);
+    setUploadOpen(false);
   };
 
-  const handleImportForce = () => {
-    Modal.confirm({
-      title: 'Import with errors?',
-      content: `${importRows.filter((r) => r.errors.length > 0).length} row(s) have errors and will be skipped. Only valid rows will be imported. Continue?`,
-      okText: 'Import Anyway',
-      okType: 'danger',
-      cancelText: 'Cancel',
-      onOk: () => {
-        const validCount = importRows.filter((r) => r.errors.length === 0).length;
-        message.success(`Imported ${validCount} valid garment(s), skipped ${importRows.filter((r) => r.errors.length > 0).length} error row(s) (simulated)`);
-        setImportOpen(false);
-        setImportFileName(null);
-        setImportRows([]);
-      },
+  const handleUploadClose = () => {
+    uploadedFiles.forEach((uf) => URL.revokeObjectURL(uf.previewUrl));
+    setUploadedFiles([]);
+    setUploadOpen(false);
+  };
+
+  const removeUploadedFile = (uid: string) => {
+    setUploadedFiles((prev) => {
+      const target = prev.find((f) => f.uid === uid);
+      if (target) URL.revokeObjectURL(target.previewUrl);
+      return prev.filter((f) => f.uid !== uid);
     });
   };
-
-  const handleImportClose = () => {
-    setImportOpen(false);
-    setImportFileName(null);
-    setImportRows([]);
-  };
-
-  const importPreviewColumns: ColumnsType<ImportRow> = [
-    {
-      title: 'Row',
-      dataIndex: 'key',
-      width: 56,
-      render: (v: number) => <span style={{ color: '#aaa' }}>#{v}</span>,
-    },
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      render: (v: string, record: ImportRow) => {
-        const err = record.errors.find((e) => e.includes('Name'));
-        return err
-          ? <Tooltip title={err}><span style={{ color: '#ff4d4f' }}>{v || '(empty)'}</span></Tooltip>
-          : <span>{v}</span>;
-      },
-    },
-    {
-      title: 'Category',
-      dataIndex: 'category',
-      render: (v: string, record: ImportRow) => {
-        const err = record.errors.find((e) => e.includes('category'));
-        if (!v) return <Typography.Text type="secondary">-</Typography.Text>;
-        return err
-          ? <Tooltip title={err}><Tag color="red">{v}</Tag></Tooltip>
-          : <Tag color="cyan">{v}</Tag>;
-      },
-    },
-    {
-      title: 'Sex',
-      dataIndex: 'sex',
-      render: (v: string, record: ImportRow) => {
-        const err = record.errors.find((e) => e.includes('sex'));
-        return err
-          ? <Tooltip title={err}><Tag color="red">{v}</Tag></Tooltip>
-          : <Tag color="blue">{v}</Tag>;
-      },
-    },
-    {
-      title: 'Status',
-      width: 80,
-      render: (_: unknown, record: ImportRow) =>
-        record.errors.length > 0
-          ? <Tag color="red">Error</Tag>
-          : <Tag color="green">OK</Tag>,
-    },
-  ];
 
   // ── 行选择配置 ────────────────────────────────────────────
   const rowSelection: TableRowSelection<GarmentCatalog> = {
     selectedRowKeys,
     onChange: (keys) => setSelectedRowKeys(keys),
-    selections: [
-      Table.SELECTION_ALL,
-      Table.SELECTION_INVERT,
-      Table.SELECTION_NONE,
-    ],
+    selections: [Table.SELECTION_ALL, Table.SELECTION_INVERT, Table.SELECTION_NONE],
   };
 
   const columns: ColumnsType<GarmentCatalog> = [
@@ -310,7 +245,9 @@ export default function CustomerGarmentsPage() {
       key: 'category',
       render: (_, record) => {
         const catName = getGarmentCategoryName(record.category_id);
-        return catName ? <Tag color="cyan">{catName}</Tag> : <Typography.Text type="secondary">-</Typography.Text>;
+        return catName
+          ? <Tag color="cyan">{catName}</Tag>
+          : <Typography.Text type="secondary">-</Typography.Text>;
       },
     },
     {
@@ -385,7 +322,10 @@ export default function CustomerGarmentsPage() {
               type="link"
               size="small"
               danger
-              onClick={() => message.info(`Delete garment ${record.name} (simulated)`)}
+              onClick={() => {
+                setLocalGarments((prev) => prev.filter((g) => g.catalog_id !== record.catalog_id));
+                message.success(`Garment "${record.name}" deleted`);
+              }}
             >
               Delete
             </Button>
@@ -402,17 +342,15 @@ export default function CustomerGarmentsPage() {
         <Title level={4} style={{ margin: 0 }}>
           {orgName} - Garments
         </Title>
-        <Space>
-          <PermGuard permission="customer:garments:upload">
-            <Button
-              type="primary"
-              icon={<UploadOutlined />}
-              onClick={() => setImportOpen(true)}
-            >
-              Upload / Import
-            </Button>
-          </PermGuard>
-        </Space>
+        <PermGuard permission="customer:garments:upload">
+          <Button
+            type="primary"
+            icon={<UploadOutlined />}
+            onClick={() => setUploadOpen(true)}
+          >
+            Upload
+          </Button>
+        </PermGuard>
       </div>
 
       {/* Filter bar */}
@@ -441,18 +379,13 @@ export default function CustomerGarmentsPage() {
                   <Button
                     size="small"
                     icon={<AppstoreAddOutlined />}
-                    onClick={handleBulkSetCategory}
+                    onClick={() => { setBulkCategoryId(null); setBulkCatOpen(true); }}
                   >
                     Set Category
                   </Button>
                 </PermGuard>
                 <PermGuard permission="customer:garments:delete" fallback="disable">
-                  <Button
-                    size="small"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={handleBulkDelete}
-                  >
+                  <Button size="small" danger icon={<DeleteOutlined />} onClick={handleBulkDelete}>
                     Delete
                   </Button>
                 </PermGuard>
@@ -475,7 +408,64 @@ export default function CustomerGarmentsPage() {
         pagination={{ pageSize: 10 }}
       />
 
-      {/* ── Edit 弹窗（Set Category + Set Templates 合并） ── */}
+      {/* ── Upload 弹窗 ── */}
+      <Modal
+        title="Upload Garments"
+        open={uploadOpen}
+        onCancel={handleUploadClose}
+        onOk={handleUploadConfirm}
+        okText={uploadedFiles.length > 0 ? `Add ${uploadedFiles.length} garment(s)` : 'Add'}
+        okButtonProps={{ disabled: uploadedFiles.length === 0 }}
+        cancelText="Cancel"
+        width={560}
+      >
+        <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 16, fontSize: 13 }}>
+          Upload one or more garment images. After adding, click <strong>Edit</strong> on each row to fill in name, category, and other details.
+        </Typography.Text>
+
+        <Upload.Dragger
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          showUploadList={false}
+          beforeUpload={handleUploadBeforeUpload}
+          style={{ marginBottom: uploadedFiles.length > 0 ? 16 : 0 }}
+        >
+          <p className="ant-upload-drag-icon"><InboxOutlined /></p>
+          <p className="ant-upload-text">Click or drag images here</p>
+          <p className="ant-upload-hint">JPG · PNG · WebP, up to multiple files at once</p>
+        </Upload.Dragger>
+
+        {uploadedFiles.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+            {uploadedFiles.map((uf) => (
+              <div key={uf.uid} style={{ position: 'relative' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={uf.previewUrl}
+                  alt={uf.name}
+                  style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 6, display: 'block', border: '1px solid #f0f0f0' }}
+                />
+                <button
+                  onClick={() => removeUploadedFile(uf.uid)}
+                  style={{
+                    position: 'absolute', top: 4, right: 4,
+                    background: 'rgba(0,0,0,0.45)', border: 'none', borderRadius: '50%',
+                    width: 20, height: 20, cursor: 'pointer', color: '#fff',
+                    fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >
+                  ×
+                </button>
+                <div style={{ fontSize: 11, color: '#555', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {uf.name}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
+
+      {/* ── Edit 弹窗 ── */}
       <Modal
         title={`Edit Garment — "${editGarment?.name}"`}
         open={editOpen}
@@ -514,19 +504,7 @@ export default function CustomerGarmentsPage() {
           </Form.Item>
 
           <Form.Item label="Name">
-            <Input
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-            />
-          </Form.Item>
-
-          <Form.Item label="Status">
-            <Switch
-              checked={editStatus === 'Active'}
-              onChange={(checked) => setEditStatus(checked ? 'Active' : 'Disabled')}
-              checkedChildren="Active"
-              unCheckedChildren="Disabled"
-            />
+            <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
           </Form.Item>
 
           <Form.Item label="Category">
@@ -540,9 +518,33 @@ export default function CustomerGarmentsPage() {
             />
           </Form.Item>
 
+          <Form.Item label="Sex">
+            <Select
+              placeholder="Select sex"
+              allowClear
+              style={{ width: '100%' }}
+              value={editSex}
+              onChange={(val) => setEditSex(val)}
+              options={[
+                { label: 'male', value: 'male' },
+                { label: 'female', value: 'female' },
+                { label: 'unisex', value: 'unisex' },
+              ]}
+            />
+          </Form.Item>
+
+          <Form.Item label="Status">
+            <Switch
+              checked={editStatus === 'Active'}
+              onChange={(checked) => setEditStatus(checked ? 'Active' : 'Disabled')}
+              checkedChildren="Active"
+              unCheckedChildren="Disabled"
+            />
+          </Form.Item>
+
           <Form.Item
             label="Templates"
-            extra="Select which templates apply to this garment. Only templates assigned to your account are shown."
+            extra="Only templates assigned to your account are shown."
           >
             {assignedTemplates.length === 0 ? (
               <Typography.Text type="secondary">
@@ -555,7 +557,6 @@ export default function CustomerGarmentsPage() {
                 style={{ width: '100%' }}
                 value={editTemplateIds}
                 onChange={setEditTemplateIds}
-                optionLabelProp="label"
                 options={assignedTemplates.map((t) => ({
                   label: t.template_name,
                   value: t.template_id,
@@ -631,120 +632,6 @@ export default function CustomerGarmentsPage() {
         <Typography.Text type="secondary" style={{ fontSize: 12, marginTop: 8, display: 'block' }}>
           Clearing the selection will set the garments to "Uncategorized".
         </Typography.Text>
-      </Modal>
-
-      {/* ── 批量导入弹窗 ── */}
-      <Modal
-        title="Bulk Import Garments"
-        open={importOpen}
-        onCancel={handleImportClose}
-        width={680}
-        footer={[
-          <Button key="cancel" onClick={handleImportClose}>Cancel</Button>,
-          ...(importHasErrors && importRows.length > 0 ? [
-            <Button
-              key="force"
-              danger
-              onClick={handleImportForce}
-            >
-              忽略错误，强制导入
-            </Button>,
-          ] : []),
-          <Button
-            key="confirm"
-            type="primary"
-            disabled={importRows.length === 0 || importHasErrors}
-            onClick={handleImportConfirm}
-          >
-            Confirm Import
-          </Button>,
-        ]}
-      >
-        {/* 下载模板 */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <Typography.Text type="secondary">
-            Download the template, fill in garment info, then upload the file.
-          </Typography.Text>
-          <Button icon={<DownloadOutlined />} onClick={handleDownloadTemplate}>
-            Download Template
-          </Button>
-        </div>
-
-        <div style={{ background: '#fafafa', border: '1px solid #f0f0f0', borderRadius: 6, padding: '8px 12px', marginBottom: 12, fontSize: 12, lineHeight: '20px' }}>
-          <Typography.Text type="secondary">
-            <strong>category</strong> — allowed values: <Tag style={{ fontSize: 11 }}>Top</Tag><Tag style={{ fontSize: 11 }}>Bottom</Tag><Tag style={{ fontSize: 11 }}>Whole look</Tag>
-          </Typography.Text>
-          <br />
-          <Typography.Text type="secondary">
-            <strong>sex</strong> — allowed values: <Tag style={{ fontSize: 11 }}>male</Tag><Tag style={{ fontSize: 11 }}>female</Tag><Tag style={{ fontSize: 11 }}>unisex</Tag>
-          </Typography.Text>
-        </div>
-
-        <Divider style={{ margin: '12px 0' }} />
-
-        {/* 上传区域 */}
-        {!importFileName ? (
-          <Upload.Dragger
-            accept=".xlsx,.xls,.csv"
-            showUploadList={false}
-            beforeUpload={handleImportBeforeUpload}
-            style={{ marginBottom: 0 }}
-          >
-            <p className="ant-upload-drag-icon">
-              <InboxOutlined />
-            </p>
-            <p className="ant-upload-text">Click or drag a file here to upload</p>
-            <p className="ant-upload-hint">Supports .xlsx, .xls, .csv</p>
-          </Upload.Dragger>
-        ) : (
-          <div>
-            {/* 文件信息 + 错误摘要 */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <Space>
-                <Typography.Text strong>{importFileName}</Typography.Text>
-                <Typography.Text type="secondary">
-                  — {importRows.length} rows parsed
-                </Typography.Text>
-              </Space>
-              <Space>
-                {importHasErrors && (
-                  <Tag color="red">
-                    {importRows.filter((r) => r.errors.length > 0).length} error(s) found
-                  </Tag>
-                )}
-                <Button
-                  size="small"
-                  type="text"
-                  onClick={() => { setImportFileName(null); setImportRows([]); }}
-                >
-                  Re-upload
-                </Button>
-              </Space>
-            </div>
-
-            {importHasErrors && (
-              <Alert
-                type="warning"
-                showIcon
-                message="存在错误行。你可以修正后重新上传，或点击「忽略错误，强制导入」跳过错误行仅导入有效数据。"
-                style={{ marginBottom: 8 }}
-              />
-            )}
-
-            {/* 预览表格 */}
-            <Table<ImportRow>
-              columns={importPreviewColumns}
-              dataSource={importRows}
-              rowKey="key"
-              size="small"
-              pagination={false}
-              onRow={(record) => ({
-                style: record.errors.length > 0 ? { background: '#fff2f0' } : {},
-              })}
-              style={{ border: '1px solid #f0f0f0', borderRadius: 6 }}
-            />
-          </div>
-        )}
       </Modal>
 
       {/* ── 分配设备弹窗 ── */}

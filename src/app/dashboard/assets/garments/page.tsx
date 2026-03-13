@@ -30,7 +30,9 @@ export default function GarmentsPage() {
   }, [searchInput]);
 
   const orgOptions = useMemo(() => {
-    return organizations.map((o) => ({ label: `${o.name} (${o.org_id})`, value: o.org_id }));
+    return organizations
+      .filter((o) => o.org_type === 'CUSTOMER')
+      .map((o) => ({ label: `${o.name} (${o.org_id})`, value: o.org_id }));
   }, []);
 
   const dataSource: GarmentRow[] = useMemo(() => {

@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, Typography, Select, message, Radio, Alert } from 'antd';
+import { Table, Button, Tag, Space, Modal, Form, Input, Typography, Select, message, Radio, Alert, Divider } from 'antd';
 import { PlusOutlined, KeyOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuthStore } from '@/lib/store';
-import { getChannelCustomers, getCustomerSummary, getOrgActivationCodes } from '@/lib/mock-data';
-import type { Organization, Status, ActivationCode, ActivationCodeStatus } from '@/lib/types';
+import { getChannelCustomers, getCustomerSummary } from '@/lib/mock-data';
+import { useCodeStore } from '@/lib/code-store';
+import type { Organization, Status, ActivationCode, ActivationCodeStatus, CodeType } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
 
 const { Title, Text } = Typography;
@@ -40,9 +41,25 @@ export default function ChannelCustomersPage() {
   const [createCodeModalOpen, setCreateCodeModalOpen] = useState(false);
   const [createCodeForm] = Form.useForm();
 
+  const { codes, revokeCode, assignToCustomer, createCodeForCustomer } = useCodeStore();
+
   const orgCodes = useMemo(
-    () => (codesOrg ? getOrgActivationCodes(codesOrg.org_id) : []),
-    [codesOrg]
+    () => (codesOrg ? codes.filter((c) => c.org_id === codesOrg.org_id) : []),
+    [codes, codesOrg]
+  );
+
+  // Channel pool: unassigned codes belonging to this channel
+  const channelPool = useMemo(
+    () =>
+      currentUser
+        ? codes.filter(
+            (c) =>
+              c.channel_org_id === currentUser.org_id &&
+              c.org_id === null &&
+              c.status === 'Unused'
+          )
+        : [],
+    [codes, currentUser]
   );
 
   const unusedTrialCount = useMemo(
@@ -85,9 +102,30 @@ export default function ChannelCustomersPage() {
 
   const handleCreateCode = () => {
     createCodeForm.validateFields().then((values) => {
-      message.success(`Trial code created for ${codesOrg?.name} · ${values.trialMaxSessions} sessions (simulated)`);
+      createCodeForCustomer(
+        codesOrg!.org_id,
+        'Trial',
+        values.trialMaxSessions,
+        'channel',
+        currentUser?.org_id ?? null,
+      );
+      message.success(`Trial code created for ${codesOrg?.name} · ${values.trialMaxSessions} sessions`);
       setCreateCodeModalOpen(false);
       createCodeForm.resetFields();
+    });
+  };
+
+  const handleAssignFromPool = (code: ActivationCode) => {
+    if (!codesOrg) return;
+    Modal.confirm({
+      title: `Assign code ${code.code} to ${codesOrg.name}?`,
+      content: `This ${code.code_type} code will be moved from the channel pool and assigned to ${codesOrg.name}.`,
+      okText: 'Assign',
+      okType: 'primary',
+      onOk: () => {
+        assignToCustomer(code.code_id, codesOrg.org_id);
+        message.success(`Code assigned to ${codesOrg.name}`);
+      },
     });
   };
 
@@ -166,6 +204,38 @@ export default function ChannelCustomersPage() {
     },
   ];
 
+  const poolColumns: ColumnsType<ActivationCode> = [
+    {
+      title: 'Code',
+      dataIndex: 'code',
+      key: 'code',
+      render: (c: string) => <Text code style={{ fontSize: 12 }}>{c}</Text>,
+    },
+    {
+      title: 'Type',
+      dataIndex: 'code_type',
+      key: 'code_type',
+      render: (t: CodeType) => <Tag color={t === 'Trial' ? 'orange' : 'blue'}>{t}</Tag>,
+    },
+    {
+      title: 'Sessions',
+      key: 'sessions',
+      render: (_: unknown, r: ActivationCode) =>
+        r.code_type === 'Trial' ? <Text>{r.trial_max_sessions}</Text> : <Text type="secondary">—</Text>,
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_: unknown, rec: ActivationCode) => (
+        <PermGuard permission="channel:codes:assign">
+          <Button type="link" size="small" onClick={() => handleAssignFromPool(rec)}>
+            Assign
+          </Button>
+        </PermGuard>
+      ),
+    },
+  ];
+
   if (!currentUser) return null;
 
   const trialLimitReached = unusedTrialCount >= TRIAL_LIMIT;
@@ -215,7 +285,7 @@ export default function ChannelCustomersPage() {
         open={codesModalOpen}
         onCancel={() => { setCodesModalOpen(false); setCodesOrg(null); }}
         footer={null}
-        width={760}
+        width={800}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <Space direction="vertical" size={2}>
@@ -324,7 +394,7 @@ export default function ChannelCustomersPage() {
                         content: 'This code will be permanently revoked and cannot be used to bind a device.',
                         okText: 'Revoke',
                         okType: 'danger',
-                        onOk: () => message.success('Code revoked (simulated)'),
+                        onOk: () => { revokeCode(rec.code_id); message.success('Code revoked'); },
                       })
                     }
                   >
@@ -334,6 +404,21 @@ export default function ChannelCustomersPage() {
             },
           ]}
         />
+
+        {/* Assign from Channel Pool */}
+        <Divider style={{ fontSize: 13 }}>Assign from Channel Pool</Divider>
+        {channelPool.length === 0 ? (
+          <Text type="secondary" style={{ fontSize: 12 }}>No available codes in channel pool.</Text>
+        ) : (
+          <Table<ActivationCode>
+            size="small"
+            dataSource={channelPool}
+            rowKey="code_id"
+            pagination={false}
+            columns={poolColumns}
+            locale={{ emptyText: 'No codes available in pool.' }}
+          />
+        )}
       </Modal>
 
       {/* Create Trial Code Modal */}

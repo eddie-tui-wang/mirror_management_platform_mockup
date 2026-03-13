@@ -26,7 +26,7 @@ export const PERMISSIONS = {
   'platform:devices:view': 'View all devices (aggregated)',
   'platform:email_records:view': 'View email send records',
   'platform:website_inquiries:view': 'View website form submissions',
-  'platform:images:view': 'View image assets (aggregated)',
+  'platform:channels:assign_code': 'Assign activation codes to channel',
 
   // ---- 渠道端 ----
   'channel:customers:view': 'View customers',
@@ -36,6 +36,8 @@ export const PERMISSIONS = {
   'channel:users:reinvite': 'Resend invitation',
   'channel:templates:view': 'View templates',
   'channel:templates:assign': 'Assign template to customer',
+  'channel:codes:view': 'View channel code pool',
+  'channel:codes:assign': 'Assign code from pool to customer',
 
   // ---- 客户端 ----
   'customer:users:view': 'View members',
@@ -52,9 +54,6 @@ export const PERMISSIONS = {
   'customer:devices:view': 'View devices',
   'customer:devices:manage': 'Add device / set nickname',
   'customer:garments:assign_device': 'Assign garments to devices',
-  'customer:images:view': 'View image library',
-  'customer:images:upload': 'Upload images',
-  'customer:images:delete': 'Delete images',
 } as const;
 
 export type PermissionKey = keyof typeof PERMISSIONS;
@@ -72,6 +71,8 @@ export const PORTAL_PERMISSIONS: Record<PortalType, PermissionKey[]> = {
     'channel:users:reinvite',
     'channel:templates:view',
     'channel:templates:assign',
+    'channel:codes:view',
+    'channel:codes:assign',
   ],
 
   customer: [
@@ -89,9 +90,6 @@ export const PORTAL_PERMISSIONS: Record<PortalType, PermissionKey[]> = {
     'customer:devices:view',
     'customer:devices:manage',
     'customer:garments:assign_device',
-    'customer:images:view',
-    'customer:images:upload',
-    'customer:images:delete',
   ],
 };
 
@@ -103,18 +101,17 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   '/dashboard/assets/garments': 'platform:garments:view',
   '/dashboard/assets/templates': 'platform:templates:view',
   '/dashboard/assets/devices': 'platform:devices:view',
-  '/dashboard/assets/images': 'platform:images:view',
   '/dashboard/email-records': 'platform:email_records:view',
   '/dashboard/website-inquiries': 'platform:website_inquiries:view',
   // 渠道端
   '/dashboard/channel/customers': 'channel:customers:view',
   '/dashboard/channel/templates': 'channel:templates:view',
+  '/dashboard/channel/codes': 'channel:codes:view',
   // 客户端
   '/dashboard/customer/users': 'customer:users:view',
   '/dashboard/customer/garments': 'customer:garments:view',
   '/dashboard/customer/templates': 'customer:templates:view',
   '/dashboard/customer/devices': 'customer:devices:view',
-  '/dashboard/customer/images': 'customer:images:view',
 };
 
 // ==================== 权限检查工具函数 ====================

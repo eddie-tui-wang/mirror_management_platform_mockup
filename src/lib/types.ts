@@ -50,7 +50,7 @@ export type GarmentSex = 'male' | 'female' | 'unisex';
 
 export interface GarmentCatalog {
   catalog_id: string;
-  garment_id: string;
+  garment_id?: string;
   org_id: string;
   name: string;
   image_url: string;
@@ -112,7 +112,8 @@ export type ActivationCodeStatus = 'Unused' | 'Bound' | 'Expired' | 'Revoked';
 export interface ActivationCode {
   code_id: string;
   code: string;
-  org_id: string;
+  org_id: string | null;         // null = code is in channel pool, not yet assigned to a customer
+  channel_org_id: string | null; // which channel holds this code
   created_by_portal: 'platform' | 'channel';
   created_at: string;
   expires_at: string;                // Unused codes expire 7 days after creation

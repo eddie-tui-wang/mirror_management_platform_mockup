@@ -3,13 +3,14 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import {
   Table, Button, Tag, Space, Typography, message, Select, Modal, Form,
-  Input,
+  Input, Dropdown, Radio,
 } from 'antd';
-import { PlusOutlined, KeyOutlined, SearchOutlined } from '@ant-design/icons';
+import { PlusOutlined, KeyOutlined, SearchOutlined, DownOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { organizations, users, getCustomerSummary, getOrgActivationCodes } from '@/lib/mock-data';
-import type { CustomerType, Status, ActivationCode, ActivationCodeStatus } from '@/lib/types';
+import { organizations, users, getCustomerSummary } from '@/lib/mock-data';
+import { useCodeStore } from '@/lib/code-store';
+import type { CustomerType, Status, ActivationCode, ActivationCodeStatus, CodeType } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
 
 const { Title, Text } = Typography;
@@ -48,17 +49,22 @@ export default function CustomersPage() {
     const timer = setTimeout(() => setSearchText(searchInput), 500);
     return () => clearTimeout(timer);
   }, [searchInput]);
+
   const [form] = Form.useForm();
+  const [createCodeForm] = Form.useForm();
 
   const [codesModalOpen, setCodesModalOpen] = useState(false);
   const [codesOrg, setCodesOrg] = useState<CustomerRow | null>(null);
   const [createCodeModalOpen, setCreateCodeModalOpen] = useState(false);
-  const [createCodeForm] = Form.useForm();
+  const [createCodeType, setCreateCodeType] = useState<CodeType>('Regular');
+
+  const { codes, revokeCode, createCodeForCustomer } = useCodeStore();
 
   const orgCodes = useMemo(
-    () => (codesOrg ? getOrgActivationCodes(codesOrg.org_id) : []),
-    [codesOrg]
+    () => codes.filter((c) => c.org_id === codesOrg?.org_id),
+    [codes, codesOrg]
   );
+
   const unusedRegularCount = useMemo(
     () => orgCodes.filter((c) => c.status === 'Unused' && c.code_type === 'Regular').length,
     [orgCodes]
@@ -131,8 +137,15 @@ export default function CustomersPage() {
   };
 
   const handleCreateCode = () => {
-    createCodeForm.validateFields().then(() => {
-      message.success(`Regular activation code created for ${codesOrg?.name} (simulated)`);
+    createCodeForm.validateFields().then((values) => {
+      createCodeForCustomer(
+        codesOrg!.org_id,
+        createCodeType,
+        createCodeType === 'Trial' ? values.trialMaxSessions : null,
+        'platform',
+        null,
+      );
+      message.success(`${createCodeType} code created for ${codesOrg?.name}`);
       setCreateCodeModalOpen(false);
       createCodeForm.resetFields();
     });
@@ -327,15 +340,23 @@ export default function CustomersPage() {
             )}
           </Text>
           <PermGuard permission="platform:customers:create_code">
-            <Button
-              type="primary"
-              size="small"
-              icon={<PlusOutlined />}
+            <Dropdown
+              menu={{
+                items: [
+                  { key: 'Regular', label: 'Regular Code' },
+                  { key: 'Trial', label: 'Trial Code' },
+                ],
+                onClick: ({ key }) => {
+                  setCreateCodeType(key as CodeType);
+                  setCreateCodeModalOpen(true);
+                },
+              }}
               disabled={codesOrg?.status === 'Disabled'}
-              onClick={() => setCreateCodeModalOpen(true)}
             >
-              Create Regular Code
-            </Button>
+              <Button size="small" icon={<PlusOutlined />} disabled={codesOrg?.status === 'Disabled'}>
+                Create Code <DownOutlined />
+              </Button>
+            </Dropdown>
           </PermGuard>
         </div>
         <Table<ActivationCode>
@@ -408,7 +429,7 @@ export default function CustomersPage() {
                         content: 'This code will be permanently revoked and cannot be used to bind a device.',
                         okText: 'Revoke',
                         okType: 'danger',
-                        onOk: () => message.success('Code revoked (simulated)'),
+                        onOk: () => { revokeCode(rec.code_id); message.success('Code revoked'); },
                       })
                     }
                   >
@@ -420,18 +441,34 @@ export default function CustomersPage() {
         />
       </Modal>
 
-      {/* Create Regular Code Modal */}
+      {/* Create Code Modal */}
       <Modal
-        title={`Create Regular Activation Code — ${codesOrg?.name ?? ''}`}
+        title={`Create ${createCodeType} Activation Code — ${codesOrg?.name ?? ''}`}
         open={createCodeModalOpen}
         onOk={handleCreateCode}
         onCancel={() => { setCreateCodeModalOpen(false); createCodeForm.resetFields(); }}
         okText="Create"
         cancelText="Cancel"
       >
-        <Text type="secondary" style={{ fontSize: 13 }}>
-          Regular codes grant permanent device access with no session limit. Only platform admins can create Regular codes.
-        </Text>
+        {createCodeType === 'Regular' ? (
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            Regular codes grant permanent device access with no session limit. Only platform admins can create Regular codes.
+          </Text>
+        ) : (
+          <Form form={createCodeForm} layout="vertical">
+            <Form.Item
+              name="trialMaxSessions"
+              label="Max Try-on Sessions"
+              initialValue={25}
+              rules={[{ required: true, message: 'Please select max sessions' }]}
+            >
+              <Radio.Group>
+                <Radio value={25}>25 sessions</Radio>
+                <Radio value={50}>50 sessions</Radio>
+              </Radio.Group>
+            </Form.Item>
+          </Form>
+        )}
       </Modal>
 
       {/* Create Customer Modal */}
