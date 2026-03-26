@@ -34,8 +34,7 @@ export default function ChannelTemplatesPage() {
       if (searchText) {
         const lower = searchText.toLowerCase();
         const matchName = t.name.toLowerCase().includes(lower);
-        const matchPrompt = t.prompts.some((p) => p.toLowerCase().includes(lower));
-        if (!matchName && !matchPrompt) return false;
+        if (!matchName) return false;
       }
       return true;
     });
@@ -118,7 +117,7 @@ export default function ChannelTemplatesPage() {
       <div style={{ marginBottom: 16 }}>
         <Input
           prefix={<SearchOutlined style={{ color: '#bbb' }} />}
-          placeholder="Search name or prompt"
+          placeholder="Search by name"
           allowClear
           style={{ width: 240 }}
           value={searchInput}
