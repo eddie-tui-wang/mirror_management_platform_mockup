@@ -143,6 +143,8 @@ export default function SettingsPage() {
                   onPressEnter={handleSaveName}
                   size="small"
                   style={{ width: 220 }}
+                  maxLength={50}
+                  showCount
                   autoFocus
                 />
                 <Button size="small" type="primary" onClick={handleSaveName}>Save</Button>

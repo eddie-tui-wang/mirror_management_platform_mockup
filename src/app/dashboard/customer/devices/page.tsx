@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Table, Tag, Typography, Space, Button, Modal, Input, Progress } from 'antd';
+import { Table, Tag, Typography, Button, Modal, Input } from 'antd';
 import { DesktopOutlined, EditOutlined } from '@ant-design/icons';
 import { message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -77,21 +77,6 @@ export default function CustomerDevicesPage() {
       dataIndex: 'status',
       key: 'status',
       render: (status: ActivationCodeStatus) => <Tag color={STATUS_COLOR[status]}>{status}</Tag>,
-    },
-    {
-      title: 'Sessions',
-      key: 'sessions',
-      render: (_: unknown, r: ActivationCode) => {
-        if (r.code_type !== 'Trial') return <Text type="secondary">—</Text>;
-        const max = r.trial_max_sessions ?? 0;
-        const used = r.trial_used_sessions ?? 0;
-        return (
-          <Space direction="vertical" size={2} style={{ width: 120 }}>
-            <Text style={{ fontSize: 12 }}>{used} / {max} used</Text>
-            <Progress percent={Math.round((used / max) * 100)} size="small" showInfo={false} status={used >= max ? 'exception' : 'normal'} />
-          </Space>
-        );
-      },
     },
     {
       title: 'Bound Device',
@@ -200,6 +185,8 @@ export default function CustomerDevicesPage() {
           value={nicknameValue}
           onChange={(e) => setNicknameValue(e.target.value)}
           onPressEnter={handleSetNickname}
+          maxLength={50}
+          showCount
           autoFocus
         />
       </Modal>

@@ -298,7 +298,7 @@ export default function ChannelsPage() {
       >
         <Form form={form} layout="vertical">
           <Form.Item name="name" label="Channel Name" rules={[{ required: true, message: 'Please enter channel name' }]}>
-            <Input placeholder="e.g. Channel B" />
+            <Input placeholder="e.g. Channel B" maxLength={50} showCount />
           </Form.Item>
           <Form.Item name="adminEmail" label="Admin Email" rules={[{ required: true, type: 'email', message: 'Please enter a valid email' }]}>
             <Input placeholder="admin@channel.com" />

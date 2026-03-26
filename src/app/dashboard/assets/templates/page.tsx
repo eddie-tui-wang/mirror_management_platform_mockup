@@ -148,6 +148,8 @@ export default function TemplatesPage() {
         value={formName}
         onChange={(e) => setFormName(e.target.value)}
         placeholder="e.g. Daily Life Scene"
+        maxLength={100}
+        showCount
         style={{ marginBottom: 16 }}
       />
       <div style={{ marginBottom: 8 }}>
@@ -159,6 +161,8 @@ export default function TemplatesPage() {
           onChange={(e) => setPromptInput(e.target.value)}
           placeholder="Enter a prompt and click Add"
           onPressEnter={addPrompt}
+          maxLength={200}
+          showCount
         />
         <Button type="primary" onClick={addPrompt}>
           Add

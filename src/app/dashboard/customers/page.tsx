@@ -497,7 +497,7 @@ export default function CustomersPage() {
             label="Customer Name"
             rules={[{ required: true, message: 'Please enter customer name' }]}
           >
-            <Input placeholder="Please enter customer name" />
+            <Input placeholder="Please enter customer name" maxLength={50} showCount />
           </Form.Item>
           <Form.Item
             name="adminEmail"

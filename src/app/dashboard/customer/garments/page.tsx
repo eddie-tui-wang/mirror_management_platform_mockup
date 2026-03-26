@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import {
   Table, Button, Tag, Space, Typography, Image, Select, Modal,
   Input, message, Alert, Form, Switch, Upload,
@@ -8,7 +8,7 @@ import {
 import {
   UploadOutlined, DeleteOutlined,
   DesktopOutlined, AppstoreAddOutlined, EditOutlined,
-  PictureOutlined, CheckCircleFilled, InboxOutlined,
+  InboxOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType, TableRowSelection } from 'antd/es/table/interface';
 import { useAuthStore } from '@/lib/store';
@@ -21,16 +21,6 @@ import type { GarmentCatalog, Status } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
 
 const { Title } = Typography;
-
-// ── 图片库 mock 数据 ──────────────────────────────────────────
-const MOCK_IMAGE_LIBRARY = [
-  { key: 'img_001', file_name: 'product-jacket.jpg',   image_url: 'https://picsum.photos/seed/jacket/400/400' },
-  { key: 'img_002', file_name: 'summer-dress.png',     image_url: 'https://picsum.photos/seed/dress/400/400' },
-  { key: 'img_003', file_name: 'casual-trousers.webp', image_url: 'https://picsum.photos/seed/trousers/400/400' },
-  { key: 'img_004', file_name: 'floral-blouse.jpg',    image_url: 'https://picsum.photos/seed/blouse/400/400' },
-  { key: 'img_005', file_name: 'wool-coat.jpg',        image_url: 'https://picsum.photos/seed/coat/400/400' },
-  { key: 'img_006', file_name: 'striped-tee.png',      image_url: 'https://picsum.photos/seed/tee/400/400' },
-];
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -55,9 +45,8 @@ export default function CustomerGarmentsPage() {
   const [editImageUrl, setEditImageUrl] = useState('');
   const [editSex, setEditSex] = useState<string | undefined>(undefined);
 
-  // ── 图片库选择器弹窗 ──────────────────────────────────────
-  const [imagePickerOpen, setImagePickerOpen] = useState(false);
-  const [imagePickerSelected, setImagePickerSelected] = useState<string>('');
+  // ── 图片上传（Edit 弹窗） ─────────────────────────────────
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   // ── Upload 弹窗 ───────────────────────────────────────────
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -484,34 +473,38 @@ export default function CustomerGarmentsPage() {
       >
         <Form layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item label="Image">
-            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
               <Image
                 src={editImageUrl}
                 alt="garment"
-                width={64}
-                height={64}
+                width={72}
+                height={72}
                 style={{ objectFit: 'cover', borderRadius: 6, border: '1px solid #f0f0f0', flexShrink: 0 }}
                 fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iMTQiIHk9IjM3IiBmb250LXNpemU9IjEyIiBmaWxsPSIjY2NjIj5OL0E8L3RleHQ+PC9zdmc+"
               />
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <Input
-                  placeholder="Paste image URL..."
-                  value={editImageUrl}
-                  onChange={(e) => setEditImageUrl(e.target.value)}
-                />
-                <Button
-                  size="small"
-                  icon={<PictureOutlined />}
-                  onClick={() => { setImagePickerSelected(editImageUrl); setImagePickerOpen(true); }}
-                >
-                  Choose from Library
-                </Button>
-              </div>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                ref={imageInputRef}
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) setEditImageUrl(URL.createObjectURL(file));
+                  e.target.value = '';
+                }}
+              />
+              <Button
+                size="small"
+                icon={<UploadOutlined />}
+                onClick={() => imageInputRef.current?.click()}
+              >
+                Upload New
+              </Button>
             </div>
           </Form.Item>
 
           <Form.Item label="Name">
-            <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+            <Input value={editName} onChange={(e) => setEditName(e.target.value)} maxLength={100} showCount />
           </Form.Item>
 
           <Form.Item label="Category">
@@ -573,50 +566,6 @@ export default function CustomerGarmentsPage() {
             )}
           </Form.Item>
         </Form>
-      </Modal>
-
-      {/* ── 图片库选择器弹窗 ── */}
-      <Modal
-        title="Choose from Image Library"
-        open={imagePickerOpen}
-        onCancel={() => setImagePickerOpen(false)}
-        onOk={() => { setEditImageUrl(imagePickerSelected); setImagePickerOpen(false); }}
-        okText="Confirm"
-        cancelText="Cancel"
-        okButtonProps={{ disabled: !imagePickerSelected }}
-        width={600}
-      >
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, padding: '8px 0' }}>
-          {MOCK_IMAGE_LIBRARY.map((img) => {
-            const selected = imagePickerSelected === img.image_url;
-            return (
-              <div
-                key={img.key}
-                onClick={() => setImagePickerSelected(img.image_url)}
-                style={{
-                  position: 'relative', cursor: 'pointer', borderRadius: 6,
-                  border: selected ? '2px solid #1677ff' : '2px solid transparent',
-                  overflow: 'hidden',
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={img.image_url}
-                  alt={img.file_name}
-                  style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', display: 'block' }}
-                />
-                {selected && (
-                  <div style={{ position: 'absolute', top: 4, right: 4 }}>
-                    <CheckCircleFilled style={{ color: '#1677ff', fontSize: 18, background: '#fff', borderRadius: '50%' }} />
-                  </div>
-                )}
-                <div style={{ padding: '4px 6px', fontSize: 11, color: '#555', background: '#fafafa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {img.file_name}
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </Modal>
 
       {/* ── 批量设置分类弹窗 ── */}
