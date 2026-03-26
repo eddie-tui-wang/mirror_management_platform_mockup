@@ -19,7 +19,6 @@
 |------|------|------|------|
 | [Channels](platform-channels.md) | `/dashboard/channels` | `platform:channels:view` | 渠道管理，含码池管理 |
 | [Customers](platform-customers.md) | `/dashboard/customers` | `platform:customers:view` | 客户管理，含激活码管理 |
-| [Users](platform-users.md) | `/dashboard/users` | 平台门户可访问 | 全局用户视图（非主导航） |
 | [Assets > Garments](platform-assets-garments.md) | `/dashboard/assets/garments` | `platform:garments:view` | 全量服装聚合视图（只读） |
 | [Assets > Templates](platform-assets-templates.md) | `/dashboard/assets/templates` | `platform:templates:view` | 主模板管理 + 分配 |
 | [Assets > Device Activity](platform-assets-device-activity.md) | `/dashboard/assets/devices` | `platform:devices:view` | 激活码全局视图（只读） |
@@ -45,7 +44,6 @@
 | [Garments](customer-garments.md) | `/dashboard/customer/garments` | `customer:garments:view` | 服装目录管理，含上传/编辑/设备分配 |
 | [Templates](customer-templates.md) | `/dashboard/customer/templates` | `customer:templates:view` | 查看已分配模板 |
 | [Devices](customer-devices.md) | `/dashboard/customer/devices` | `customer:devices:view` | 激活码管理与设备绑定 |
-| [Members](customer-users.md) | `/dashboard/customer/users` | `customer:users:view` | 成员账号管理 |
 
 ---
 

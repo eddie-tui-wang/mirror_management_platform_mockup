@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { Table, Tag, Typography, Button, Modal, Input } from 'antd';
-import { DesktopOutlined, EditOutlined } from '@ant-design/icons';
+import { EditOutlined } from '@ant-design/icons';
 import { message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuthStore } from '@/lib/store';
@@ -24,31 +24,17 @@ export default function CustomerDevicesPage() {
   const orgId = currentUser?.org_id ?? '';
   const orgName = currentUser?.org_name ?? '';
 
-  const { codes, bindCode, setNickname } = useCodeStore();
+  const { codes, setNickname } = useCodeStore();
 
   const customerCodes = useMemo(
     () => codes.filter((c) => c.org_id === orgId),
     [codes, orgId]
   );
 
-  // Bind Device modal
-  const [bindOpen, setBindOpen] = useState(false);
-  const [bindTarget, setBindTarget] = useState<ActivationCode | null>(null);
-  const [bindDeviceId, setBindDeviceId] = useState('');
-
   // Set Nickname modal
   const [nicknameOpen, setNicknameOpen] = useState(false);
   const [nicknameTarget, setNicknameTarget] = useState<ActivationCode | null>(null);
   const [nicknameValue, setNicknameValue] = useState('');
-
-  const handleBind = () => {
-    if (!bindTarget || !bindDeviceId.trim()) return;
-    bindCode(bindTarget.code_id, bindDeviceId.trim());
-    message.success(`Device "${bindDeviceId.trim()}" bound successfully`);
-    setBindOpen(false);
-    setBindTarget(null);
-    setBindDeviceId('');
-  };
 
   const handleSetNickname = () => {
     if (!nicknameTarget) return;
@@ -102,18 +88,6 @@ export default function CustomerDevicesPage() {
       title: 'Actions',
       key: 'actions',
       render: (_: unknown, rec: ActivationCode) => {
-        if (rec.status === 'Unused') {
-          return (
-            <PermGuard permission="customer:devices:manage">
-              <Button
-                type="link" size="small" icon={<DesktopOutlined />}
-                onClick={() => { setBindTarget(rec); setBindDeviceId(''); setBindOpen(true); }}
-              >
-                Bind Device
-              </Button>
-            </PermGuard>
-          );
-        }
         if (rec.status === 'Bound') {
           return (
             <PermGuard permission="customer:devices:manage">
@@ -147,29 +121,6 @@ export default function CustomerDevicesPage() {
         pagination={{ pageSize: 10 }}
         locale={{ emptyText: 'No activation codes yet. Contact your account manager.' }}
       />
-
-      {/* Bind Device Modal */}
-      <Modal
-        title={`Bind Device — ${bindTarget?.code}`}
-        open={bindOpen}
-        onOk={handleBind}
-        onCancel={() => { setBindOpen(false); setBindTarget(null); setBindDeviceId(''); }}
-        okText="Bind"
-        okButtonProps={{ disabled: !bindDeviceId.trim() }}
-        cancelText="Cancel"
-      >
-        <Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 13 }}>
-          Enter the Device ID of the smart mirror you want to bind this activation code to.
-        </Text>
-        <Input
-          prefix={<DesktopOutlined style={{ color: '#bbb' }} />}
-          placeholder="e.g. dev_42"
-          value={bindDeviceId}
-          onChange={(e) => setBindDeviceId(e.target.value)}
-          onPressEnter={handleBind}
-          autoFocus
-        />
-      </Modal>
 
       {/* Set Nickname Modal */}
       <Modal

@@ -127,8 +127,5 @@ Trail 码上限计数的范围是状态为 `Bound` 或 `Unused` 的 Trial 码之
 ### R-CCU-03：从码池分配 Regular 码是"转移"操作，非"复制"
 将渠道码池中的 Regular 激活码分配给客户后，该码的 `org_id` 被更新为目标客户的 `org_id`，同时该码不再出现在渠道码池视图中。每个激活码只能属于一个客户。
 
-### R-CCU-04：Resend Invitation 仅在管理员从未登录时显示
-只有当客户管理员的 `last_login` 字段为 `null` 时，才显示 Resend Invitation 按钮。一旦管理员完成首次登录，该按钮永久消失。
-
-### R-CCU-05：渠道只能看到自己的下属客户
+### R-CCU-04：渠道只能看到自己的下属客户
 渠道管理员登录后，Customers 页面只展示 `parent_org_id = 当前渠道 org_id` 的客户。跨渠道客户不可见。

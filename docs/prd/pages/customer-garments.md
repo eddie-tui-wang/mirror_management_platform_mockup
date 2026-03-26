@@ -23,6 +23,7 @@
 | Name | 服装名称 |
 | Category | 所属分类名称；未分类显示"—" |
 | Templates | 关联的模板数量（可点击查看） |
+| Devices | 关联的设备数量 |
 | Sex | 适用性别：`male`（男）/ `female`（女）/ `unisex`（通用） |
 | Status | `Active`（绿色）/ `Disabled`（红色） |
 | Updated At | 最近更新时间 |
@@ -54,7 +55,7 @@
 | 参数 | 说明 |
 |------|------|
 | 支持格式 | JPEG、PNG、WebP |
-| 上传后状态 | 默认 `Active` |
+| 上传后状态 | 默认 `Disabled` |
 
 上传完成后，服装以新记录的形式追加至服装列表，初始不含分类（`category_id = null`）且未关联任何模板（`template_ids = []`）。
 
@@ -123,7 +124,7 @@
 "分配设备"弹窗中展示的设备列表来自客户名下状态为 `Bound` 的激活码记录（每条 Bound 的激活码对应一台设备），而非来自独立的设备管理表。设备以激活码的 `bound_device_id` 为标识。
 
 ### R-CG-04：Disabled 服装仍可存在于设备分配中
-将服装状态设为 `Disabled` 不会自动解除其与设备的分配关系。Disabled 服装的业务含义为"在 AI 智能镜上不展示/不可选"，需由业务逻辑决定是否显示 Disabled 服装。
+将服装状态设为 `Disabled` 不会自动解除其与设备的分配关系。Disabled 服装的业务含义为"在 AI 智能镜上不展示。
 
 ### R-CG-05：上传服装时图片格式限于 JPEG/PNG/WebP
 非以上格式的文件（如 GIF、TIFF、PDF）不可上传，会被客户端文件类型校验拦截。
