@@ -1,4 +1,4 @@
-# Platform > Email Records
+【二期】# Platform > Email Records
 
 **路径**: `/dashboard/email-records`
 **适用门户**: Platform

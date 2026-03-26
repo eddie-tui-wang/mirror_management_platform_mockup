@@ -161,7 +161,7 @@ export default function TemplatesPage() {
           onChange={(e) => setPromptInput(e.target.value)}
           placeholder="Enter a prompt and click Add"
           onPressEnter={addPrompt}
-          maxLength={200}
+          maxLength={500}
           showCount
         />
         <Button type="primary" onClick={addPrompt}>

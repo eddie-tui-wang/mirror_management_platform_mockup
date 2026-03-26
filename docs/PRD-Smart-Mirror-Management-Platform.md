@@ -323,7 +323,7 @@ Unused ──── 设备绑定 ──── Bound
 | Display Name（用户昵称） | 50 字符 |
 | 商品名（Garment Name） | 100 字符 |
 | 模板名（Template Name） | 100 字符 |
-| Prompt 内容 | 200 字符 |
+| Prompt 内容 | 500 字符 |
 | 设备昵称（Device Nickname） | 50 字符 |
 | 渠道名称（Channel Name） | 50 字符 |
 | 客户名称（Customer Name） | 50 字符 |
