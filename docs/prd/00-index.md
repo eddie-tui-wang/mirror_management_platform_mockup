@@ -22,8 +22,8 @@
 | [Assets > Garments](platform-assets-garments.md) | `/dashboard/assets/garments` | `platform:garments:view` | 全量服装聚合视图（只读） |
 | [Assets > Templates](platform-assets-templates.md) | `/dashboard/assets/templates` | `platform:templates:view` | 主模板管理 + 分配 |
 | [Assets > Device Activity](platform-assets-device-activity.md) | `/dashboard/assets/devices` | `platform:devices:view` | 激活码全局视图（只读） |
-| [Email Records](platform-email-records.md) | `/dashboard/email-records` | `platform:email_records:view` | AI 生成结果发送记录 |
-| [Website Inquiries](platform-website-inquiries.md) | `/dashboard/website-inquiries` | `platform:website_inquiries:view` | 官网询价表单记录 |
+| 【二期】[Email Records](platform-email-records.md) | `/dashboard/email-records` | `platform:email_records:view` | AI 生成结果发送记录 |
+| 【二期】[Website Inquiries](platform-website-inquiries.md) | `/dashboard/website-inquiries` | `platform:website_inquiries:view` | 官网询价表单记录 |
 
 ---
 
