@@ -228,6 +228,7 @@ export const activationCodes: ActivationCode[] = [
 export const demoAccounts: DemoAccount[] = [
   { user_id: 'u_super', email: 'super@platform.com', name: 'Platform Admin', portal: 'platform', org_id: 'platform', org_name: 'AI Fitting Mirror Platform', password: 'demo' },
   { user_id: 'u_001', email: 'admin@channel-a.com', name: 'Alice Chen', portal: 'channel', org_id: 'org_ch_001', org_name: 'Channel A', password: 'demo' },
+  { user_id: 'u_015', email: 'admin@channel-c.com', name: 'Frank Zhao', portal: 'channel', org_id: 'org_ch_003', org_name: 'Channel C', password: 'demo' },
   { user_id: 'u_002', email: 'hq.admin@x.com', name: 'David Zhang', portal: 'customer', org_id: 'org_cu_1001', org_name: 'Customer X', password: 'demo' },
 ];
 
@@ -429,18 +430,23 @@ export function getCustomerSummary(customerOrgId: string) {
 const PLACEHOLDER_IMG = 'https://placehold.co/80x80/e8f4ff/667eea?text=Result';
 
 export const emailRecords: EmailRecord[] = [
-  { record_id: 'er_001', customer_email: 'alice@example.com',   sent_time: '2026-03-01 10:23', generation_result_url: PLACEHOLDER_IMG },
-  { record_id: 'er_002', customer_email: 'bob@fashion.co',      sent_time: '2026-03-01 11:05', generation_result_url: PLACEHOLDER_IMG },
-  { record_id: 'er_003', customer_email: 'carol@style.io',      sent_time: '2026-03-02 09:14', generation_result_url: PLACEHOLDER_IMG },
-  { record_id: 'er_004', customer_email: 'dave@retail.com',     sent_time: '2026-03-02 14:32', generation_result_url: PLACEHOLDER_IMG },
-  { record_id: 'er_005', customer_email: 'eve@boutique.cn',     sent_time: '2026-03-03 08:50', generation_result_url: PLACEHOLDER_IMG },
-  { record_id: 'er_006', customer_email: 'frank@mall.com',      sent_time: '2026-03-03 13:17', generation_result_url: PLACEHOLDER_IMG },
-  { record_id: 'er_007', customer_email: 'grace@luxury.hk',     sent_time: '2026-03-04 10:44', generation_result_url: PLACEHOLDER_IMG },
-  { record_id: 'er_008', customer_email: 'henry@shopping.sg',   sent_time: '2026-03-05 15:28', generation_result_url: PLACEHOLDER_IMG },
-  { record_id: 'er_009', customer_email: 'iris@outlet.jp',      sent_time: '2026-03-06 09:03', generation_result_url: PLACEHOLDER_IMG },
-  { record_id: 'er_010', customer_email: 'jack@tryon.ai',       sent_time: '2026-03-07 11:55', generation_result_url: PLACEHOLDER_IMG },
-  { record_id: 'er_011', customer_email: 'kate@wear.com',       sent_time: '2026-03-08 16:10', generation_result_url: PLACEHOLDER_IMG },
-  { record_id: 'er_012', customer_email: 'leo@apparel.cn',      sent_time: '2026-03-09 10:30', generation_result_url: PLACEHOLDER_IMG },
+  // Customer X (org_cu_1001)
+  { record_id: 'er_001', customer_org_id: 'org_cu_1001', customer_email: 'alice@example.com',   sent_time: '2026-03-01 10:23', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_002', customer_org_id: 'org_cu_1001', customer_email: 'bob@fashion.co',      sent_time: '2026-03-01 11:05', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_003', customer_org_id: 'org_cu_1001', customer_email: 'carol@style.io',      sent_time: '2026-03-02 09:14', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_004', customer_org_id: 'org_cu_1001', customer_email: 'dave@retail.com',     sent_time: '2026-03-02 14:32', generation_result_url: PLACEHOLDER_IMG },
+  // Customer Y (org_cu_1002)
+  { record_id: 'er_005', customer_org_id: 'org_cu_1002', customer_email: 'eve@boutique.cn',     sent_time: '2026-03-03 08:50', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_006', customer_org_id: 'org_cu_1002', customer_email: 'frank@mall.com',      sent_time: '2026-03-03 13:17', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_007', customer_org_id: 'org_cu_1002', customer_email: 'grace@luxury.hk',     sent_time: '2026-03-04 10:44', generation_result_url: PLACEHOLDER_IMG },
+  // Customer Z (org_cu_1003)
+  { record_id: 'er_008', customer_org_id: 'org_cu_1003', customer_email: 'henry@shopping.sg',   sent_time: '2026-03-05 15:28', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_009', customer_org_id: 'org_cu_1003', customer_email: 'iris@outlet.jp',      sent_time: '2026-03-06 09:03', generation_result_url: PLACEHOLDER_IMG },
+  // Customer W (org_cu_1004)
+  { record_id: 'er_010', customer_org_id: 'org_cu_1004', customer_email: 'jack@tryon.ai',       sent_time: '2026-03-07 11:55', generation_result_url: PLACEHOLDER_IMG },
+  { record_id: 'er_011', customer_org_id: 'org_cu_1004', customer_email: 'kate@wear.com',       sent_time: '2026-03-08 16:10', generation_result_url: PLACEHOLDER_IMG },
+  // Customer V (org_cu_1005)
+  { record_id: 'er_012', customer_org_id: 'org_cu_1005', customer_email: 'leo@apparel.cn',      sent_time: '2026-03-09 10:30', generation_result_url: PLACEHOLDER_IMG },
 ];
 
 // ==================== 官网表单提交记录 ====================

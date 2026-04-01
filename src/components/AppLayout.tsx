@@ -6,6 +6,7 @@ import {
   BankOutlined, TeamOutlined, UserOutlined, AppstoreOutlined,
   SkinOutlined, LayoutOutlined, DesktopOutlined, ClockCircleOutlined,
   LogoutOutlined, SettingOutlined, MailOutlined, FormOutlined, KeyOutlined,
+  PictureOutlined, ControlOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
@@ -28,6 +29,8 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   MailOutlined: <MailOutlined />,
   FormOutlined: <FormOutlined />,
   KeyOutlined: <KeyOutlined />,
+  PictureOutlined: <PictureOutlined />,
+  ControlOutlined: <ControlOutlined />,
 };
 
 const PORTAL_COLOR: Record<string, string> = {

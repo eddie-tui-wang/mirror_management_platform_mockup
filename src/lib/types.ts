@@ -165,6 +165,7 @@ export interface AuthState {
 
 export interface EmailRecord {
   record_id: string;
+  customer_org_id: string;
   customer_email: string;
   sent_time: string;
   generation_result_url: string;

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, Typography, Select, message, Radio, Alert } from 'antd';
+import { Table, Button, Tag, Space, Modal, Form, Input, Typography, Select, message, Radio, Alert, Tooltip } from 'antd';
 import { PlusOutlined, KeyOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuthStore } from '@/lib/store';
@@ -258,14 +258,25 @@ export default function ChannelCustomersPage() {
           </Space>
           <PermGuard permission="channel:customers:create_code">
             <Space size="small">
-              <Button
-                size="small"
-                icon={<KeyOutlined />}
-                disabled={codesOrg?.status === 'Disabled' || channelRegularPool.length === 0}
-                onClick={() => setAssignModalOpen(true)}
+              <Tooltip
+                title={
+                  channelRegularPool.length === 0 && codesOrg?.status !== 'Disabled'
+                    ? 'No Regular codes available in channel pool.'
+                    : undefined
+                }
               >
-                Assign Regular Codes
-              </Button>
+                <span>
+                  <Button
+                    size="small"
+                    icon={<KeyOutlined />}
+                    disabled={codesOrg?.status === 'Disabled' || channelRegularPool.length === 0}
+                    onClick={() => setAssignModalOpen(true)}
+                    style={channelRegularPool.length === 0 && codesOrg?.status !== 'Disabled' ? { pointerEvents: 'none' } : undefined}
+                  >
+                    Assign Regular Codes
+                  </Button>
+                </span>
+              </Tooltip>
               <Button
                 type="primary"
                 size="small"

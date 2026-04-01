@@ -38,6 +38,9 @@ const customerMenu: MenuItemConfig[] = [
   { key: 'cu-garments', label: 'Garments', icon: 'SkinOutlined', path: '/dashboard/customer/garments', permission: 'customer:garments:view' },
   { key: 'cu-templates', label: 'Templates', icon: 'LayoutOutlined', path: '/dashboard/customer/templates', permission: 'customer:templates:view' },
   { key: 'cu-devices', label: 'Devices', icon: 'DesktopOutlined', path: '/dashboard/customer/devices', permission: 'customer:devices:view' },
+  { key: 'cu-screensaver', label: 'Screensaver Settings', icon: 'PictureOutlined', path: '/dashboard/customer/screensaver', permission: 'customer:screensaver:manage' },
+  { key: 'cu-generation', label: 'Generation Control', icon: 'ControlOutlined', path: '/dashboard/customer/generation-control', permission: 'customer:generation:manage' },
+  { key: 'cu-email-records', label: 'Email Records', icon: 'MailOutlined', path: '/dashboard/customer/email-records', permission: 'customer:email_records:view' },
 ];
 
 export const PORTAL_MENUS: Record<PortalType, MenuItemConfig[]> = {

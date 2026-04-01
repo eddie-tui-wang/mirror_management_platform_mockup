@@ -54,6 +54,10 @@ export const PERMISSIONS = {
   'customer:devices:view': 'View devices',
   'customer:devices:manage': 'Add device / set nickname',
   'customer:garments:assign_device': 'Assign garments to devices',
+  'customer:screensaver:manage': 'Manage screensaver settings',
+  'customer:generation:manage': 'Manage generation control settings',
+  'customer:email_records:view': 'View customer email records',
+  'platform:customers:screensaver': 'View/edit screensaver settings for a customer',
 } as const;
 
 export type PermissionKey = keyof typeof PERMISSIONS;
@@ -90,6 +94,9 @@ export const PORTAL_PERMISSIONS: Record<PortalType, PermissionKey[]> = {
     'customer:devices:view',
     'customer:devices:manage',
     'customer:garments:assign_device',
+    'customer:screensaver:manage',
+    'customer:generation:manage',
+    'customer:email_records:view',
   ],
 };
 
@@ -112,6 +119,9 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   '/dashboard/customer/garments': 'customer:garments:view',
   '/dashboard/customer/templates': 'customer:templates:view',
   '/dashboard/customer/devices': 'customer:devices:view',
+  '/dashboard/customer/screensaver': 'customer:screensaver:manage',
+  '/dashboard/customer/generation-control': 'customer:generation:manage',
+  '/dashboard/customer/email-records': 'customer:email_records:view',
 };
 
 // ==================== 权限检查工具函数 ====================

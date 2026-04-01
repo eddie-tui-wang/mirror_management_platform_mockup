@@ -3,12 +3,17 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import {
   Table, Button, Tag, Space, Typography, message, Select, Modal, Form,
-  Input, Dropdown, Radio, InputNumber,
+  Input, Dropdown, Radio, InputNumber, Drawer, Upload, Divider, Empty,
 } from 'antd';
-import { PlusOutlined, KeyOutlined, SearchOutlined, DownOutlined } from '@ant-design/icons';
+import {
+  PlusOutlined, KeyOutlined, SearchOutlined, DownOutlined, PictureOutlined,
+  SaveOutlined, UploadOutlined, ArrowUpOutlined, ArrowDownOutlined, DeleteOutlined,
+} from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import type { UploadFile } from 'antd/es/upload/interface';
+import type { GarmentCatalog } from '@/lib/types';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { organizations, users, getCustomerSummary } from '@/lib/mock-data';
+import { organizations, users, getCustomerSummary, getOrgGarments } from '@/lib/mock-data';
 import { useCodeStore } from '@/lib/code-store';
 import type { CustomerType, Status, ActivationCode, ActivationCodeStatus, CodeType } from '@/lib/types';
 import PermGuard from '@/components/PermGuard';
@@ -58,6 +63,23 @@ export default function CustomersPage() {
   const [createCodeModalOpen, setCreateCodeModalOpen] = useState(false);
   const [createCodeType, setCreateCodeType] = useState<CodeType>('Regular');
   const [createCodeQty, setCreateCodeQty] = useState(1);
+
+  // Screensaver drawer state
+  const [screensaverDrawerOpen, setScreensaverDrawerOpen] = useState(false);
+  const [screensaverOrg, setScreensaverOrg] = useState<CustomerRow | null>(null);
+  const [bgFileList, setBgFileList] = useState<UploadFile[]>([]);
+  const [logoFileList, setLogoFileList] = useState<UploadFile[]>([]);
+  const [ssQueue, setSsQueue] = useState<string[]>([]);
+  const [ssSearch, setSsSearch] = useState('');
+  const [ssSaved, setSsSaved] = useState<{ bg: string[]; logo: string[]; queue: string[] }>({ bg: [], logo: [], queue: [] });
+
+  const ssIsDirty = useMemo(() => {
+    return (
+      JSON.stringify(bgFileList.map((f) => f.uid)) !== JSON.stringify(ssSaved.bg) ||
+      JSON.stringify(logoFileList.map((f) => f.uid)) !== JSON.stringify(ssSaved.logo) ||
+      JSON.stringify(ssQueue) !== JSON.stringify(ssSaved.queue)
+    );
+  }, [bgFileList, logoFileList, ssQueue, ssSaved]);
 
   const { codes, revokeCode, createCodeForCustomer } = useCodeStore();
 
@@ -231,6 +253,22 @@ export default function CustomersPage() {
               onClick={() => router.push(`/dashboard/assets/garments?org=${record.org_id}`)}
             >
               View Assets
+            </Button>
+            <Button
+              type="link"
+              size="small"
+              icon={<PictureOutlined />}
+              onClick={() => {
+                setScreensaverOrg(record);
+                setBgFileList([]);
+                setLogoFileList([]);
+                setSsQueue([]);
+                setSsSearch('');
+                setSsSaved({ bg: [], logo: [], queue: [] });
+                setScreensaverDrawerOpen(true);
+              }}
+            >
+              Screensaver
             </Button>
             <Button
               type="link"
@@ -511,6 +549,128 @@ export default function CustomersPage() {
           </Form.Item>
         </Form>
       </Modal>
+
+      {/* Screensaver Settings Drawer */}
+      <Drawer
+        title={
+          <Space>
+            <PictureOutlined />
+            <span>Screensaver Settings — {screensaverOrg?.name}</span>
+          </Space>
+        }
+        open={screensaverDrawerOpen}
+        onClose={() => setScreensaverDrawerOpen(false)}
+        width={560}
+        extra={
+          ssIsDirty ? (
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              onClick={() => {
+                setSsSaved({ bg: bgFileList.map((f) => f.uid), logo: logoFileList.map((f) => f.uid), queue: ssQueue });
+                message.success('Screensaver settings saved (simulated)');
+              }}
+            >
+              Save
+            </Button>
+          ) : null
+        }
+      >
+        {screensaverOrg && (() => {
+          const orgGarments = getOrgGarments(screensaverOrg.org_id).filter((g) => g.status === 'Active');
+          const ssFiltered = ssSearch
+            ? orgGarments.filter((g) => g.name.toLowerCase().includes(ssSearch.toLowerCase()))
+            : orgGarments;
+          const queuedSet = new Set(ssQueue);
+          const garmentMap: Record<string, GarmentCatalog> = {};
+          orgGarments.forEach((g) => { garmentMap[g.catalog_id] = g; });
+
+          const handleSsAdd = (id: string) => { if (!queuedSet.has(id)) setSsQueue((p) => [...p, id]); };
+          const handleSsRemove = (id: string) => setSsQueue((p) => p.filter((x) => x !== id));
+          const handleSsMoveUp = (idx: number) => setSsQueue((p) => { if (idx === 0) return p; const n = [...p]; [n[idx - 1], n[idx]] = [n[idx], n[idx - 1]]; return n; });
+          const handleSsMoveDown = (idx: number) => setSsQueue((p) => { if (idx === p.length - 1) return p; const n = [...p]; [n[idx], n[idx + 1]] = [n[idx + 1], n[idx]]; return n; });
+
+          return (
+            <>
+              <Typography.Text strong style={{ display: 'block', marginBottom: 8 }}>Background Image</Typography.Text>
+              <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 12 }}>
+                Recommended: 1920 × 1080 px
+              </Typography.Text>
+              <Upload listType="picture-card" fileList={bgFileList} maxCount={1} beforeUpload={() => false} onChange={({ fileList }) => setBgFileList(fileList)} accept="image/*">
+                {bgFileList.length === 0 && <div><UploadOutlined /><div style={{ marginTop: 8 }}>Upload</div></div>}
+              </Upload>
+
+              <Divider />
+
+              <Typography.Text strong style={{ display: 'block', marginBottom: 8 }}>Logo</Typography.Text>
+              <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 12 }}>
+                Recommended: 400 × 200 px, PNG with transparent background
+              </Typography.Text>
+              <Upload listType="picture-card" fileList={logoFileList} maxCount={1} beforeUpload={() => false} onChange={({ fileList }) => setLogoFileList(fileList)} accept="image/*">
+                {logoFileList.length === 0 && <div><UploadOutlined /><div style={{ marginTop: 8 }}>Upload</div></div>}
+              </Upload>
+
+              <Divider />
+
+              <Typography.Text strong style={{ display: 'block', marginBottom: 8 }}>Loop Garments</Typography.Text>
+              <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 12 }}>
+                Add garments to the queue and adjust playback order.
+              </Typography.Text>
+
+              {/* Searchable list */}
+              <Input
+                placeholder="Search garments..."
+                allowClear
+                value={ssSearch}
+                onChange={(e) => setSsSearch(e.target.value)}
+                style={{ marginBottom: 8 }}
+              />
+              <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #f0f0f0', borderRadius: 6, marginBottom: 12 }}>
+                {ssFiltered.length === 0 ? (
+                  <div style={{ padding: 16, textAlign: 'center' }}><Typography.Text type="secondary">No garments found</Typography.Text></div>
+                ) : ssFiltered.map((g) => (
+                  <div key={g.catalog_id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderBottom: '1px solid #f9f9f9' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={g.image_url} alt={g.name} style={{ width: 30, height: 30, objectFit: 'cover', borderRadius: 3, flexShrink: 0 }} />
+                    <Typography.Text style={{ flex: 1, fontSize: 13 }}>{g.name}</Typography.Text>
+                    {queuedSet.has(g.catalog_id)
+                      ? <Tag color="green" style={{ fontSize: 11 }}>Added</Tag>
+                      : <Button size="small" type="primary" onClick={() => handleSsAdd(g.catalog_id)}>Add</Button>}
+                  </div>
+                ))}
+              </div>
+
+              {/* Queue */}
+              <Typography.Text strong style={{ display: 'block', marginBottom: 8 }}>
+                Loop Queue ({ssQueue.length})
+              </Typography.Text>
+              {ssQueue.length === 0 ? (
+                <Empty description="No garments added yet" image={Empty.PRESENTED_IMAGE_SIMPLE} style={{ margin: '8px 0' }} />
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {ssQueue.map((id, idx) => {
+                    const g = garmentMap[id];
+                    if (!g) return null;
+                    return (
+                      <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', border: '1px solid #f0f0f0', borderRadius: 6, background: '#fafafa' }}>
+                        <Typography.Text type="secondary" style={{ fontSize: 12, minWidth: 18 }}>{idx + 1}.</Typography.Text>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={g.image_url} alt={g.name} style={{ width: 26, height: 26, objectFit: 'cover', borderRadius: 3, flexShrink: 0 }} />
+                        <Typography.Text style={{ flex: 1, fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.name}</Typography.Text>
+                        <Space size={0}>
+                          <Button type="text" size="small" icon={<ArrowUpOutlined />} disabled={idx === 0} onClick={() => handleSsMoveUp(idx)} />
+                          <Button type="text" size="small" icon={<ArrowDownOutlined />} disabled={idx === ssQueue.length - 1} onClick={() => handleSsMoveDown(idx)} />
+                          <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => handleSsRemove(id)} />
+                        </Space>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          );
+        })()}
+      </Drawer>
     </div>
   );
 }
